@@ -42,7 +42,7 @@ Usage error: ${message}
 `);
     }
     console.log(`Usage: ${app} <TARGET_PROP> [options...]
-Where: 
+Where:
 TARGET_PROP          is the configuration name. Use either hostnames (eg: www.example.com) or akamai configuration
                      names (eg: example_prod_ion).
 --version VERSION    the configuration VERSION of TARGET_PROP to access or for copy/clone the version of SRC_PROP
@@ -66,6 +66,9 @@ TARGET_PROP          is the configuration name. Use either hostnames (eg: www.ex
 --group              group ID for create or clone.  Requires contract
 --section            section for the credentials file
 --nocopy             don't copy the hostnames when cloning
+--srmap MAP          SureRoute custom map (e.g. example-srt.akasrg.akamai.com)
+--srto SRTO_PATH     SureRoute test object with leading slash (e.g. /akamai/akamai-sureroute-test-object.htm)
+--srtohost HOST      SureRoutehost custom host header
 `);
     process.exit(0);
 }
@@ -91,6 +94,13 @@ function setOrigin(property, options) {
     return property.setOrigin(options.targetProperty, options.origin);
 }
 
+function setSureRoute(property, options) {
+    if (!options.srmap || options.srto || options.srtohost) {
+        return Promise.resolve();
+    }
+    return property.setSureRoute(options.targetProperty, options.srmap, options.srto, options.srtohost);
+}
+
 function updateProperty(property, targetProperty, options) {
     if (options.file)
         return property.updateFromFile(targetProperty, options.file, options.origin);
@@ -111,32 +121,32 @@ function createProperty(property, options) {
 
     if (options.create) {
         if (options.srcfile) {
-          return property.createFromFile(hostnames, 
+          return property.createFromFile(hostnames,
                                         options.srcfile,
                                         options.targetProperty,
-                                        options.contract, 
+                                        options.contract,
                                         options.group,
                                         options.cpcode,
                                         options.origin,
                                         options.ehname);
 
         } else {
-            return property.create(hostnames, 
+            return property.create(hostnames,
                                         options.cpcode,
                                         options.targetProperty,
-                                        options.contract, 
+                                        options.contract,
                                         options.group,
                                         null,
                                         options.origin,
                                         options.ehname);
         }
     } else if (options.clone) {
-        return property.createFromExisting(options.clone, 
-                                        options.srcVersion, 
+        return property.createFromExisting(options.clone,
+                                        options.srcVersion,
                                         options.nocopy,
                                         hostnames,
-                                        options.targetProperty, 
-                                        options.contract, 
+                                        options.targetProperty,
+                                        options.contract,
                                         options.group,
                                         options.origin,
                                         options.ehname,
@@ -213,8 +223,8 @@ function main()
 {
     if (options._.length <= 0) {
        help("Don't forget to specify the target property (no flag)");
-    } 
-    
+    }
+
     // Process arguments with no flag
     options._.forEach(function(argument) {
         if (argument.match('--')) {
@@ -223,11 +233,11 @@ function main()
             options.targetProperty = argument;
         }
     })
- 
-	if (options.help) help();
 
-	if (options.version && Number.isNaN(Number(options.version)) || options.version < -2)
-		help();	
+    if (options.help) help();
+
+    if (options.version && Number.isNaN(Number(options.version)) || options.version < -2)
+        help();
 
     if (options.copy) {
         if (options.version) srcVersion = options.version
@@ -240,13 +250,13 @@ function main()
     if (options.activate) {
         let env = options.activate.toUpperCase();
         if ("BOTH" != env && !env.startsWith("STAG") && !env.startsWith("PROD"))
-           help("--activate (STAGING, PRODUCTION, BOTH)");        
+           help("--activate (STAGING, PRODUCTION, BOTH)");
     }
 
     if (options.deactivate) {
         options.deactivate = options.deactivate.toUpperCase();
         if ("BOTH" != env && !env.startsWith("STAG") && !env.startsWith("PROD"))
-           help("--deactivate (STAGING, PRODUCTION, BOTH)");        
+           help("--deactivate (STAGING, PRODUCTION, BOTH)");
      }
 
      if (options.cpcode) {
@@ -260,12 +270,12 @@ function main()
      if (!options.section) {
          options.section = "papi";
      }
-        
+
         let property = new WebSite({path:"~/.edgerc", section: options.section});
 
         let app = appName();
         console.time(app);
-        
+
         Promise.resolve()
             .then(() => createProperty(property, options))
             .then(() => delHostnames(property, options))
