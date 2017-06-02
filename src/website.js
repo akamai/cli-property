@@ -169,7 +169,7 @@ class WebSite {
                         if (!hostRef)
                             hostRef = this._propertyByHost[host.cnameFrom] = {};
                         this._ehnByHostname[host.cnameTo] = host.edgeHostnameId;
-                        
+
                         if (prop.stagingVersion && prop.stagingVersion === hostList.propertyVersion)
                             hostRef.staging = prop;
                         if (prop.productionVersion && prop.productionVersion === hostList.propertyVersion)
@@ -206,16 +206,16 @@ class WebSite {
 
     _getCloneConfig(srcProperty, srcVersion = LATEST_VERSION.STAGING) {
         let cloneFrom = {};
-        let contractId, 
-            groupId, 
+        let contractId,
+            groupId,
             productId,
             edgeHostnameId;
-        
+
         return this._getProperty(srcProperty, srcVersion)
             .then(cloneFromProperty => {
                 contractId = cloneFromProperty.contractId;
                 groupId = cloneFromProperty.groupId;
-                        
+
                 let productionHosts = cloneFromProperty.productionHosts;
                 let stagingHosts = cloneFromProperty.stagingHosts;
                 let latestHosts = cloneFromProperty.latestHosts;
@@ -283,7 +283,7 @@ class WebSite {
                 cloneFrom.rules.rules.behaviors.map(behavior => {
                     if (behavior.name == "cpCode") {
                         cloneFrom.cpcode = behavior.options.value.id
-                    } 
+                    }
                 })
                 return Promise.resolve(cloneFrom);
             })
@@ -753,7 +753,7 @@ class WebSite {
                                                     ehnSecureContractCounts[host.edgeHostnameId] += 1;
                                                 }
                                             }
-                                        
+
                                         if (current.groupId == groupId) {
                                             if (!ehnGroupCounts[host.edgeHostnameId]) {
                                                 ehnGroupCounts[host.edgeHostnameId] = 1;
@@ -767,7 +767,7 @@ class WebSite {
                         })
                         let groupSorted = Object.keys(ehnGroupCounts).sort((a,b) => ehnGroupCounts[a]-ehnGroupCounts[b])
                         let contractSorted = Object.keys(ehnContractCounts).sort((a,b) => ehnContractCounts[b]-ehnContractCounts[a])
-                        
+
                         if (groupSorted.length > 0) {
                             let edgeHostnameId = groupSorted[0];
                             resolve(edgeHostnameId);
@@ -1014,7 +1014,7 @@ class WebSite {
         return new Promise((resolve, reject) => {
             console.info('Gathering asset ID for property');
             console.time('... requesting');
-            
+
             let request = {
                 method: 'GET',
                 path: `/user-admin/v1/accounts/${accountId}/groups/${groupId}/properties`
@@ -1034,7 +1034,7 @@ class WebSite {
         });
     }
 
-    
+
     _moveProperty(propertyLookup, destGroup, fallThrough=false) {
         let sourceGroup, propertyId, accountId, propertyName;
 
@@ -1076,7 +1076,7 @@ class WebSite {
                                     method: 'PUT',
                                     path: `/user-admin/v1/accounts/${accountId}/properties/${assetId}`,
                                     body: moveData
-                    }; 
+                    };
 
                     this._edge.auth(request);
 
@@ -1120,7 +1120,7 @@ class WebSite {
 
     _assignHostnames(groupId, contractId, configName, edgeHostnameId, propertyId, hostnames, deleteHosts=false, newConfig=false) {
         let assignHostnameArray,myDelete=false;
-        let newHostnameArray = [];  
+        let newHostnameArray = [];
         return this._getHostnameList(configName, LATEST_VERSION.LATEST,newConfig)
         .then(hostnamelist => {
             if (hostnamelist) {
@@ -1134,7 +1134,7 @@ class WebSite {
             return new Promise((resolve, reject) => {
                 console.info('Updating property hostnames');
                 console.time('... updating hostname');
-                
+
                 if (hostnames.length == 0) {
                     hostnames = [configName];
                 }
@@ -1153,10 +1153,10 @@ class WebSite {
                              assignHostnameObj = {
                                 "cnameType": "EDGE_HOSTNAME",
                                 "cnameTo": edgeHostnameId,
-                                "cnameFrom": hostname                           
+                                "cnameFrom": hostname
                             }
                         }
-                        
+
                         console.log("Adding hostname " + assignHostnameObj["cnameFrom"]);
                         newHostnameArray.push(assignHostnameObj);
                     })
@@ -1174,7 +1174,7 @@ class WebSite {
                             console.log("Not removing hostname " + host["cnameFrom"]);
                         }
                     })
-                } 
+                }
 
                 let request = {
                     method: 'PUT',
@@ -1229,7 +1229,7 @@ class WebSite {
         if (contractId && (!contractId.match("ctr_"))) {
             contractId = "ctr_" + contractId;
         }
-        
+
         return new Promise((resolve, reject) => {
             if (groupId && contractId) {
                 data.contractId = contractId;
@@ -1265,7 +1265,7 @@ class WebSite {
              } else if (hostnames.length == 0) {
                 hostnames = [configName]
             }
-            if (!configName) 
+            if (!configName)
                configName = hostnames[0]
             let letters = "/^[0-9a-zA-Z\\_\\-\\.]+$/";
             if (!configName.match(letters)) {
@@ -1433,7 +1433,7 @@ class WebSite {
      * @param {number} versionLookup specify the version or use LATEST_VERSION.PRODUCTION / STAGING / latest
      * @returns {Promise} with the property rules as the {TResult}
      */
-    
+
     retrieveToFile(propertyLookup, toFile, versionLookup = LATEST_VERSION.LATEST) {
         return this.retrieve(propertyLookup, versionLookup)
             .then(data => {
@@ -1638,9 +1638,9 @@ class WebSite {
 
     assignEdgeHostname(propertyLookup, edgeHostname) {
         const version = WebSite._getLatestVersion(propertyLookup);
-        let contractId, 
-            groupId, 
-            productId, 
+        let contractId,
+            groupId,
+            productId,
             propertyId,
             configName;
 
@@ -1696,11 +1696,11 @@ class WebSite {
 
     delHostnames(propertyLookup, hostnames) {
         const version = WebSite._getLatestVersion(propertyLookup);
-        let contractId, 
-            groupId, 
-            productId, 
+        let contractId,
+            groupId,
+            productId,
             propertyId,
-            configName, 
+            configName,
             hostlist;
 
         let names = this._getConfigAndHostname(propertyLookup, hostnames);
@@ -1731,18 +1731,18 @@ class WebSite {
     }
 
     addHostnames(propertyLookup, hostnames, edgeHostname=null) {
-        let contractId, 
-            groupId, 
-            productId, 
+        let contractId,
+            groupId,
+            productId,
             propertyId,
-            configName, 
+            configName,
             hostlist;
 
         let names = this._getConfigAndHostname(propertyLookup, hostnames);
         configName = names[0];
         hostnames = names[1];
         const version = WebSite._getLatestVersion(configName);
-        
+
 
         return this._getProperty(configName)
             .then(data => {
@@ -1783,7 +1783,7 @@ class WebSite {
             "create":[],
             "update":[]
         };
-        
+
         return new Promise ((resolve, reject) => {
             fs.readFile(untildify(variablefile), (err, data) => {
                 if (err)
@@ -1806,7 +1806,7 @@ class WebSite {
             changeVars['create'].map(variable => {
 
                 let index_check = newVars.findIndex(elt=>elt.name==variable.name);
-                
+
                 if (index_check < 0) {
                     delete variable.action;
                     newVars.push(variable)
@@ -1836,9 +1836,9 @@ class WebSite {
                     newVars[ind] = variable;
                 }
             })
-            
-            data.rules.variables = newVars;   
-            
+
+            data.rules.variables = newVars;
+
             return Promise.resolve(data);
             })
             .then(rules => {
@@ -1860,7 +1860,7 @@ class WebSite {
             forwardHostHeader = "CUSTOM"
             customForward = forward
         }
-           
+
           return this._getPropertyRules(propertyLookup, version)
             .then(data => {
                 let behaviors = [];
@@ -1881,7 +1881,7 @@ class WebSite {
                     }
                     behaviors.push(behavior);
                 })
-                data.rules.behaviors = behaviors;   
+                data.rules.behaviors = behaviors;
                 return Promise.resolve(data);
             })
             .then(rules => {
@@ -1889,9 +1889,39 @@ class WebSite {
             })
     }
 
-    /** 
+    setSureRoute(propertyLookup, map, srto, tohost) {
+        let version = WebSite._getLatestVersion(propertyLookup);
+
+          return this._getPropertyRules(propertyLookup, version)
+            .then(data => {
+                let behaviors = [];
+
+                data.rules.behaviors.map(behavior => {
+                    if (behavior.name == "sureRoute") {
+                        if (map) {
+                            behavior.options.customMap = map;
+                            behavior.options.type = "CUSTOM_MAP";
+                        }
+                        if (srto) {
+                            behavior.options.testObjectUrl = srto;
+                        }
+                        if (host) {
+							behavior.options.toHost = tohost;
+							behavior.options.toHostStatus = "OTHER";
+                    }
+                    behaviors.push(behavior);
+                })
+                data.rules.behaviors = behaviors;
+                return Promise.resolve(data);
+            })
+            .then(rules => {
+                return this._updatePropertyRules(propertyLookup,version,rules);
+            })
+    }
+
+    /**
      * Adds specified hostnames to the property
-     * 
+     *
      * @param {string}
     */
 
@@ -1952,7 +1982,7 @@ class WebSite {
                 let propInfo=data.properties.items[0];
                 this._propertyByName[propInfo.propertyName] = propInfo;
                 this._propertyById[propInfo.propertyId] = propInfo;
-                this._propertyByName[configName] = propInfo;    
+                this._propertyByName[configName] = propInfo;
 
                 if (newRules) {
                     return Promise.resolve(newRules)
@@ -1969,7 +1999,7 @@ class WebSite {
                 if (edgeHostname) {
                     if(edgeHostname.indexOf("edgekey") > -1) {
                           secure=true;
-                    }                     
+                    }
                     edgeHostnameId = this._ehnByHostname[edgeHostname];
                     return Promise.resolve(edgeHostnameId);
                 } else if (data.edgeHostnameId) {
@@ -2015,15 +2045,15 @@ class WebSite {
 
      }
 
-    createFromExisting( srcProperty, 
-                        srcVersion = LATEST_VERSION.LATEST, 
-                        copyHostnames = false, 
-                        hostnames = [], 
-                        configName = null, 
-                        contractId = null, 
-                        groupId = null, 
+    createFromExisting( srcProperty,
+                        srcVersion = LATEST_VERSION.LATEST,
+                        copyHostnames = false,
+                        hostnames = [],
+                        configName = null,
+                        contractId = null,
+                        groupId = null,
                         origin=null,
-                        edgeHostname=null, 
+                        edgeHostname=null,
                         cpcode=null,
                         secure=false) {
         let names = this._getConfigAndHostname(configName, hostnames);
@@ -2035,7 +2065,7 @@ class WebSite {
             productName,
             propertyId,
             edgeHostnameId;
-        
+
 
        return this._getProperty(srcProperty)
              .then(data => {
@@ -2051,11 +2081,11 @@ class WebSite {
                     groupId = data.groupId;
                     contractId = data.contractId;
                 }
-                
+
                 if (edgeHostname) {
                     if(edgeHostname.indexOf("edgekey") > -1) {
                           secure=true;
-                    }                     
+                    }
                     edgeHostnameId = this._ehnByHostname[edgeHostname];
                     return Promise.resolve(edgeHostnameId);
                 } else if (data.edgeHostnameId) {
@@ -2066,7 +2096,7 @@ class WebSite {
                 }
             })
             .then(() => {
-                    
+
                 return this._createHostname(groupId,
                             contractId,
                             configName,
@@ -2089,7 +2119,7 @@ class WebSite {
                 let propInfo=data.properties.items[0];
                 this._propertyByName[propInfo.propertyName] = propInfo;
                 this._propertyById[propInfo.propertyId] = propInfo;
-                this._propertyByName[configName] = propInfo;    
+                this._propertyByName[configName] = propInfo;
                 return this._setRules(groupId, contractId, propertyId, configName, cpcode, hostnames, origin, secure)
             })
              .then(rules => {
