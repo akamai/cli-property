@@ -39,7 +39,7 @@ let targetProperty;
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
 function activateProperty(property, targetProperty, options) {
-    
+
     let env = options.network.toUpperCase();
     return Promise.resolve()
         .then(() => {
@@ -50,19 +50,19 @@ function activateProperty(property, targetProperty, options) {
                 options.ver = data.propertyVersion;
             }
             if ("BOTH" === env || env.startsWith("STAG"))
-                return property.activate(   targetProperty, 
-                                            options.ver, 
+                return property.activate(   targetProperty,
+                                            options.ver,
                                             WebSite.AKAMAI_ENV.STAGING,
-                                            "Updated Automatically to staging.", 
+                                            "Updated Automatically to staging.",
                                             options.email);
             return Promise.resolve(data);
         })
         .then(data => {
             if ("BOTH" === env || env.startsWith("PROD"))
-                return property.activate(   targetProperty, 
-                                            options.ver, 
+                return property.activate(   targetProperty,
+                                            options.ver,
                                             WebSite.AKAMAI_ENV.PRODUCTION,
-                                            "Updated Automatically to prod.", 
+                                            "Updated Automatically to prod.",
                                             options.email);
             return Promise.resolve(data);
         });
@@ -70,22 +70,22 @@ function activateProperty(property, targetProperty, options) {
 
 function deactivateProperty(property, targetProperty, options) {
     section = options.section || section;
-    
+
     let env = options.network.toUpperCase();
     return Promise.resolve()
         .then(() => {
             if ("BOTH" === env || env.startsWith("STAG"))
-               return property.deactivate(  targetProperty, 
+               return property.deactivate(  targetProperty,
                                             WebSite.AKAMAI_ENV.STAGING,
-                                            "Automatically deactivating on staging.", 
+                                            "Automatically deactivating on staging.",
                                             options.email);
             return Promise.resolve();
         })
         .then(() => {
             if ("BOTH" === env || env.startsWith("PROD"))
-                return property.deactivate( targetProperty, 
+                return property.deactivate( targetProperty,
                                             WebSite.AKAMAI_ENV.PRODUCTION,
-                                            "Automatically deactivating on prod.", 
+                                            "Automatically deactivating on prod.",
                                             options.email);
             return Promise.resolve(data);
         });
@@ -94,15 +94,15 @@ function deactivateProperty(property, targetProperty, options) {
 
 function updateProperty(property, targetProperty, options) {
     section = options.section || section;
- 
+
     if (options.file)
-        return property.updateFromFile( targetProperty, 
-                                        options.file, 
+        return property.updateFromFile( targetProperty,
+                                        options.file,
                                         options.origin);
     if (options.srcprop)
-        return property.copy(   options.srcprop, 
-                                options.srcver, 
-                                targetProperty, 
+        return property.copy(   options.srcprop,
+                                options.srcver,
+                                targetProperty,
                                 options.origin);
     return Promise.resolve();
 }
@@ -120,32 +120,32 @@ function createProperty(property, targetProperty, options) {
 
     if (!options.clone) {
         if (options.srcfile) {
-          return property.createFromFile(hostnames, 
+          return property.createFromFile(hostnames,
                                         options.srcfile,
                                         targetProperty,
-                                        options.contract, 
+                                        options.contract,
                                         options.group,
                                         options.cpcode,
                                         options.origin,
                                         options.edgehostname);
 
         } else {
-            return property.create(hostnames, 
+            return property.create(hostnames,
                                         options.cpcode,
                                         targetProperty,
-                                        options.contract, 
+                                        options.contract,
                                         options.group,
                                         null,
                                         options.origin,
                                         options.edgehostname)
         }
     } else {
-        return property.createFromExisting(options.clone, 
-                                        options.sourceversion, 
+        return property.createFromExisting(options.clone,
+                                        options.sourceversion,
                                         options.nocopy,
                                         hostnames,
-                                        targetProperty, 
-                                        options.contract, 
+                                        targetProperty,
+                                        options.contract,
                                         options.group,
                                         options.origin,
                                         options.edgehostname,
@@ -157,11 +157,11 @@ function createProperty(property, targetProperty, options) {
 function retrieveProperty(property, targetProperty, options) {
 
     if (options.file) {
-        return property.retrieveToFile( targetProperty, 
-                                        options.file, 
+        return property.retrieveToFile( targetProperty,
+                                        options.file,
                                         options.propver);
     } else {
-        return property.retrieve(targetProperty, 
+        return property.retrieve(targetProperty,
                                 options.propver,
                                 '-')
         .then(data => {
@@ -206,10 +206,17 @@ function modifyProperty(property, targetProperty, options) {
             } else {
              return Promise.resolve();
             }
-    }) 
+    })
     .then(() => {
         if (options.move) {
             return property.moveProperty(targetProperty, options.move)
+        } else {
+            return Promise.resolve();
+        }
+    })
+    .then(() => {
+        if (options.srmap || options.srto || options.srtohost) {
+            return property.setSureRoute(targetProperty, options.srmap, options.srto. options.srtohost);
         } else {
             return Promise.resolve();
         }
@@ -248,7 +255,7 @@ function main()
              process.argv.push("--help")
              program.parse(process.argv)
          })
-        
+
      program
         .command('activate <property>')
         .option('--network <network>', "Network to activate, PROD/STAG/BOTH")
@@ -267,10 +274,10 @@ function main()
             console.log('Activating %s on %s', targetProperty, options.network)
 
             let env = options.network.toUpperCase();
-            if ("BOTH" != env && 
-                !env.startsWith("STAG") && 
+            if ("BOTH" != env &&
+                !env.startsWith("STAG") &&
                 !env.startsWith("PROD"))
-            program.help("activate <property> --network (STAGING, PRODUCTION, BOTH)"); 
+            program.help("activate <property> --network (STAGING, PRODUCTION, BOTH)");
 
         })
 
@@ -292,16 +299,16 @@ function main()
             targetProperty = target;
             options = opts;
             command = "create";
-            
+
             if (!targetProperty)
                 program.help();
 
             console.log('Creating new property %s', targetProperty);
 
-            if ((options.group || options.contract) && (!(options.group && options.contract))) 
+            if ((options.group || options.contract) && (!(options.group && options.contract)))
                 program.help("Need both contract and group")
 
-            if ((options.cpcode) && (!(options.group && options.contract)) && !options.clone) 
+            if ((options.cpcode) && (!(options.group && options.contract)) && !options.clone)
                 program.help("CPCode requires both contract and group")
         })
 
@@ -321,8 +328,8 @@ function main()
             }
            console.log('Deactivating %s on %s', targetProperty, options.network)
             let env = options.network.toUpperCase();
-            if ("BOTH" != env && 
-                !env.startsWith("STAG") && 
+            if ("BOTH" != env &&
+                !env.startsWith("STAG") &&
                 !env.startsWith("PROD"))
             program.help("deactivate <property> --network (STAGING, PRODUCTION, BOTH)");
         })
@@ -334,9 +341,9 @@ function main()
             targetProperty = target;
             options = opts;
             command = "delete";
-            
+
             console.log('Deleting %s', targetProperty)
-            
+
         })
 
     program
@@ -348,7 +355,7 @@ function main()
             targetProperty = target;
             options = opts;
             command="retrieve";
-            
+
             console.log('Retrieving %s', targetProperty)
         })
     program
@@ -374,7 +381,7 @@ function main()
         .option("--origin <origin>", "Origin ")
         .option("--edgehostname <ehn>", "TODO: Edge hostname")
         .option("--variables <file>", "User variables file.  Format should be\n" +
-                "\t\t\t\t   [{\n" + 
+                "\t\t\t\t   [{\n" +
         '\t\t\t\t\t"name": "PMUSER_TEST",' + "\n" +
         '\t\t\t\t\t"value": "Foobar",' +"\n" +
         '\t\t\t\t\t"description": "This is my test variable",' +"\n" +
@@ -389,7 +396,7 @@ function main()
             targetProperty = target;
             options = opts;
             command = "modify";
- 
+
             console.log('Modifying property %s', targetProperty);
         })
 
@@ -402,7 +409,7 @@ function main()
 
     section = options.section || section;
     let property = new WebSite({path:"~/.edgerc", section: section});
-  
+
     console.time(app);
 
     if (options.propver) {
