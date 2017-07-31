@@ -214,7 +214,7 @@ class WebSite {
 
             let request = {
                 method: 'GET',
-                path: `/papi/v0/properties/${propertyId}?contractId=${contractId}&groupId=${groupId}`,
+                path: `/papi/v1/properties/${propertyId}?contractId=${contractId}&groupId=${groupId}`,
             };
             this._edge.auth(request);
 
@@ -275,7 +275,7 @@ class WebSite {
 
                     let request = {
                         method: 'GET',
-                        path: `/papi/v0/properties/${cloneFrom.propertyId}/versions/${cloneFrom.version}?contractId=${contractId}&groupId=${groupId}`,
+                        path: `/papi/v1/properties/${cloneFrom.propertyId}/versions/${cloneFrom.version}?contractId=${contractId}&groupId=${groupId}`,
                         followRedirect: false
                     };
                     this._edge.auth(request);
@@ -298,7 +298,7 @@ class WebSite {
                 return new Promise((resolve, reject) => {
                     let request = {
                         method: 'GET',
-                        path: `/papi/v0/properties/${cloneFrom.propertyId}/versions/${cloneFrom.version}/rules?contractId=${contractId}&groupId=${groupId}`,
+                        path: `/papi/v1/properties/${cloneFrom.propertyId}/versions/${cloneFrom.version}/rules?contractId=${contractId}&groupId=${groupId}`,
                         followRedirect: false
                     };
                     this._edge.auth(request);
@@ -330,7 +330,7 @@ class WebSite {
 
             let request = {
                 method: 'GET',
-                path: '/papi/v0/groups',
+                path: '/papi/v1/groups',
                 followRedirect: false,
                 followAllRedirects: false
             };
@@ -384,7 +384,7 @@ class WebSite {
                     } else {
                         let request = {
                             method: 'GET',
-                            path: `/papi/v0/properties/${propertyId}/versions/${version}/hostnames/?contractId=${contractId}&groupId=${groupId}`,
+                            path: `/papi/v1/properties/${propertyId}/versions/${version}/hostnames/?contractId=${contractId}&groupId=${groupId}`,
                             followRedirect: false
                         };
                         this._edge.auth(request);
@@ -430,12 +430,11 @@ class WebSite {
             console.info('... retrieving list of Products for this contract');
             let request = {
                 method: 'GET',
-                path: `/papi/v0/products?contractId=${contractId}&groupId=${groupId}`,
+                path: `/papi/v1/products?contractId=${contractId}&groupId=${groupId}`,
                 followRedirect: false,
                 followAllRedirects: false
             };
             this._edge.auth(request);
-
             this._edge.send(function (data, response) {
                 if (response && response.statusCode >= 200 && response.statusCode < 400) {
                     let parsed = JSON.parse(response.body);
@@ -447,6 +446,14 @@ class WebSite {
                                 groupId: groupId,
                                 contractId: contractId
                             };
+                            resolve(productInfo);
+                        } else if (item.productId == "prd_Rich_Media_Accel") {
+                            productInfo = {
+                                productId: "prd_Rich_Media_Accel",
+                                productName: "Rich_Media_Accel",
+                                groupId: groupId,
+                                contractId: contractId
+                            }
                             resolve(productInfo);
                         } else if (item.productId == "prd_Dynamic_Site_Del") {
                             productInfo = {
@@ -618,7 +625,7 @@ class WebSite {
         return new Promise((resolve, reject) => {
             let request = {
                 method: 'GET',
-                path: `/papi/v0/edgehostnames?contractId=${contractId}&groupId=${groupId}`,
+                path: `/papi/v1/edgehostnames?contractId=${contractId}&groupId=${groupId}`,
             };
             this._edge.auth(request);
 
@@ -645,7 +652,7 @@ class WebSite {
 
             let request = {
                 method: 'GET',
-                path: `/papi/v0/properties?contractId=${contractId}&groupId=${groupId}`,
+                path: `/papi/v1/properties?contractId=${contractId}&groupId=${groupId}`,
             };
             this._edge.auth(request);
 
@@ -684,7 +691,7 @@ class WebSite {
 
                     let request = {
                         method: 'GET',
-                        path: `/papi/v0/properties/${propertyId}/versions/${version}/rules?contractId=${contractId}&groupId=${groupId}`,
+                        path: `/papi/v1/properties/${propertyId}/versions/${version}/rules?contractId=${contractId}&groupId=${groupId}`,
                         followRedirect: false
                     };
                     this._edge.auth(request);
@@ -733,7 +740,7 @@ class WebSite {
 
                     let request = {
                         method: 'POST',
-                        path: `/papi/v0/properties/${propertyId}/versions?contractId=${contractId}&groupId=${groupId}`,
+                        path: `/papi/v1/properties/${propertyId}/versions?contractId=${contractId}&groupId=${groupId}`,
                         body: body
                     };
 
@@ -857,14 +864,14 @@ class WebSite {
                     if (rules.ruleFormat && rules.ruleFormat != "latest" ) {
                         request = {
                                 method: 'PUT',
-                                path: `/papi/v0/properties/${propertyId}/versions/${version}/rules?contractId=${contractId}&groupId=${groupId}`,
+                                path: `/papi/v1/properties/${propertyId}/versions/${version}/rules?contractId=${contractId}&groupId=${groupId}`,
                                 body: rules,
                                 headers: {'Content-Type':'application/vnd.akamai.papirules.' + rules.ruleFormat + '+json'}
                         }
                     } else {
                         request = {
                                 method: 'PUT',
-                                path: `/papi/v0/properties/${propertyId}/versions/${version}/rules?contractId=${contractId}&groupId=${groupId}`,
+                                path: `/papi/v1/properties/${propertyId}/versions/${version}/rules?contractId=${contractId}&groupId=${groupId}`,
                                 body: rules
                         }
                     }
@@ -894,7 +901,7 @@ class WebSite {
             };
             let request = {
                 method: 'POST',
-                path: `/papi/v0/cpcodes?contractId=${contractId}&groupId=${groupId}`,
+                path: `/papi/v1/cpcodes?contractId=${contractId}&groupId=${groupId}`,
                 body: cpCode
             };
 
@@ -1011,7 +1018,7 @@ class WebSite {
 
                         let request = {
                             method: 'POST',
-                            path: `/papi/v0/edgehostnames?contractId=${contractId}&groupId=${groupId}`,
+                            path: `/papi/v1/edgehostnames?contractId=${contractId}&groupId=${groupId}`,
                             body: hostnameObj
                         };
 
@@ -1068,7 +1075,7 @@ class WebSite {
                     };
                     let request = {
                         method: 'POST',
-                        path: `/papi/v0/properties/${propertyId}/activations?contractId=${contractId}&groupId=${groupId}`,
+                        path: `/papi/v1/properties/${propertyId}/activations?contractId=${contractId}&groupId=${groupId}`,
                         body: activationData
                     };
 
@@ -1139,7 +1146,7 @@ class WebSite {
                     };
                     let request = {
                         method: 'POST',
-                        path: `/papi/v0/properties/${propertyId}/activations?contractId=${contractId}&groupId=${groupId}`,
+                        path: `/papi/v1/properties/${propertyId}/activations?contractId=${contractId}&groupId=${groupId}`,
                         body: activationData
                     };
 
@@ -1158,7 +1165,7 @@ class WebSite {
                             } else {
                                 resolve(matches[1])
                             }
-                        } else if (response.statusCode == '500' && response.body.match('https://problems.luna.akamaiapis.net/papi/v0/toolkit/property_version_not_active_in')) {
+                        } else if (response.statusCode == '500' && response.body.match('https://problems.luna.akamaiapis.net/papi/v1/toolkit/property_version_not_active_in')) {
                             console.log("Version not active on " + env)
                             resolve();
                         } else {
@@ -1180,7 +1187,7 @@ class WebSite {
 
                     let request = {
                         method: 'GET',
-                        path: `/papi/v0/properties/${propertyId}/activations/${activationID}?contractId=${contractId}&groupId=${groupId}`,
+                        path: `/papi/v1/properties/${propertyId}/activations/${activationID}?contractId=${contractId}&groupId=${groupId}`,
                     };
 
                     this._edge.auth(request);
@@ -1317,7 +1324,7 @@ class WebSite {
             console.time('... deleting property');
             let request = {
                 method: 'DELETE',
-                path: `/papi/v0/properties/${property.propertyId}?contractId=${property.contractId}&groupId=${property.groupId}`
+                path: `/papi/v1/properties/${property.propertyId}?contractId=${property.contractId}&groupId=${property.groupId}`
             }
             this._edge.auth(request);
             this._edge.send((data, response) => {
@@ -1394,7 +1401,7 @@ class WebSite {
 
                     let request = {
                         method: 'PUT',
-                        path: `/papi/v0/properties/${propertyId}/versions/${version}/hostnames/?contractId=${contractId}&groupId=${groupId}`,
+                        path: `/papi/v1/properties/${propertyId}/versions/${version}/hostnames/?contractId=${contractId}&groupId=${groupId}`,
                         body: newHostnameArray
                     }
 
@@ -1637,7 +1644,7 @@ class WebSite {
             console.time('... retrieved rules formats');
             let request = {
                 method: 'GET',
-                path: `/papi/v0/rule-formats`
+                path: `/papi/v1/rule-formats`
             }
 
             this._edge.auth(request);
