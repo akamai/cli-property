@@ -128,7 +128,7 @@ class WebSite {
             })
             .then(propList => {
                 let promiseList = [];
-                
+
                 propList.map(v => {
                     if (!v || !v.properties || !v.properties.items) return;
                     return v.properties.items.map(item => {
@@ -156,9 +156,9 @@ class WebSite {
                 });
                 if (promiseList) {
                     console.info('... retrieving Hosts from %s properties', Object.keys(this._propertyById).length);
-                }    
+                }
                 return Promise.all(promiseList);
-                
+
             })
             .then(hostListList => {
                 hostListList.map(hostList => {
@@ -383,10 +383,10 @@ class WebSite {
             })
             .then(() => {
                 if (concurrent_requests >= request_throttle) {
-                    return this._getHostnameList(property.propertyId, version, false);                    
-                } 
+                    return this._getHostnameList(property.propertyId, version, false);
+                }
                 concurrent_requests += 1;
-                
+
                 //set basic data like contract & group
                 const contractId = property.contractId;
                 const groupId = property.groupId;
@@ -627,7 +627,7 @@ class WebSite {
                         prop = hostnameEnvironment === LATEST_VERSION.STAGING ? host.staging : host.production;
                 }
 
-                
+
                 if (!prop)
                     return Promise.reject(Error(`Cannot find property: ${propertyLookup}`));
                 return Promise.resolve(prop);
@@ -856,7 +856,7 @@ class WebSite {
                 rules.rules.options = { "is_secure": true }
             }
             rules.rules.children.behaviors = children_behaviors;
-            
+
             delete rules.errors;
             resolve(rules);
         })
@@ -888,7 +888,7 @@ class WebSite {
                                 body: rules
                         }
                     }
-                    
+
                     this._edge.auth(request);
 
                     this._edge.send(function (data, response) {
@@ -1178,7 +1178,7 @@ class WebSite {
                             } else {
                                 resolve(matches[1])
                             }
-                        } else if (response.body.match('https://problems.luna.akamaiapis.net/papi/v0/toolkit/property_version_not_active_in')) {
+                        } else if (response.body.match('https://problems.luna.akamaiapis.net/papi/v1/toolkit/property_version_not_active_in')) {
                             console.log("Version not active on " + env)
                             resolve();
                         } else {
@@ -1359,7 +1359,7 @@ class WebSite {
         if (!hostnames) {
             hostnames = []
         }
-            
+
         return this._getHostnameList(configName)
             .then(hostnamelist => {
                 if (hostnamelist) {
@@ -1391,7 +1391,7 @@ class WebSite {
                     } else {
                         hostsToProcess = hostnames;
                     }
-                    
+
                     hostsToProcess.map(hostname => {
                         let assignHostnameObj;
                         if (edgeHostnameId.includes("ehn_")) {
@@ -1497,7 +1497,7 @@ class WebSite {
 
 
     _setRules(groupId, contractId, productId, configName, cpcode = null, hostnames = [], origin = null, secure = false, baserules=null) {
-        
+
         return new Promise((resolve, reject) => {
             if (cpcode) {
                 return resolve(cpcode)
@@ -1996,7 +1996,7 @@ class WebSite {
     }
 
     setRuleFormat(propertyLookup, version, ruleformat) {
-        
+
         return this._getProperty(propertyLookup)
             .then(data => {
                 version = WebSite._getLatestVersion(data, version)
@@ -2170,7 +2170,7 @@ class WebSite {
             })
     }
 
-    getVariables(propertyLookup, versionLookup=0, filename=null) {       
+    getVariables(propertyLookup, versionLookup=0, filename=null) {
         return this._getProperty(propertyLookup)
             .then(property => {
                     let version = (versionLookup && versionLookup > 0) ? versionLookup : WebSite._getLatestVersion(property, versionLookup)
@@ -2209,7 +2209,7 @@ class WebSite {
                 return this._updatePropertyRules(propertyLookup, version, rules);
             })
     }
-    
+
     setOrigin(propertyLookup, version = 0, origin, forward) {
         let forwardHostHeader;
         let customForward = "";
@@ -2282,18 +2282,18 @@ class WebSite {
                     child.behaviors = behaviors;
                     children.push(child)
                 })
-                
+
                 data.rules.children = children;
-                return Promise.resolve(data);   
+                return Promise.resolve(data);
             })
             .then(rules => {
                 return this._updatePropertyRules(propertyLookup,version,rules);
             })
     }
 
-    /** 
+    /**
      * Adds specified hostnames to the property
-     * 
+     *
      * @param {string}
     */
 
@@ -2309,13 +2309,13 @@ class WebSite {
      * @param {string} origin
      */
 
-    create(hostnames = [],  cpcode = null, 
-                            configName = null, 
-                            contractId = null, 
-                            groupId = null, 
-                            newRules = null, 
-                            origin = null, 
-                            edgeHostname = null, 
+    create(hostnames = [],  cpcode = null,
+                            configName = null,
+                            contractId = null,
+                            groupId = null,
+                            newRules = null,
+                            origin = null,
+                            edgeHostname = null,
                             secure = false) {
         if (!configName && !hostnames) {
             return Promise.reject("Configname or hostname are required.")
@@ -2323,7 +2323,7 @@ class WebSite {
         let names = this._getConfigAndHostname(configName, hostnames);
         configName = names[0];
         hostnames = names[1];
-        
+
         if (!origin) {
             origin = "origin-" + configName;
         }
@@ -2459,7 +2459,7 @@ class WebSite {
             .then(data => {
                 cloneFrom = data;
                 productId = data.productId;
-                
+
                 if (!cpcode) {
                     cpcode = data.cpcode;
                 }
