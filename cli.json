@@ -1,4 +1,5 @@
 {
+  "name": "akamai/property",
   "requirements": {
     "node": "7.0.0"
   },
