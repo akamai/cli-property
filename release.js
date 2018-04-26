@@ -12,10 +12,10 @@ var exec = require('child-process-promise').exec;
 
 exec(`pkg ${source} --target node7-linux-x86,node7-linux-x64,node7-win-x86,node7-win-x64,node7-macos-x64 --output ${target}`)
     .then(function (result) {
-        let stdout = result.stdout;
-        let stderr = result.stderr;
-        console.log('stdout: ', stdout);
-        console.log('stderr: ', stderr);
+        let stdout = result.stdout
+        ,   stderr = result.stderr;
+        console.error('stdout: ', stdout);
+        console.error('stderr: ', stderr);
     })
     .then(() => {
       exec(`ls ${target}\*`)
