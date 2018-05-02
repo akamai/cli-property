@@ -1,8 +1,0 @@
-[{
-	"name": "PMUSER_TEST",
-    	"value": "Foobar",
-    	"description": "This is my big awesome test variable",
-    	"hidden": false,
-    	"sensitive": false,
-    	"action":["create","update"]
-}]
