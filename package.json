@@ -9,6 +9,7 @@
   },
   "scripts": {
     "start": "node bin/akamaiProperty",
+    "pretest": "eslint --ignore-path .gitignore .",
     "test": "mocha test --timeout 0",
     "build": "pkg bin/akamaiProperty --target node8-linux-x86,node8-linux-x64,node8-win-x86,node8-win-x64,node8-macos-x64 --output akamai-property-1.0.0"
   },
@@ -34,6 +35,8 @@
     "yargs": "^10.0.3"
   },
   "devDependencies": {
+    "eslint": "^4.19.1",
+    "eslint-config-strongloop": "^2.1.0",
     "gulp": "^3.9.1",
     "through2": "^2.0.1"
   }
