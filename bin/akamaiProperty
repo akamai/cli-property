@@ -27,8 +27,8 @@ let untildify = require('untildify');
 let WebSite = require('../index').WebSite;
 
 if ((process.versions["node"]).split('.')[0] < 7) {
-    console.log("The Akamai CLI for Property Manager requires Node 7 or later.")
-    process.exit()
+    console.error("The Akamai CLI for Property Manager requires Node 7 or later.");
+    process.exit();
 }
 
 function appName() {
@@ -549,7 +549,7 @@ function main () {
         },
         run: options => {
             if (!options.file && !options.srcprop) {
-                console.log("Required: srcprop or file")
+                console.error("Required: srcprop or file");
                 return Promise.resolve();
             }
             let app = new WebSite({path:options.config, section: options.section, debug: options.debug});
