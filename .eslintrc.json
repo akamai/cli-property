@@ -1,6 +1,7 @@
 {
   "extends": "loopback",
   "rules": {
-    "max-len": "off"
+    "max-len": "off",
+    "camelcase": ["error", {"properties": "never"}]
   }
 }
