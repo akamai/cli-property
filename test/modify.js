@@ -1,26 +1,19 @@
-var assert = require('assert');
-var WebSite = require('../index').WebSite;
-var path = require('path');
-var fs = require('fs');
+'use strict';
+const assert = require('assert');
+const WebSite = require('../index').WebSite;
 
-var timeInMs = Date.now();
-var edgercFile = '~/.edgerc';
-var sectionName = 'papi';
-var propertyId = 'prp_284816';
-var propertyName = 'jenkins.base.property'; // Change this to your test property
+const timeInMs = Date.now();
+let propertyName = 'jenkins.base.property'; // Change this to your test property
 
-// To run locally, set AKAMAI_TEST_HOST and AKAMAI_TEST_PROPID in your environment
+// To run locally, set AKAMAI_TEST_HOST in your environment
 // You must have a 'papi' section in your .edgerc file or use Akamai environment
 // variables to set your credentials.  These credentials must be at the account
 // level with read and write access in order to run these tests.
 if (process.env.AKAMAI_TEST_HOST) {
   propertyName = process.env.AKAMAI_TEST_HOST;
 }
-if (process.env.AKAMAI_TEST_PROPID) {
-  propertyId = process.env.AKAMAI_TEST_PROPID;
-}
 
-var akamaiweb = new WebSite({path: '~/.edgerc', section: 'papi'});
+const akamaiweb = new WebSite({path: '~/.edgerc', section: 'papi'});
 
 describe('Modify property', function() {
   it('should fail to modify an activated property', function() {
