@@ -13,15 +13,10 @@
 // limitations under the License.
 'use strict';
 
-let EdgeGrid = require('edgegrid');
-let untildify = require('untildify');
-let md5 = require('md5');
-let fs = require('fs');
-let tmpDir = require('os').tmpdir();
-
-let concurrent_requests = 0;
-const REQUEST_THROTTLE = process.env.REQUEST_THROTTLE ? process.env.REQUEST_THROTTLE : 10;
-let cache_complete = 0;
+const EdgeGrid = require('edgegrid');
+const untildify = require('untildify');
+const md5 = require('md5');
+const fs = require('fs');
 
 // export
 const LATEST_VERSION = {
@@ -37,7 +32,7 @@ const AKAMAI_ENV = {
 };
 
 function sleep(time) {
-  return new Promise((resolve) => setTimeout(resolve, time));
+  return new Promise(resolve => setTimeout(resolve, time));
 }
 
 /**
@@ -141,7 +136,6 @@ class WebSite {
             }
           });
         });
-        cache_complete = 1;
       });
   }
 
@@ -681,7 +675,7 @@ class WebSite {
   _updatePropertyBehaviors(rules, configName, hostname, cpcode, origin = null, secure = false) {
     return new Promise((resolve, reject) => {
       let behaviors = [];
-      let children_behaviors = [];
+      let childrenBehaviors = [];
       let cpCodeExists = 0;
 
       rules.rules.behaviors.map(behavior => {
@@ -712,13 +706,13 @@ class WebSite {
               behavior.options.sr_test_object_url = '/akamai/sureroute-testobject.html';
             }
           }
-          children_behaviors.push(behavior);
+          childrenBehaviors.push(behavior);
         });
       });
       if (secure) {
         rules.rules.options = {'is_secure': true};
       }
-      rules.rules.children.behaviors = children_behaviors;
+      rules.rules.children.behaviors = childrenBehaviors;
 
       delete rules.errors;
       resolve(rules);
@@ -1087,7 +1081,7 @@ class WebSite {
           this._edge.auth(request);
 
           this._edge.send(function(data, response) {
-            if (!response && fallthrough) {
+            if (!response && fallThrough) {
               reject();
             } else if (!response) {
               return this._moveProperty(propertyLookup, destGroup, 1);
@@ -1123,10 +1117,11 @@ class WebSite {
   }
 
   _assignHostnames(groupId, contractId, configName, edgeHostnameId, propertyId, hostnames, deleteHosts = null, newConfig = false) {
-    let assignHostnameArray, myDelete = false;
-    let newHostnameArray = [];
+    let myDelete = false;
     let hostsToProcess = [];
-    let version, property;
+    let version,
+      property;
+    const newHostnameArray = [];
     if (!hostnames) {
       hostnames = [];
     }
@@ -1646,7 +1641,7 @@ class WebSite {
     return this._getProperty(propertyLookup)
       .then(property => {
         if (!property.stagingVersion)
-          new Promise(resolve => reject(`No version in Staging for ${propertyLookup}`));
+          new Promise((resolve, reject) => reject(`No version in Staging for ${propertyLookup}`));
         else if (property.productionVersion !== property.stagingVersion)
           return this.activate(propertyLookup, stagingVersion, AKAMAI_ENV.PRODUCTION, notes, email);
         else
@@ -1949,9 +1944,9 @@ class WebSite {
         let newVars = data.rules.variables || [];
 
         changeVars['create'].map(variable => {
-          let index_check = newVars.findIndex(elt => elt.name == variable.name);
+          let indexCheck = newVars.findIndex(elt => elt.name == variable.name);
 
-          if (index_check < 0) {
+          if (indexCheck < 0) {
             delete variable.action;
             newVars.push(variable);
             changeVars['update'].splice(
@@ -2129,15 +2124,13 @@ class WebSite {
      * @param {string} origin
      */
 
-  create(hostnames = [], cpcode = null,
-    configName = null,
-    contractId = null,
-    groupId = null,
-    newRules = null,
-    origin = null,
-    edgeHostname = null,
-    secure = false) {
-    let newEdgeHostname;
+  create(hostnames = [], cpcode = null, configName = null, contractId = null, groupId = null,
+    newRules = null, origin = null, edgeHostname = null, secure = false) {
+    let newEdgeHostname,
+      productId,
+      productName,
+      propertyId,
+      edgeHostnameId;
     if (!configName && !hostnames) {
       return Promise.reject('Configname or hostname is required.');
     }
@@ -2158,11 +2151,6 @@ class WebSite {
     if (!origin) {
       origin = 'origin-' + configName;
     }
-
-    let productId,
-      productName,
-      propertyId,
-      edgeHostnameId;
 
     return this._getPropertyInfo(contractId, groupId)
       .then(data => {
@@ -2202,10 +2190,13 @@ class WebSite {
         return this._retrieveEdgeHostnames(contractId, groupId);
       })
       .then(data => {
-        let ehn_exists = 0;
+        let ehnExists = 0;
         data.edgeHostnames.items.map(hostname => {
-          if (hostname.domainPrefix = configName) {
-            ehn_exists = 1;
+          // previously, this line was an assignment
+          // ...domainPrefix = configName) {
+          // I don't know if this was by design
+          if (hostname.domainPrefix == configName) {
+            ehnExists = 1;
           }
         });
 
@@ -2220,7 +2211,7 @@ class WebSite {
           return Promise.resolve(edgeHostnameId);
         } else {
           edgeHostnameId = configName;
-          if (!ehn_exists) {
+          if (!ehnExists) {
             return this._createEdgeHostname(groupId,
               contractId,
               configName,
@@ -2330,9 +2321,9 @@ class WebSite {
         return this._getEHNId(data.propertyId, data.version, groupId, contractId);
       })
 
-      .then(clone_ehn =>{
-        if ((clone_ehn.hostnames.items) && (!edgeHostnameId)) {
-          edgeHostnameId = clone_ehn.hostnames.items[0].cnameTo || clone_ehn.hostnames.items[0].edgeHostnameId;
+      .then(clonedEhn => {
+        if ((clonedEhn.hostnames.items) && (!edgeHostnameId)) {
+          edgeHostnameId = clonedEhn.hostnames.items[0].cnameTo || clonedEhn.hostnames.items[0].edgeHostnameId;
         }
         return Promise.resolve(edgeHostnameId);
       })
