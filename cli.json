@@ -5,7 +5,7 @@
   "commands": [
     {
       "name": "property",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "description": "Manage configurations for Akamai properties",
       "bin": "https://github.com/akamai/cli-property/releases/download/{{.Version}}/akamai-{{.Name}}-{{.Version}}-{{.OS}}-{{.Arch}}{{.BinSuffix}}"
     }

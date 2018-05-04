@@ -2,7 +2,7 @@
 // No command line arguments, we're just going to use the env vars
 const fs = require('fs');
 const source = 'bin/akamaiProperty';
-const target = 'akamai-property-1.0.2';
+const target = 'akamai-property-1.0.3';
 const exec = require('child-process-promise').exec;
 
 exec(`pkg ${source} --target node7-linux-x86,node7-linux-x64,node7-win-x86,node7-win-x64,node7-macos-x64 --output ${target}`)
