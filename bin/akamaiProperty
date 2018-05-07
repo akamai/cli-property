@@ -21,10 +21,8 @@
  *
  * @author Kirsten Hunter <khunter@akamai.com>
  */
-
-var path = require('path');
-let untildify = require('untildify');
-let WebSite = require('../index').WebSite;
+const untildify = require('untildify');
+const WebSite = require('../index').WebSite;
 
 if ((process.versions["node"]).split('.')[0] < 7) {
     console.error("The Akamai CLI for Property Manager requires Node 7 or later.");
@@ -34,13 +32,10 @@ if ((process.versions["node"]).split('.')[0] < 7) {
 function appName() {
     return process.argv[1].replace(/.*\//, "");
 }
-let app = "akamai property";
 
 let section = "papi";
 let config = untildify("~/.edgerc");
 let debug = false;
-let targetProperty;
-let searchString;
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
