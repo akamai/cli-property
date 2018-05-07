@@ -39,6 +39,14 @@ let debug = false;
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
+function extendOptions (options) {
+    return Object.assign({
+        section: section,
+        config: config,
+        debug: debug,
+    }, options);
+}
+
 function activateProperty(app, targetProperty, options) {
     
     let env = options.network.toUpperCase();
@@ -70,8 +78,6 @@ function activateProperty(app, targetProperty, options) {
 }
 
 function deactivateProperty(app, targetProperty, options) {
-    section = options.section || section;
-    
     let env = options.network.toUpperCase();
     return Promise.resolve()
         .then(() => {
@@ -94,7 +100,7 @@ function deactivateProperty(app, targetProperty, options) {
 
 
 function updateProperty(app, targetProperty, options) {
-    section = options.section || section;
+    options = extendOptions(options);
  
     if (options.file)
         return app.updateFromFile( targetProperty, 
@@ -315,6 +321,7 @@ function main () {
       .command('groups', {
         desc: 'retrieve account groups',
         run: options => {
+            options = extendOptions(options);
             let app = new WebSite({path:options.config, section: options.section, debug: options.debug});
             return retrieveGroups(app)
         }
@@ -322,6 +329,7 @@ function main () {
       .command('formats', {
         desc: 'get rules formats',
         run: options => {
+            options = extendOptions(options);
             let app = new WebSite({path:options.config, section: options.section, debug: options.debug});
             if (options.newest) {
                 return retrieveNewestFormat(app)
@@ -335,6 +343,7 @@ function main () {
         desc: 'search for a property name',
         paramsDesc: 'Enter a string to search for.',
         run: options => {
+            options = extendOptions(options);
             let app = new WebSite({path:options.config, section: options.section, debug: options.debug});
             return searchProperties(app, options.property)
         }
@@ -399,6 +408,7 @@ function main () {
             })
         },
         run: options => {
+            options = extendOptions(options);
             let app = new WebSite({path:options.config, section: options.section, debug: options.debug});
             return createProperty(app, options.property, options)
             .then(() => {
@@ -470,6 +480,7 @@ function main () {
             .file('--variables <file>', { desc: '<REPLACE_ME>' })
         },
         run: options => {
+            options = extendOptions(options);
             let app = new WebSite({path:options.config, section: options.section, debug: options.debug});
             return modifyProperty(app, options.property, options)
         }
@@ -493,6 +504,7 @@ function main () {
             })
         },
         run: options => {
+            options = extendOptions(options);
             let app = new WebSite({path:options.config, section: options.section, debug: options.debug});
             return activateProperty(app, options.property, options)
         }
@@ -512,6 +524,7 @@ function main () {
             })
         },
         run: options => {
+            options = extendOptions(options);
             let app = new WebSite({path:options.config, section: options.section, debug: options.debug});
             return deactivateProperty(app, options.property, options)
         }
@@ -520,6 +533,7 @@ function main () {
         desc: 'delete a property',
         run: options => {
             options.network = "BOTH"
+            options = extendOptions(options);
             let app = new WebSite({path:options.config, section: options.section, debug: options.debug});
             return deactivateProperty(app, options.property, options)
             .then(() => {
@@ -547,6 +561,7 @@ function main () {
                 console.error("Required: srcprop or file");
                 return Promise.resolve();
             }
+            options = extendOptions(options);
             let app = new WebSite({path:options.config, section: options.section, debug: options.debug});
             return updateProperty(app, options.property, options);
         }
@@ -563,6 +578,7 @@ function main () {
               desc: 'Output file'
         })},
         run: options => {
+            options = extendOptions(options);
             let app = new WebSite({path:options.config, section: options.section, debug: options.debug});
             if (options.hostnames) {
                 return retrieveHostnames(app, options.property)
