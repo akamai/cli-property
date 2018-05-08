@@ -14,7 +14,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-"use strict";
+'use strict';
 
 /**
  * Command line tool to interface with the WebSite library for manipulating the CDN activities on Akamai
@@ -24,598 +24,596 @@
 const untildify = require('untildify');
 const WebSite = require('../index').WebSite;
 
-if ((process.versions["node"]).split('.')[0] < 7) {
-    console.error("The Akamai CLI for Property Manager requires Node 7 or later.");
-    process.exit();
+if ((process.versions['node']).split('.')[0] < 7) {
+  console.error('The Akamai CLI for Property Manager requires Node 7 or later.');
+  process.exit();
 }
 
 function appName() {
-    return process.argv[1].replace(/.*\//, "");
+  return process.argv[1].replace(/.*\//, '');
 }
 
-let section = "papi";
-let config = untildify("~/.edgerc");
+let section = 'papi';
+let config = untildify('~/.edgerc');
 let debug = false;
 
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
-function extendOptions (options) {
-    return Object.assign({
-        section: section,
-        config: config,
-        debug: debug,
-    }, options);
+function extendOptions(options) {
+  return Object.assign({
+    section: section,
+    config: config,
+    debug: debug,
+  }, options);
 }
 
 function activateProperty(app, targetProperty, options) {
-    
-    let env = options.network.toUpperCase();
-    return app.lookupPropertyIdFromHost(targetProperty)
-        .then(data => {
-            if (!numberVersion(options.propver)) {
-                options.propver = data.propertyVersion;
-            }
-            if ("BOTH" === env || env.startsWith("STAG"))
-                return app.activate(   targetProperty, 
-                                            numberVersion(options.propver), 
-                                            WebSite.AKAMAI_ENV.STAGING,
-                                            "Updated Automatically to staging.", 
-                                            options.email);
-            return Promise.resolve(data);
-        })
-        .then(data => {
-            if ("BOTH" === env || env.startsWith("PROD"))
-                return app.activate(   targetProperty, 
-                                            numberVersion(options.propver), 
-                                            WebSite.AKAMAI_ENV.PRODUCTION,
-                                            "Updated Automatically to prod.", 
-                                            options.email);
-            return Promise.resolve(data);
-        });
-}
-
-function deactivateProperty(app, targetProperty, options) {
-    let env = options.network.toUpperCase();
-    let p = ("BOTH" === env || env.startsWith("STAG"))?
-        app.deactivate( targetProperty, 
-                        WebSite.AKAMAI_ENV.STAGING,
-                        "Automatically deactivating on staging.", 
-                        options.email) :
-        Promise.resolve();
-    return p.then(() => {
-        if ("BOTH" === env || env.startsWith("PROD")) {
-            return app.deactivate(  targetProperty, 
-                                    WebSite.AKAMAI_ENV.PRODUCTION,
-                                    "Automatically deactivating on prod.", 
-                                    options.email);
-        } else {
-            return Promise.resolve();
-        }
+  let env = options.network.toUpperCase();
+  return app.lookupPropertyIdFromHost(targetProperty)
+    .then(data => {
+      if (!numberVersion(options.propver)) {
+        options.propver = data.propertyVersion;
+      }
+      if ('BOTH' === env || env.startsWith('STAG'))
+        return app.activate(targetProperty,
+          numberVersion(options.propver),
+          WebSite.AKAMAI_ENV.STAGING,
+          'Updated Automatically to staging.',
+          options.email);
+      return Promise.resolve(data);
+    })
+    .then(data => {
+      if ('BOTH' === env || env.startsWith('PROD'))
+        return app.activate(targetProperty,
+          numberVersion(options.propver),
+          WebSite.AKAMAI_ENV.PRODUCTION,
+          'Updated Automatically to prod.',
+          options.email);
+      return Promise.resolve(data);
     });
 }
 
+function deactivateProperty(app, targetProperty, options) {
+  let env = options.network.toUpperCase();
+  let p = ('BOTH' === env || env.startsWith('STAG')) ?
+    app.deactivate(targetProperty,
+      WebSite.AKAMAI_ENV.STAGING,
+      'Automatically deactivating on staging.',
+      options.email) :
+    Promise.resolve();
+  return p.then(() => {
+    if ('BOTH' === env || env.startsWith('PROD')) {
+      return app.deactivate(targetProperty,
+        WebSite.AKAMAI_ENV.PRODUCTION,
+        'Automatically deactivating on prod.',
+        options.email);
+    } else {
+      return Promise.resolve();
+    }
+  });
+}
 
 function updateProperty(app, targetProperty, options) {
-    options = extendOptions(options);
- 
-    if (options.file)
-        return app.updateFromFile( targetProperty, 
-                                        options.file, 
-                                        options.origin);
-    
-    if (options.srcprop)
-        return app.copy(   options.srcprop, 
-                                numberVersion(options.srcver), 
-                                targetProperty);
-    return Promise.resolve();
+  options = extendOptions(options);
+
+  if (options.file)
+    return app.updateFromFile(targetProperty,
+      options.file,
+      options.origin);
+
+  if (options.srcprop)
+    return app.copy(options.srcprop,
+      numberVersion(options.srcver),
+      targetProperty);
+  return Promise.resolve();
 }
 
 function deleteProperty(app, targetProperty, options) {
-    return app.deleteProperty(targetProperty);
+  return app.deleteProperty(targetProperty);
 }
 
 function createProperty(app, targetProperty, options) {
-    let hostnames = options.hostnames;
-    if (options.edgehostname) {
-        process.env.USE_PROVIDED_HOSTNAME = 1;
-    }
-    let p;
-    if (options.clone) {
-        options.srcver = numberVersion(options.srcver);
-        options.hostnames = hostnames;
-        p = app.createFromExisting(targetProperty, options);
-    } else {
-        p = options.file?
-            app.createFromFile( hostnames, 
-                                options.file,
-                                targetProperty,
-                                options.contract, 
-                                options.group,
-                                options.cpcode,
-                                options.origin,
-                                options.edgehostname,
-                                options.ruleformat):
-            app.create( hostnames,
-                        options.cpcode,
-                        targetProperty,
-                        options.contract, 
-                        options.group,
-                        null,
-                        options.origin,
-                        options.edgehostname,
-                        options.ruleformat);
-        
-    }
-    if (options.retrieve) {
-        p = p
-            .then(() => {
-                return app.retrieve(targetProperty);
-            })
-            .then(data => {
-                if (data) {
-                    console.log(JSON.stringify(data,'',2));
-                }
-                return Promise.resolve();
-            });
-    }
-    return p;
+  let hostnames = options.hostnames;
+  if (options.edgehostname) {
+    process.env.USE_PROVIDED_HOSTNAME = 1;
+  }
+  let p;
+  if (options.clone) {
+    options.srcver = numberVersion(options.srcver);
+    options.hostnames = hostnames;
+    p = app.createFromExisting(targetProperty, options);
+  } else {
+    p = options.file ?
+      app.createFromFile(hostnames,
+        options.file,
+        targetProperty,
+        options.contract,
+        options.group,
+        options.cpcode,
+        options.origin,
+        options.edgehostname,
+        options.ruleformat) :
+      app.create(hostnames,
+        options.cpcode,
+        targetProperty,
+        options.contract,
+        options.group,
+        null,
+        options.origin,
+        options.edgehostname,
+        options.ruleformat);
+  }
+  if (options.retrieve) {
+    p = p
+      .then(() => {
+        return app.retrieve(targetProperty);
+      })
+      .then(data => {
+        if (data) {
+          console.log(JSON.stringify(data, '', 2));
+        }
+        return Promise.resolve();
+      });
+  }
+  return p;
 }
 
 function retrieveProperty(app, targetProperty, options) {
-    if (options.file) {
-        return app.retrieveToFile(targetProperty, options.file, numberVersion(options.propver));
-    } else if (options.format) {
-        return app.retrievePropertyRuleFormat(targetProperty, numberVersion(options.propver));
-    } else if (options.variables) {
-        return app.getVariables(targetProperty, numberVersion(options.propver), options.file);
-    } else {
-        return app.retrieve(targetProperty, numberVersion(options.propver), false)
-        .then(data => {
-            console.log(JSON.stringify(data,'',2));
-            return Promise.resolve();
-        });
-    }
+  if (options.file) {
+    return app.retrieveToFile(targetProperty, options.file, numberVersion(options.propver));
+  } else if (options.format) {
+    return app.retrievePropertyRuleFormat(targetProperty, numberVersion(options.propver));
+  } else if (options.variables) {
+    return app.getVariables(targetProperty, numberVersion(options.propver), options.file);
+  } else {
+    return app.retrieve(targetProperty, numberVersion(options.propver), false)
+      .then(data => {
+        console.log(JSON.stringify(data, '', 2));
+        return Promise.resolve();
+      });
+  }
 }
 
 function retrieveNewestFormat(app) {
-    return app.retrieveFormats(true)
+  return app.retrieveFormats(true)
     .then(data => {
-        console.log(JSON.stringify(data,'',2));
+      console.log(JSON.stringify(data, '', 2));
     });
 }
 
 function retrieveGroups(app) {
-    return app.retrieveGroups()
+  return app.retrieveGroups()
     .then(data => {
-        console.log(JSON.stringify(data,'',2));
+      console.log(JSON.stringify(data, '', 2));
     });
 }
 
 function searchProperties(app, searchString, options) {
-    return app.searchProperties(searchString)
+  return app.searchProperties(searchString)
     .then(data => {
-        console.log(JSON.stringify(data,'',2));
+      console.log(JSON.stringify(data, '', 2));
     });
 }
 
 function retrieveFormats(app, options) {
-    return app.retrieveFormats()
+  return app.retrieveFormats()
     .then(data => {
-        console.log(JSON.stringify(data,'',2))
-    })
+      console.log(JSON.stringify(data, '', 2));
+    });
 }
 
 function retrieveHostnames(app, targetProperty) {
-    return app.retrieve(targetProperty, 0, true)
+  return app.retrieve(targetProperty, 0, true)
     .then(data => {
-        console.log(JSON.stringify(data.hostnames.items, '', 2));
-    })
+      console.log(JSON.stringify(data.hostnames.items, '', 2));
+    });
 }
 
 function modifyProperty(app, targetProperty, options, command) {
-    let version = numberVersion(options.propver) ? numberVersion(options.propver) : 0;
-    if (options.new) {
-            return app.createNewPropertyVersion(targetProperty)
-        }
-    if (options.addhosts.length > 0) {
-            return app.addHostnames(targetProperty, version, options.addhosts, options.edgehostname);
-        } 
-    if (options.delhosts.length > 0) {
-            return app.delHostnames(targetProperty, version, options.delhosts, options.edgehostname)
-        }
-    if (options.origin || options.forward) {
-            return app.setOrigin(targetProperty, version, options.origin, options.forward);
-        }
-    if (options.edgehostname && command != "create") {
-            return app.assignEdgeHostname(targetProperty, version, options.edgehostname, options.new);
-        }
-    if (options.notes) {
-            return app.setComments(targetProperty, version, options.notes);
-        } 
-    if (options.variables) {
-            return app.setVariables(targetProperty, version, options.variables);
-        }
-    if (options.cpcode) {
-            return app.setCpcode(targetProperty, version, options.cpcode)
-        }
-    if (options.move) {
-            return app.moveProperty(targetProperty, options.move)
-        }
-    if (options.ruleformat) {
-            return app.setRuleFormat(targetProperty, version, options.ruleformat)
-        } 
-    if (options.sureroutemap || options.surerouteto || options.sureroutetohost) {
-            return app.setSureRoute(targetProperty,
-                                            version, 
-                                            options.sureroutemap, 
-                                            options.surerouteto,
-                                            options.sureroutetohost);
-        }
+  let version = numberVersion(options.propver) ? numberVersion(options.propver) : 0;
+  if (options.new) {
+    return app.createNewPropertyVersion(targetProperty);
+  }
+  if (options.addhosts.length > 0) {
+    return app.addHostnames(targetProperty, version, options.addhosts, options.edgehostname);
+  }
+  if (options.delhosts.length > 0) {
+    return app.delHostnames(targetProperty, version, options.delhosts, options.edgehostname);
+  }
+  if (options.origin || options.forward) {
+    return app.setOrigin(targetProperty, version, options.origin, options.forward);
+  }
+  if (options.edgehostname && command != 'create') {
+    return app.assignEdgeHostname(targetProperty, version, options.edgehostname, options.new);
+  }
+  if (options.notes) {
+    return app.setComments(targetProperty, version, options.notes);
+  }
+  if (options.variables) {
+    return app.setVariables(targetProperty, version, options.variables);
+  }
+  if (options.cpcode) {
+    return app.setCpcode(targetProperty, version, options.cpcode);
+  }
+  if (options.move) {
+    return app.moveProperty(targetProperty, options.move);
+  }
+  if (options.ruleformat) {
+    return app.setRuleFormat(targetProperty, version, options.ruleformat);
+  }
+  if (options.sureroutemap || options.surerouteto || options.sureroutetohost) {
+    return app.setSureRoute(targetProperty,
+      version,
+      options.sureroutemap,
+      options.surerouteto,
+      options.sureroutetohost);
+  }
 }
 
 function numberVersion(version) {
-    if (version == null) {
-        return 0;
-    }
-    
-    let versionstring = version.toString();
-    let returnstring;
+  if (version == null) {
+    return 0;
+  }
 
-    if (versionstring.match(/^stag/i)) {
-            returnstring = -2;
-    } else if (versionstring.match(/^prod/i)) {
-            returnstring = -1;
-    } else if (versionstring.match(/^late/i)) {
-            returnstring = 0;
-    } else if (!versionstring.match(/^\d*$/)){
-            console.error("Unable to parse version string, using latest")
-            return 0;
-    } else {
-        returnstring = version;
-    }
-    return returnstring;
+  let versionstring = version.toString();
+  let returnstring;
+
+  if (versionstring.match(/^stag/i)) {
+    returnstring = -2;
+  } else if (versionstring.match(/^prod/i)) {
+    returnstring = -1;
+  } else if (versionstring.match(/^late/i)) {
+    returnstring = 0;
+  } else if (!versionstring.match(/^\d*$/)) {
+    console.error('Unable to parse version string, using latest');
+    return 0;
+  } else {
+    returnstring = version;
+  }
+  return returnstring;
 }
 
 const variableFileExample = [{
-    name: 'PMUSER_TEST',
-    value: 'Foobar',
-    description: 'This is my test variable',
-    hidden: false,
-    sensitive: false,
-    action: ['delete', 'update', 'create']
-  }]
+  name: 'PMUSER_TEST',
+  value: 'Foobar',
+  description: 'This is my test variable',
+  hidden: false,
+  sensitive: false,
+  action: ['delete', 'update', 'create'],
+}];
 
-function main () {
-    process.argv[1] = 'akamai property'
-    const NETWORK_CHOICES = ['PROD', 'STAGING', 'BOTH']
-    const chalk = require('chalk')
-    return require('sywac')
-      .file('--config <config>', { 
-          desc: 'Config file ',
-          defaultValue: config,
-          group: "Command options:"
-      })
-      .string('--section <section>', { 
-          desc: 'Config section ',
-          defaultValue: section,
-          group: "Command options:"
-        })
-       .boolean('--debug <debug>', { 
-            desc: 'Turn on debugging.',
-            defaultValue: false,
-            group: "Command options:"
-       })
-      .command('groups', {
-        desc: 'retrieve account groups',
-        run: options => {
-            options = extendOptions(options);
-            let app = new WebSite({path:options.config, section: options.section, debug: options.debug});
-            return retrieveGroups(app)
+function main() {
+  process.argv[1] = 'akamai property';
+  const NETWORK_CHOICES = ['PROD', 'STAGING', 'BOTH'];
+  const chalk = require('chalk');
+  return require('sywac')
+    .file('--config <config>', {
+      desc: 'Config file ',
+      defaultValue: config,
+      group: 'Command options:',
+    })
+    .string('--section <section>', {
+      desc: 'Config section ',
+      defaultValue: section,
+      group: 'Command options:',
+    })
+    .boolean('--debug <debug>', {
+      desc: 'Turn on debugging.',
+      defaultValue: false,
+      group: 'Command options:',
+    })
+    .command('groups', {
+      desc: 'retrieve account groups',
+      run: options => {
+        options = extendOptions(options);
+        let app = new WebSite({path: options.config, section: options.section, debug: options.debug});
+        return retrieveGroups(app);
+      },
+    })
+    .command('formats', {
+      desc: 'get rules formats',
+      run: options => {
+        options = extendOptions(options);
+        let app = new WebSite({path: options.config, section: options.section, debug: options.debug});
+        if (options.newest) {
+          return retrieveNewestFormat(app);
+        } else {
+          return retrieveFormats(app);
         }
-      })
-      .command('formats', {
-        desc: 'get rules formats',
-        run: options => {
-            options = extendOptions(options);
-            let app = new WebSite({path:options.config, section: options.section, debug: options.debug});
-            if (options.newest) {
-                return retrieveNewestFormat(app)
+      },
+
+    })
+    .command('search <property>', {
+      desc: 'search for a property name',
+      paramsDesc: 'Enter a string to search for.',
+      run: options => {
+        options = extendOptions(options);
+        let app = new WebSite({path: options.config, section: options.section, debug: options.debug});
+        return searchProperties(app, options.property);
+      },
+    })
+    .command('create <property>', {
+      desc: 'create a new property',
+      setup: sywac => {
+        sywac
+          .string('--clone <from>', {
+            desc: 'Source property to clone from',
+            group: 'Source options:',
+          })
+          .string('--srcver <version>', {
+            desc: 'Version for source property',
+            group: 'Source options:',
+          })
+          .file('--file <path>', {
+            desc: 'Source file for new property rules',
+            mustExist: true, // make sure file exists on local file system
+            group: 'Source options:',
+          })
+          .stringArray('--hostnames <list>', {
+            desc: 'Comma delimited list of hostnames for property',
+            group: 'Hostname options:',
+          })
+          .string('--origin <origin>', {
+            desc: 'Origin to set for property',
+            group: 'Hostname options:',
+          })
+          .string('--edgehostname <edgehostname>', {
+            desc: 'Edge hostname to use',
+            group: 'Hostname options:',
+          })
+          .number('--cpcode <cpcode>', {
+            desc: 'Use specified cpcode for new property',
+            group: 'Location options:',
+          })
+          .string('--contract <contract>', {
+            desc: 'Contract for new property',
+            group: 'Location options:',
+          })
+          .string('--group <group>', {
+            desc: 'Group for new property',
+            group: 'Location options:',
+          })
+          .boolean('--nocopy', {
+            desc: 'Do not copy cloned hostnames',
+            group: 'Source options:',
+          })
+          .string('--forward <value>', { // could use enumeration if <hostname> was not dynamic ;)
+            desc: 'Forward host header (origin|incoming|<host>)',
+            group: 'Hostname options:',
+          })
+          .string('--ruleformat <format>', {
+            desc: 'Use specified rule format',
+          })
+          .string('--notes <notes>', { // could use stringArray here to allow multiples, e.g. `--notes one --notes two`
+            desc: 'Version notes for the property version',
+          })
+          .boolean('--retrieve', {
+            desc: 'Retrieve rules for created property',
+          });
+      },
+      run: options => {
+        options = extendOptions(options);
+        let app = new WebSite({path: options.config, section: options.section, debug: options.debug});
+        return createProperty(app, options.property, options)
+          .then(() => {
+            if (options.forward || options.variables || options.notes) {
+              return modifyProperty(app, options.property, options, command);
             } else {
-                return retrieveFormats(app)
+              return Promise.resolve();
             }
-          }
-
-      })
-      .command('search <property>', { 
-        desc: 'search for a property name',
-        paramsDesc: 'Enter a string to search for.',
-        run: options => {
-            options = extendOptions(options);
-            let app = new WebSite({path:options.config, section: options.section, debug: options.debug});
-            return searchProperties(app, options.property)
-        }
-      })
-      .command('create <property>', {
-        desc: 'create a new property',
-        setup: sywac => {
-          sywac
-            .string('--clone <from>', {
-              desc: 'Source property to clone from',
-              group: 'Source options:'
-            })
-            .string('--srcver <version>', {
-              desc: 'Version for source property',
-              group: 'Source options:'
-            })
-            .file('--file <path>', {
-              desc: 'Source file for new property rules',
-              mustExist: true, // make sure file exists on local file system
-              group: 'Source options:'
-            })
-            .stringArray('--hostnames <list>', {
-              desc: 'Comma delimited list of hostnames for property',
-              group: "Hostname options:"
-            })
-            .string('--origin <origin>', {
-              desc: 'Origin to set for property',
-              group: "Hostname options:"
-            })
-            .string('--edgehostname <edgehostname>', {
-              desc: 'Edge hostname to use',
-              group: "Hostname options:"
-            })
-            .number('--cpcode <cpcode>', {
-              desc: 'Use specified cpcode for new property',
-              group: 'Location options:'
-            })
-            .string('--contract <contract>', {
-              desc: 'Contract for new property',
-              group: 'Location options:'
-            })
-            .string('--group <group>', {
-              desc: 'Group for new property',
-              group: 'Location options:'
-            })
-            .boolean('--nocopy', {
-              desc: 'Do not copy cloned hostnames',
-              group: 'Source options:'
-            })
-            .string('--forward <value>', { // could use enumeration if <hostname> was not dynamic ;)
-              desc: 'Forward host header (origin|incoming|<host>)',
-              group: "Hostname options:"
-            })
-            .string('--ruleformat <format>', {
-              desc: 'Use specified rule format'
-            })
-            .string('--notes <notes>', { // could use stringArray here to allow multiples, e.g. `--notes one --notes two`
-              desc: 'Version notes for the property version'
-            })
-            .boolean('--retrieve', {
-                desc: "Retrieve rules for created property"
-            })
-        },
-        run: options => {
-            options = extendOptions(options);
-            let app = new WebSite({path:options.config, section: options.section, debug: options.debug});
-            return createProperty(app, options.property, options)
-            .then(() => {
-                if (options.forward || options.variables || options.notes) {
-                    return modifyProperty(app, options.property, options, command)
-                } else {
-                    return Promise.resolve();
-                }
-            })
-        }
-      })
-      .command('modify <property>', {
-          desc: 'Modify specified property',
-          params: [{ hidden: true }],
-          setup: sywac => {
-            sywac
-            .string('--propver <propver>', {
-                desc: 'Property version - LATEST/STAG/PROD/<number>'
-            })
-            .stringArray('--addhosts <addhosts>', {
-                  desc: 'Comma delimited list of hostnames',
-                  group: 'Hostname options:'
-            })
-            .stringArray('--delhosts <delhosts>', {
-                desc: 'Comma delimited list of hostnames',
-                group: 'Hostname options:'
-            })
-            .string('--edgehostname <edgehostname>', {
-                desc: 'Edge hostname to use',
-                group: 'Hostname options:'
-            })
-            .string('--sureroutemap <sureroutemap>', {
-                desc: 'Map for SureRoute',
-                group: 'SureRoute options:'
-            })
-            .string('--surerouteto <surerouteto>', {
-                desc: '"To" entry for SureRoute',
-                group: 'SureRoute options:'
-            })
-            .string('--sureroutetohost <sureroutetohost>', {
-                desc: 'Target host entry for SureRoute',
-                group: 'SureRoute options:'
-            })
-            .string('--origin <origin>', {
-                desc: 'Host for origin',
-                group: "Hostname options:"
-            })
-            .string('--forward <forward>', {
-                desc: 'Forward host header (origin|incoming|<host>)',
-                group: "Hostname options:"
-            })
-            .number('--cpcode <cpcode>', {
-                desc: 'Use specified cpcode for new property',
-                group: 'Location options:'
-              })
-              .string('--ruleformat <ruleformat>', {
-                desc: 'Switch property to specified rule format'
-            })
-            .string('--notes <notes>', {
-                desc: 'Version notes for the property version'
-            })
-            .string('--move <move>', {
-                desc: 'Group to move the property to (User Admin perms)',
-                group: 'Location options:'
-            })
-            .boolean('--new', {
-                desc: 'Create new property version.'
-            })
-            .file('--variables <file>', { desc: '<REPLACE_ME>' })
-        },
-        run: options => {
-            options = extendOptions(options);
-            let app = new WebSite({path:options.config, section: options.section, debug: options.debug});
-            return modifyProperty(app, options.property, options)
-        }
+          });
+      },
+    })
+    .command('modify <property>', {
+      desc: 'Modify specified property',
+      params: [{hidden: true}],
+      setup: sywac => {
+        sywac
+          .string('--propver <propver>', {
+            desc: 'Property version - LATEST/STAG/PROD/<number>',
+          })
+          .stringArray('--addhosts <addhosts>', {
+            desc: 'Comma delimited list of hostnames',
+            group: 'Hostname options:',
+          })
+          .stringArray('--delhosts <delhosts>', {
+            desc: 'Comma delimited list of hostnames',
+            group: 'Hostname options:',
+          })
+          .string('--edgehostname <edgehostname>', {
+            desc: 'Edge hostname to use',
+            group: 'Hostname options:',
+          })
+          .string('--sureroutemap <sureroutemap>', {
+            desc: 'Map for SureRoute',
+            group: 'SureRoute options:',
+          })
+          .string('--surerouteto <surerouteto>', {
+            desc: '"To" entry for SureRoute',
+            group: 'SureRoute options:',
+          })
+          .string('--sureroutetohost <sureroutetohost>', {
+            desc: 'Target host entry for SureRoute',
+            group: 'SureRoute options:',
+          })
+          .string('--origin <origin>', {
+            desc: 'Host for origin',
+            group: 'Hostname options:',
+          })
+          .string('--forward <forward>', {
+            desc: 'Forward host header (origin|incoming|<host>)',
+            group: 'Hostname options:',
+          })
+          .number('--cpcode <cpcode>', {
+            desc: 'Use specified cpcode for new property',
+            group: 'Location options:',
+          })
+          .string('--ruleformat <ruleformat>', {
+            desc: 'Switch property to specified rule format',
+          })
+          .string('--notes <notes>', {
+            desc: 'Version notes for the property version',
+          })
+          .string('--move <move>', {
+            desc: 'Group to move the property to (User Admin perms)',
+            group: 'Location options:',
+          })
+          .boolean('--new', {
+            desc: 'Create new property version.',
+          })
+          .file('--variables <file>', {desc: '<REPLACE_ME>'});
+      },
+      run: options => {
+        options = extendOptions(options);
+        let app = new WebSite({path: options.config, section: options.section, debug: options.debug});
+        return modifyProperty(app, options.property, options);
+      },
     })
 
-      .command('activate <property>', {
-        desc: 'activate the property',
-        params: [{ hidden: true }],
-        setup: sywac => {
-          sywac
-            .enumeration('--network <network>', { // just a guess that this is the behavior you want, use `string()` otherwise
-              desc: 'Network for activation',
-              choices: NETWORK_CHOICES,
-              required: true
-            })
-            .string('--propver <version>', {
-              desc: 'Source version to activate'
-            })
-            .string('--email <address>', { // could use a `coerce` function to parse the email address
-              desc: 'Email for confirmation'
-            })
-        },
-        run: options => {
-            options = extendOptions(options);
-            let app = new WebSite({path:options.config, section: options.section, debug: options.debug});
-            return activateProperty(app, options.property, options)
-        }
-      })
-      .command('deactivate <property>', {
-        desc: 'deactivate the property',
-        params: [{ hidden: true }],
-        setup: sywac => {
-          sywac
-            .enumeration('--network <network>', {
-              desc: 'Network for deactivation',
-              choices: NETWORK_CHOICES,
-              required: true
-            })
-            .string('--email <address>', { // could use a `coerce` function to parse the email address
-              desc: 'Email for confirmation'
-            })
-        },
-        run: options => {
-            options = extendOptions(options);
-            let app = new WebSite({path:options.config, section: options.section, debug: options.debug});
-            return deactivateProperty(app, options.property, options)
-        }
-      })
-      .command('delete <property>', {
-        desc: 'delete a property',
-        run: options => {
-            options.network = "BOTH"
-            options = extendOptions(options);
-            let app = new WebSite({path:options.config, section: options.section, debug: options.debug});
-            return deactivateProperty(app, options.property, options)
-            .then(() => {
-                return deleteProperty(app, options.property, options)
-            })
-        }
-      })
-      .command('update <property>', {
-        desc: 'update target property',
-        setup: sywac => {
-          sywac
-            .string('--srcprop <property>', {
-              desc: 'Source property'
-            })
-            .string('--srcver <version>', {
-              desc: 'Source version'
-            })
-            .file('--file <path>', {
-              desc: 'File with JSON rules',
-              mustExist: true // again, assuming this is what you want
-            })
-        },
-        run: options => {
-            if (!options.file && !options.srcprop) {
-                console.error("Required: srcprop or file");
-                return Promise.resolve();
-            }
-            options = extendOptions(options);
-            let app = new WebSite({path:options.config, section: options.section, debug: options.debug});
-            return updateProperty(app, options.property, options);
-        }
-      })
-      .command('retrieve <property>', {
-        desc: 'retrieve rules from target property',
-        setup: sywac => {
-          sywac
-            .boolean('--format', { desc: 'Rules format only' })
-            .boolean('--hostnames', { desc: 'Retrieve hostnames for property' })
-            .boolean('--variables', { desc: 'Retrieve user variables' })
-            .string('--propver', { desc: 'Retrieve specified version' })
-            .file('--file <path>', {
-              desc: 'Output file'
-        })},
-        run: options => {
-            options = extendOptions(options);
-            let app = new WebSite({path:options.config, section: options.section, debug: options.debug});
-            if (options.hostnames) {
-                return retrieveHostnames(app, options.property)
-            } else  {
-                return retrieveProperty(app, options.property, options)
-            }
-        }
-      })
-      .showHelpByDefault()
-      .help('--help', { group: "Command options:"})
-      .version('--version', { group: "Command options:"})
-      .epilogue('Copyright (C) Akamai Technologies, Inc\nVisit http://github.com/akamai/cli-property for detailed documentation\n')
-      .style({
-        // you can style several other things too
-        // and even style things differently when validation fails for them
-        // see http://sywac.io/docs/sync-config.html#style
-        group: str => chalk.blue.bold(str),
-        hints: str => chalk.blue.bold(str)
-      })
-      .style({ // this applied to top-level sywac
-        all: str => {
-          return str.replace(
-            '<REPLACE_ME>',
-            'File with user variables. Format should be:\n' + JSON.stringify(variableFileExample, null, 2).split('\n').map(s => new Array(30).join(' ') + s).join('\n')
-          )
-        }
-      })
-      .style({
-        group: str => chalk.bold.blue(str === 'Options:' ? 'General options:' : str)
-      })
-      .outputSettings({ maxWidth: 90 })
-      .parse()
-      .then(result => {
-        // let errors bubble up
-        if (result.errors.length) {
-            console.error("ERROR: ", result.errors[0] || JSON.stringify(result.errors[0]));
-            console.output = "";
-        }
-        // if help requested, log it and exit
-        if (result.output) {
-          console.log(result.output)
-          process.exit(result.code)
-        }
+    .command('activate <property>', {
+      desc: 'activate the property',
+      params: [{hidden: true}],
+      setup: sywac => {
+        sywac
+          .enumeration('--network <network>', { // just a guess that this is the behavior you want, use `string()` otherwise
+            desc: 'Network for activation',
+            choices: NETWORK_CHOICES,
+            required: true,
+          })
+          .string('--propver <version>', {
+            desc: 'Source version to activate',
+          })
+          .string('--email <address>', { // could use a `coerce` function to parse the email address
+            desc: 'Email for confirmation',
+          });
+      },
+      run: options => {
+        options = extendOptions(options);
+        let app = new WebSite({path: options.config, section: options.section, debug: options.debug});
+        return activateProperty(app, options.property, options);
+      },
     })
+    .command('deactivate <property>', {
+      desc: 'deactivate the property',
+      params: [{hidden: true}],
+      setup: sywac => {
+        sywac
+          .enumeration('--network <network>', {
+            desc: 'Network for deactivation',
+            choices: NETWORK_CHOICES,
+            required: true,
+          })
+          .string('--email <address>', { // could use a `coerce` function to parse the email address
+            desc: 'Email for confirmation',
+          });
+      },
+      run: options => {
+        options = extendOptions(options);
+        let app = new WebSite({path: options.config, section: options.section, debug: options.debug});
+        return deactivateProperty(app, options.property, options);
+      },
+    })
+    .command('delete <property>', {
+      desc: 'delete a property',
+      run: options => {
+        options.network = 'BOTH';
+        options = extendOptions(options);
+        let app = new WebSite({path: options.config, section: options.section, debug: options.debug});
+        return deactivateProperty(app, options.property, options)
+          .then(() => {
+            return deleteProperty(app, options.property, options);
+          });
+      },
+    })
+    .command('update <property>', {
+      desc: 'update target property',
+      setup: sywac => {
+        sywac
+          .string('--srcprop <property>', {
+            desc: 'Source property',
+          })
+          .string('--srcver <version>', {
+            desc: 'Source version',
+          })
+          .file('--file <path>', {
+            desc: 'File with JSON rules',
+            mustExist: true, // again, assuming this is what you want
+          });
+      },
+      run: options => {
+        if (!options.file && !options.srcprop) {
+          console.error('Required: srcprop or file');
+          return Promise.resolve();
+        }
+        options = extendOptions(options);
+        let app = new WebSite({path: options.config, section: options.section, debug: options.debug});
+        return updateProperty(app, options.property, options);
+      },
+    })
+    .command('retrieve <property>', {
+      desc: 'retrieve rules from target property',
+      setup: sywac => {
+        sywac
+          .boolean('--format', {desc: 'Rules format only'})
+          .boolean('--hostnames', {desc: 'Retrieve hostnames for property'})
+          .boolean('--variables', {desc: 'Retrieve user variables'})
+          .string('--propver', {desc: 'Retrieve specified version'})
+          .file('--file <path>', {
+            desc: 'Output file',
+          });
+      },
+      run: options => {
+        options = extendOptions(options);
+        let app = new WebSite({path: options.config, section: options.section, debug: options.debug});
+        if (options.hostnames) {
+          return retrieveHostnames(app, options.property);
+        } else {
+          return retrieveProperty(app, options.property, options);
+        }
+      },
+    })
+    .showHelpByDefault()
+    .help('--help', {group: 'Command options:'})
+    .version('--version', {group: 'Command options:'})
+    .epilogue('Copyright (C) Akamai Technologies, Inc\nVisit http://github.com/akamai/cli-property for detailed documentation\n')
+    .style({
+      // you can style several other things too
+      // and even style things differently when validation fails for them
+      // see http://sywac.io/docs/sync-config.html#style
+      group: str => chalk.blue.bold(str),
+      hints: str => chalk.blue.bold(str),
+    })
+    .style({ // this applied to top-level sywac
+      all: str => {
+        return str.replace(
+          '<REPLACE_ME>',
+          'File with user variables. Format should be:\n' + JSON.stringify(variableFileExample, null, 2).split('\n').map(s => new Array(30).join(' ') + s).join('\n')
+        );
+      },
+    })
+    .style({
+      group: str => chalk.bold.blue(str === 'Options:' ? 'General options:' : str),
+    })
+    .outputSettings({maxWidth: 90})
+    .parse()
+    .then(result => {
+      // let errors bubble up
+      if (result.errors.length) {
+        console.error('ERROR: ', result.errors[0] || JSON.stringify(result.errors[0]));
+        console.output = '';
+      }
+      // if help requested, log it and exit
+      if (result.output) {
+        console.log(result.output);
+        process.exit(result.code);
+      }
+    });
 }
-  console.time(app);
-  var begin=Date.now();
-  
-  main().then(options => {
-    var end=Date.now();
-    var timeSpent=((end-begin)/1000/60).toPrecision(2) +" mins";
-    console.error("Command time: " + timeSpent)
-  })                                               
+console.time(app);
+var begin = Date.now();
+
+main().then(options => {
+  var end = Date.now();
+  var timeSpent = ((end - begin) / 1000 / 60).toPrecision(2) + ' mins';
+  console.error('Command time: ' + timeSpent);
+});
