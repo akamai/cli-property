@@ -50,10 +50,7 @@ function extendOptions (options) {
 function activateProperty(app, targetProperty, options) {
     
     let env = options.network.toUpperCase();
-    return Promise.resolve()
-        .then(() => {
-            return app.lookupPropertyIdFromHost(targetProperty);
-        })
+    return app.lookupPropertyIdFromHost(targetProperty)
         .then(data => {
             if (!numberVersion(options.propver)) {
                 options.propver = data.propertyVersion;
@@ -79,23 +76,22 @@ function activateProperty(app, targetProperty, options) {
 
 function deactivateProperty(app, targetProperty, options) {
     let env = options.network.toUpperCase();
-    return Promise.resolve()
-        .then(() => {
-            if ("BOTH" === env || env.startsWith("STAG"))
-               return app.deactivate(  targetProperty, 
-                                            WebSite.AKAMAI_ENV.STAGING,
-                                            "Automatically deactivating on staging.", 
-                                            options.email);
+    let p = ("BOTH" === env || env.startsWith("STAG"))?
+        app.deactivate( targetProperty, 
+                        WebSite.AKAMAI_ENV.STAGING,
+                        "Automatically deactivating on staging.", 
+                        options.email) :
+        Promise.resolve();
+    return p.then(() => {
+        if ("BOTH" === env || env.startsWith("PROD")) {
+            return app.deactivate(  targetProperty, 
+                                    WebSite.AKAMAI_ENV.PRODUCTION,
+                                    "Automatically deactivating on prod.", 
+                                    options.email);
+        } else {
             return Promise.resolve();
-        })
-        .then(() => {
-            if ("BOTH" === env || env.startsWith("PROD"))
-                return app.deactivate( targetProperty, 
-                                            WebSite.AKAMAI_ENV.PRODUCTION,
-                                            "Automatically deactivating on prod.", 
-                                            options.email);
-            return Promise.resolve();
-        });
+        }
+    });
 }
 
 
@@ -119,74 +115,65 @@ function deleteProperty(app, targetProperty, options) {
 }
 
 function createProperty(app, targetProperty, options) {
-    let hostnames = options.hostnames
+    let hostnames = options.hostnames;
     if (options.edgehostname) {
         process.env.USE_PROVIDED_HOSTNAME = 1;
     }
-    return Promise.resolve()
-    .then(() => {
-        if (!options.clone) {
-            if (options.file) {
-            return app.createFromFile(hostnames, 
-                                            options.file,
-                                            targetProperty,
-                                            options.contract, 
-                                            options.group,
-                                            options.cpcode,
-                                            options.origin,
-                                            options.edgehostname,
-                                            options.ruleformat);
-
-            } else {
-                return app.create(hostnames, 
-                                            options.cpcode,
-                                            targetProperty,
-                                            options.contract, 
-                                            options.group,
-                                            null,
-                                            options.origin,
-                                            options.edgehostname,
-                                            options.ruleformat)
-            }
-        } else {
-            options.srcver = numberVersion(options.srcver)
-            options.hostnames = hostnames
-            return app.createFromExisting(targetProperty, options)
-                                            
-        }
-    })
-    .then(() => {
-        if (options.retrieve) {
-            return app.retrieve(targetProperty)
-        } else {
-            return Promise.resolve()
-        }
-    })
-    .then(data => {
-        if (data) {
-            console.log(JSON.stringify(data,'',2));
-         }
-         return Promise.resolve();
-        })
+    let p;
+    if (options.clone) {
+        options.srcver = numberVersion(options.srcver);
+        options.hostnames = hostnames;
+        p = app.createFromExisting(targetProperty, options);
+    } else {
+        p = options.file?
+            app.createFromFile( hostnames, 
+                                options.file,
+                                targetProperty,
+                                options.contract, 
+                                options.group,
+                                options.cpcode,
+                                options.origin,
+                                options.edgehostname,
+                                options.ruleformat):
+            app.create( hostnames,
+                        options.cpcode,
+                        targetProperty,
+                        options.contract, 
+                        options.group,
+                        null,
+                        options.origin,
+                        options.edgehostname,
+                        options.ruleformat);
+        
+    }
+    if (options.retrieve) {
+        p = p
+            .then(() => {
+                return app.retrieve(targetProperty);
+            })
+            .then(data => {
+                if (data) {
+                    console.log(JSON.stringify(data,'',2));
+                }
+                return Promise.resolve();
+            });
+    }
+    return p;
 }
 
 function retrieveProperty(app, targetProperty, options) {
     if (options.file) {
-        return app.retrieveToFile( targetProperty, 
-                                        options.file, 
-                                        numberVersion(options.propver));
+        return app.retrieveToFile(targetProperty, options.file, numberVersion(options.propver));
     } else if (options.format) {
-        return app.retrievePropertyRuleFormat(targetProperty, numberVersion(options.propver))
+        return app.retrievePropertyRuleFormat(targetProperty, numberVersion(options.propver));
     } else if (options.variables) {
-        return app.getVariables(targetProperty, numberVersion(options.propver), options.file)
+        return app.getVariables(targetProperty, numberVersion(options.propver), options.file);
     } else {
-        return app.retrieve(targetProperty, 
-                                numberVersion(options.propver),
-                                false)
+        return app.retrieve(targetProperty, numberVersion(options.propver), false)
         .then(data => {
             console.log(JSON.stringify(data,'',2));
             return Promise.resolve();
-        })
+        });
     }
 }
 
@@ -194,21 +181,21 @@ function retrieveNewestFormat(app) {
     return app.retrieveFormats(true)
     .then(data => {
         console.log(JSON.stringify(data,'',2));
-    })
+    });
 }
 
 function retrieveGroups(app) {
     return app.retrieveGroups()
     .then(data => {
         console.log(JSON.stringify(data,'',2));
-    })
+    });
 }
 
 function searchProperties(app, searchString, options) {
     return app.searchProperties(searchString)
     .then(data => {
-        console.log(JSON.stringify(data,'',2))
-    })
+        console.log(JSON.stringify(data,'',2));
+    });
 }
 
 function retrieveFormats(app, options) {
