@@ -1,7 +1,7 @@
 'use strict';
 
 const assert = require('assert');
-const WebSite = require('../index').WebSite;
+const ApropertyAPI = require('../index').ApropertyAPI;
 
 const edgercFile = '~/.edgerc';
 const sectionName = 'papi';
@@ -24,7 +24,7 @@ if (process.env.AKAMAI_TEST_PROPID) {
   propertyId = process.env.AKAMAI_TEST_PROPID;
 }
 
-const akamaiweb = new WebSite({path: edgercFile, section: sectionName});
+const akamaiweb = new ApropertyAPI({path: edgercFile, section: sectionName});
 
 describe('Check read functions', function() {
   it('should return a property', function() {

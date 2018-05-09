@@ -1,6 +1,6 @@
 'use strict';
 const assert = require('assert');
-const WebSite = require('../index').WebSite;
+const ApropertyAPI = require('../index').ApropertyAPI;
 
 const timeInMs = Date.now();
 let propertyName = 'jenkins.base.property'; // Change this to your test property
@@ -13,7 +13,7 @@ if (process.env.AKAMAI_TEST_HOST) {
   propertyName = process.env.AKAMAI_TEST_HOST;
 }
 
-const akamaiweb = new WebSite({path: '~/.edgerc', section: 'papi'});
+const akamaiweb = new ApropertyAPI({path: '~/.edgerc', section: 'papi'});
 
 describe('Modify property', function() {
   it('should fail to modify an activated property', function() {

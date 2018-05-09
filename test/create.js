@@ -1,7 +1,7 @@
 'use strict';
 
 const assert = require('assert');
-const WebSite = require('../index').WebSite;
+const PropertyAPI = require('../index').PropertyAPI;
 const path = require('path');
 const fs = require('fs');
 const propertyId = 'prp_284816';
@@ -19,7 +19,7 @@ if (process.env.AKAMAI_TEST_PROPID) {
 }
 let tempProperty = 'travis-' + Date.now() + '.example.com';
 
-var akamaiweb = new WebSite({path: '~/.edgerc', section: 'papi'});
+var akamaiweb = new PropertyAPI({path: '~/.edgerc', section: 'papi'});
 
 describe('Create a new property from clone', function() {
   it('should clone a new property, activate, deactivate and delete', function() {

@@ -36,13 +36,13 @@ function sleep(time) {
 }
 
 /**
- * WebSite configuration and manipulation. Use this class to control the workflow of your Akamai configuration for which
+ * PropertyAPI configuration and manipulation. Use this class to control the workflow of your Akamai configuration for which
  * you normally would use the Property Manager apis.
  * @author Colin Bendell
  */
 
-// export default class WebSite {
-class WebSite {
+// export default class PropertyAPI {
+class PropertyAPI {
   /**
      * Default constructor. By default the `~/.edgerc` file is used for authentication, using the `[default]` section.
      * @param auth {Object} providing the `path`, and `section` for the authentication. Alternatively, you can pass in
@@ -193,7 +193,7 @@ class WebSite {
           edgeHostnameId: edgeHostnameId,
         };
 
-        return WebSite._getLatestVersion(cloneFromProperty, srcVersion);
+        return PropertyAPI._getLatestVersion(cloneFromProperty, srcVersion);
       })
       .then(version => {
         if (!version) {
@@ -291,7 +291,7 @@ class WebSite {
 
     return this._getProperty(propertyId)
       .then(property => {
-        let version = WebSite._getLatestVersion(property, versionLookup);
+        let version = PropertyAPI._getLatestVersion(property, versionLookup);
 
         // set basic data like contract & group
         const contractId = property.contractId;
@@ -1483,11 +1483,11 @@ class WebSite {
     return this._getProperty(propertyLookup)
       .then(property => {
         if (!hostnames) {
-          let version = (versionLookup && versionLookup > 0) ? versionLookup : WebSite._getLatestVersion(property, versionLookup);
+          let version = (versionLookup && versionLookup > 0) ? versionLookup : PropertyAPI._getLatestVersion(property, versionLookup);
           console.error(`Retrieving ${property.propertyName} v${version}`);
           return this._getPropertyRules(property.propertyId, version);
         } else {
-          let version = (versionLookup && versionLookup > 0) ? versionLookup : WebSite._getLatestVersion(property, versionLookup);
+          let version = (versionLookup && versionLookup > 0) ? versionLookup : PropertyAPI._getLatestVersion(property, versionLookup);
           console.error(`Retrieving hostnames for ${property.propertyName} v${version}`);
           return this._getHostnameList(property.propertyId, version);
         }
@@ -1542,7 +1542,7 @@ class WebSite {
       .then(property => {
         let propertyName = property.propertyName;
         console.error(`Creating new version for ${propertyName}`);
-        const version = WebSite._getLatestVersion(property, 0);
+        const version = PropertyAPI._getLatestVersion(property, 0);
         property.latestVersion += 1;
         return this._copyPropertyVersion(property, version);
       });
@@ -1573,7 +1573,7 @@ class WebSite {
       .then(oldRules => {
         let updatedRules = newRules;
         // fallback in case the object is just the rules and not the full proeprty manager response
-        updatedRules.rules = WebSite.mergeAdvancedUUIDRules(oldRules.rules, newRules.rules) ? newRules.rules : newRules;
+        updatedRules.rules = PropertyAPI.mergeAdvancedUUIDRules(oldRules.rules, newRules.rules) ? newRules.rules : newRules;
         ;
         return this._updatePropertyRules(property, oldRules.propertyVersion, updatedRules);
       });
@@ -1676,7 +1676,7 @@ class WebSite {
       .then(data => {
         property = data;
         if (!version || version <= 0)
-          activationVersion = WebSite._getLatestVersion(property, version);
+          activationVersion = PropertyAPI._getLatestVersion(property, version);
 
         console.error(`Activating ${propertyLookup} to ${networkEnv}`);
         return this._activateProperty(propertyLookup, activationVersion, networkEnv, notes, emailNotification);
@@ -1714,7 +1714,7 @@ class WebSite {
       .then(data => {
         property = data;
         console.error(`Deactivating ${propertyLookup} to ${networkEnv}`);
-        let deactivationVersion = WebSite._getLatestVersion(property, networkEnv == AKAMAI_ENV.STAGING ? LATEST_VERSION.STAGING : LATEST_VERSION.PRODUCTION) || 1;
+        let deactivationVersion = PropertyAPI._getLatestVersion(property, networkEnv == AKAMAI_ENV.STAGING ? LATEST_VERSION.STAGING : LATEST_VERSION.PRODUCTION) || 1;
         return this._deactivateProperty(propertyLookup, deactivationVersion, networkEnv, notes, email);
       })
       .then(activationId => {
@@ -1740,7 +1740,7 @@ class WebSite {
 
     return this._getProperty(propertyLookup)
       .then(data => {
-        version = WebSite._getLatestVersion(data, version);
+        version = PropertyAPI._getLatestVersion(data, version);
         contractId = data.contractId;
         groupId = data.groupId;
         configName = data.propertyName;
@@ -1788,7 +1788,7 @@ class WebSite {
   setRuleFormat(propertyLookup, version, ruleformat) {
     return this._getProperty(propertyLookup)
       .then(data => {
-        version = WebSite._getLatestVersion(data, version);
+        version = PropertyAPI._getLatestVersion(data, version);
         return this._getPropertyRules(propertyLookup, version);
       })
       .then(rules => {
@@ -1800,7 +1800,7 @@ class WebSite {
   setCpcode(propertyLookup, version, cpcode) {
     return this._getProperty(propertyLookup)
       .then(data => {
-        version = WebSite._getLatestVersion(data, version);
+        version = PropertyAPI._getLatestVersion(data, version);
         return this._getPropertyRules(propertyLookup, version);
       })
       .then(rules => {
@@ -1837,7 +1837,7 @@ class WebSite {
 
     return this._getProperty(propertyLookup)
       .then(data => {
-        version = WebSite._getLatestVersion(data, 0);
+        version = PropertyAPI._getLatestVersion(data, 0);
         contractId = data.contractId;
         groupId = data.groupId;
         configName = data.propertyName;
@@ -1872,7 +1872,7 @@ class WebSite {
 
     return this._getProperty(configName)
       .then(data => {
-        version = WebSite._getLatestVersion(data, version);
+        version = PropertyAPI._getLatestVersion(data, version);
 
         contractId = data.contractId;
         groupId = data.groupId;
@@ -1929,7 +1929,7 @@ class WebSite {
         return this._getProperty(propertyLookup);
       })
       .then(data => {
-        version = WebSite._getLatestVersion(data, version);
+        version = PropertyAPI._getLatestVersion(data, version);
       })
       .then(data => {
         data = variables;
@@ -1988,7 +1988,7 @@ class WebSite {
   getVariables(propertyLookup, versionLookup = 0, filename = null) {
     return this._getProperty(propertyLookup)
       .then(property => {
-        let version = (versionLookup && versionLookup > 0) ? versionLookup : WebSite._getLatestVersion(property, versionLookup);
+        let version = (versionLookup && versionLookup > 0) ? versionLookup : PropertyAPI._getLatestVersion(property, versionLookup);
         console.error(`Retrieving variables for ${property.propertyName} v${version}`);
         return this._getPropertyRules(property.propertyId, version);
       })
@@ -2013,7 +2013,7 @@ class WebSite {
     console.error('... adding version notes');
     return this._getProperty(propertyLookup)
       .then(property => {
-        version = WebSite._getLatestVersion(property, version);
+        version = PropertyAPI._getLatestVersion(property, version);
         return this._getPropertyRules(property, version);
       })
       .then(data => {
@@ -2039,7 +2039,7 @@ class WebSite {
     }
     return this._getProperty(propertyLookup)
       .then(property => {
-        version = WebSite._getLatestVersion(property, version);
+        version = PropertyAPI._getLatestVersion(property, version);
         return this._getPropertyRules(property, version);
       })
       .then(data => {
@@ -2071,7 +2071,7 @@ class WebSite {
   setSureRoute(propertyLookup, version = 0, sureroutemap, surerouteto, sureroutetohost) {
     return this._getProperty(propertyLookup)
       .then(property => {
-        version = WebSite._getLatestVersion(property, version);
+        version = PropertyAPI._getLatestVersion(property, version);
         return this._getPropertyRules(property, version);
       })
       .then(data => {
@@ -2379,7 +2379,7 @@ class WebSite {
   }
 }
 
-WebSite.AKAMAI_ENV = Object.freeze(AKAMAI_ENV);
-WebSite.LATEST_VERSION = Object.freeze(LATEST_VERSION);
+PropertyAPI.AKAMAI_ENV = Object.freeze(AKAMAI_ENV);
+PropertyAPI.LATEST_VERSION = Object.freeze(LATEST_VERSION);
 
-module.exports = WebSite;
+module.exports = PropertyAPI;

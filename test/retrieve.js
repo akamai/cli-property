@@ -1,6 +1,6 @@
 'use strict';
 const assert = require('assert');
-const WebSite = require('../index').WebSite;
+const ApropertyAPI = require('../index').ApropertyAPI;
 
 let propertyName = 'jenkins.base.property';
 
@@ -11,7 +11,7 @@ if (process.env.AKAMAI_TEST_HOST) {
   propertyName = process.env.AKAMAI_TEST_HOST;
 }
 
-const akamaiweb = new WebSite({path: '~/.edgerc', section: 'papi'});
+const akamaiweb = new ApropertyAPI({path: '~/.edgerc', section: 'papi'});
 
 describe('Retrieve formats', function() {
   it('should retrieve the rules formats', function() {
