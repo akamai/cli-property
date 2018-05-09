@@ -1,6 +1,6 @@
 {
   "name": "akamaicliproperty",
-  "version": "0.1.1",
+  "version": "1.0.3",
   "description": "A wrapping development kit to interface common tasks with akamai's {OPEN} API.",
   "repository": "https://github.com/akamai/cli-property",
   "license": "Apache-2.0",
