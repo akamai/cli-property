@@ -5,10 +5,13 @@ const source = 'bin/akamaiProperty';
 const target = 'akamai-property-1.0.3';
 const exec = require('child-process-promise').exec;
 
-exec(`pkg ${source} --target node7-linux-x86,node7-linux-x64,node7-win-x86,node7-win-x64,node7-macos-x64 --output ${target}`)
+exec(`pkg ${source} --target node8-linux-x86,node8-linux-x64,node8-win-x86,node8-win-x64,node8-macos-x64 --output ${target}`)
   .then(result => {
     console.error('stdout: ', result.stdout);
     console.error('stderr: ', result.stderr);
+  })
+  .catch(e => {
+    console.error(e);
   })
   .then(() => {
     exec(`ls ${target}\*`)
