@@ -397,7 +397,7 @@ function main() {
         return createProperty(app, options.property, options)
           .then(() => {
             if (options.forward || options.variables || options.notes) {
-              return modifyProperty(app, options.property, options, command);
+              return modifyProperty(app, options.property, options);
             } else {
               return Promise.resolve();
             }
@@ -609,7 +609,7 @@ function main() {
       }
     });
 }
-console.time(app);
+console.time('cli-property');
 var begin = Date.now();
 
 main().then(options => {
