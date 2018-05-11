@@ -46,14 +46,16 @@ class PropertyAPI {
      *     `clientToken`, `clientSecret`, `accessToken`, and `host` directly.
      */
   constructor(auth = {path: '~/.edgerc', section: 'default', debug: false, default: true}) {
-    if (auth.clientToken && auth.clientSecret && auth.accessToken && auth.host)
+    if (auth.clientToken && auth.clientSecret && auth.accessToken && auth.host) {
       this._edge = new EdgeGrid(auth.clientToken, auth.clientSecret, auth.accessToken, auth.host, auth.debug);
-    else
+    }
+    else {
       this._edge = new EdgeGrid({
         path: untildify(auth.path),
         section: auth.section,
         debug: auth.debug,
       });
+    }
     this._propertyById = {};
     this._propertyByName = {};
     this._propertyByHost = {};
@@ -68,8 +70,9 @@ class PropertyAPI {
   }
 
   _init() {
-    if (this._initComplete)
+    if (this._initComplete) {
       return Promise.resolve();
+    }
     if (Object.keys(this._propertyById).length > 0) {
       this._initComplete = true;
       return Promise.resolve();
@@ -88,12 +91,7 @@ class PropertyAPI {
 
     return this._getGroupList()
       .then(data => {
-        return new Promise((resolve, reject) => {
-          return resolve(data);
-        });
-      })
-      .then(data => {
-        if (data.groups && data.groups.items)
+        if (data.groups && data.groups.items) {
           data.groups.items.map(item => {
             if (item.contractIds)
               item.contractIds.map(contractId => {
@@ -106,6 +104,7 @@ class PropertyAPI {
                   });
               });
           });
+        }
         // get the  list of all properties for the known list of contracts and groups now
         console.error('... retrieving properties from %s groups', groupcontractList.length);
         return Promise.all(groupcontractList.map(v => {
@@ -113,10 +112,10 @@ class PropertyAPI {
         }));
       })
       .then(propList => {
-        let promiseList = [];
-
         propList.map(v => {
-          if (!v || !v.properties || !v.properties.items) return;
+          if (!v || !v.properties || !v.properties.items) {
+            return;
+          }
           return v.properties.items.map(item => {
             let configName = item.propertyName;
             configName = configName.replace(/[^\w.-]/gi, '_');
@@ -129,7 +128,6 @@ class PropertyAPI {
             this._propertyById[item.propertyId] = item;
             if (item.propertyName == propertyLookup) {
               foundProperty = item;
-              promiseList = [];
             }
           });
         });
@@ -466,16 +464,18 @@ class PropertyAPI {
   }
 
   _getProperty(propertyLookup, hostnameEnvironment = LATEST_VERSION.STAGING) {
-    if (propertyLookup && propertyLookup.groupId && propertyLookup.propertyId && propertyLookup.contractId)
+    if (propertyLookup && propertyLookup.groupId && propertyLookup.propertyId && propertyLookup.contractId) {
       return Promise.resolve(propertyLookup);
+    }
     propertyLookup = propertyLookup.replace(/[^\w.-]/gi, '_');
     return this._init()
       .then(() => {
         let prop = this._propertyById[propertyLookup] || this._propertyByName[propertyLookup];
         if (!prop) {
           let host = this._propertyByHost[propertyLookup];
-          if (host)
+          if (host) {
             prop = hostnameEnvironment === LATEST_VERSION.STAGING ? host.staging : host.production;
+          }
         }
         if (prop) {
           return Promise.resolve(prop);
@@ -487,16 +487,20 @@ class PropertyAPI {
         }
       })
       .then(prop => {
-        if (prop) { return Promise.resolve(prop); }
+        if (prop) {
+          return Promise.resolve(prop);
+        }
         prop = this._propertyById[propertyLookup] || this._propertyByName[propertyLookup];
         if (!prop) {
           let host = this._propertyByHost[propertyLookup];
-          if (host)
+          if (host) {
             prop = hostnameEnvironment === LATEST_VERSION.STAGING ? host.staging : host.production;
+          }
         }
 
-        if (!prop)
+        if (!prop) {
           return Promise.reject(`Cannot find property:  ${propertyLookup}`);
+        }
         return Promise.resolve(prop);
       });
   };
@@ -586,14 +590,15 @@ class PropertyAPI {
   }
 
   static _getLatestVersion(property, env = LATEST_VERSION) {
-    if (env === LATEST_VERSION.PRODUCTION)
+    if (env === LATEST_VERSION.PRODUCTION) {
       return property.productionVersion;
-    else if (env === LATEST_VERSION.STAGING)
+    } else if (env === LATEST_VERSION.STAGING) {
       return property.stagingVersion;
-    else if (env === LATEST_VERSION.LATEST)
+    } else if (env === LATEST_VERSION.LATEST) {
       return property.latestVersion;
-    else
+    } else {
       return env;
+    }
   };
 
   _copyPropertyVersion(propertyLookup, versionId) {
@@ -1253,8 +1258,9 @@ class PropertyAPI {
       // TODO: Does this look like a hostname?
       hostnames = [configName];
     }
-    if (!configName)
+    if (!configName) {
       configName = hostnames[0];
+    }
     let letters = '/^[0-9a-zA-Z\\_\\-\\.]+$/';
     if (!configName.match(letters)) {
       configName = configName.replace(/[^\w.-]/gi, '_');
@@ -1339,7 +1345,9 @@ class PropertyAPI {
             md5: md5(xml),
           };
           // should we allow for multiple uses of the same hash?
-          if (!found[foundNode.md5]) found[foundNode.md5] = [];
+          if (!found[foundNode.md5]) {
+            found[foundNode.md5] = [];
+          }
           found[foundNode.md5].push(foundNode);
         }
       });
@@ -1510,10 +1518,11 @@ class PropertyAPI {
         } else {
           return new Promise((resolve, reject) => {
             fs.writeFile(untildify(toFile), JSON.stringify(data, '', 2), (err) => {
-              if (err)
+              if (err) {
                 reject(err);
-              else
+              } else {
                 resolve(data);
+              }
             });
           });
         }
@@ -1637,12 +1646,13 @@ class PropertyAPI {
     // todo: make sure email is an array
     return this._getProperty(propertyLookup)
       .then(property => {
-        if (!property.stagingVersion)
+        if (!property.stagingVersion) {
           new Promise((resolve, reject) => reject(`No version in Staging for ${propertyLookup}`));
-        else if (property.productionVersion !== property.stagingVersion)
+        } else if (property.productionVersion !== property.stagingVersion) {
           return this.activate(propertyLookup, stagingVersion, AKAMAI_ENV.PRODUCTION, notes, email);
-        else
+        } else {
           new Promise(resolve => resolve(true));
+        }
       });
   }
 
@@ -1664,27 +1674,30 @@ class PropertyAPI {
     // todo: change the version lookup
 
     let emailNotification = email;
-    if (!Array.isArray(emailNotification))
+    if (!Array.isArray(emailNotification)) {
       emailNotification = [email];
+    }
     let activationVersion = version;
     let property = propertyLookup;
 
     return this._getProperty(propertyLookup)
       .then(data => {
         property = data;
-        if (!version || version <= 0)
+        if (!version || version <= 0) {
           activationVersion = PropertyAPI._getLatestVersion(property, version);
-
+        }
         console.error(`Activating ${propertyLookup} to ${networkEnv}`);
         return this._activateProperty(propertyLookup, activationVersion, networkEnv, notes, emailNotification);
       })
       .then(activationId => {
-        if (networkEnv === AKAMAI_ENV.STAGING)
+        if (networkEnv === AKAMAI_ENV.STAGING) {
           property.stagingVersion = activationVersion;
-        else
+        } else {
           property.productionVersion = activationVersion;
-        if (wait)
+        }
+        if (wait) {
           return this._pollActivation(propertyLookup, activationId);
+        }
         return Promise.resolve(activationId);
       });
   }
@@ -1703,8 +1716,9 @@ class PropertyAPI {
      * @returns {Promise} returns a promise with the TResult of boolean
      */
   deactivate(propertyLookup, networkEnv = AKAMAI_ENV.STAGING, notes = '', email = ['test@example.com'], wait = true) {
-    if (!Array.isArray(email))
+    if (!Array.isArray(email)) {
       email = [email];
+    }
     let property;
 
     return this._getProperty(propertyLookup)
@@ -1718,12 +1732,14 @@ class PropertyAPI {
         if (!activationId) {
           return Promise.resolve();
         }
-        if (networkEnv === AKAMAI_ENV.STAGING)
+        if (networkEnv === AKAMAI_ENV.STAGING) {
           property.stagingVersion = null;
-        else
+        } else {
           property.productionVersion = null;
-        if (wait)
+        }
+        if (wait) {
           return this._pollActivation(propertyLookup, activationId);
+        }
         return Promise.resolve(activationId);
       });
   }
@@ -1915,10 +1931,11 @@ class PropertyAPI {
 
     return new Promise((resolve, reject) => {
       fs.readFile(untildify(variablefile), (err, data) => {
-        if (err)
+        if (err) {
           reject(err);
-        else
+        } else {
           variables = JSON.parse(data);
+        }
         resolve(JSON.parse(data));
       });
     })
@@ -1996,10 +2013,11 @@ class PropertyAPI {
         } else {
           return new Promise((resolve, reject) => {
             fs.writeFile(untildify(filename), JSON.stringify(rules.rules.variables, '', 2), (err) => {
-              if (err)
+              if (err) {
                 reject(err);
-              else
+              } else {
                 resolve(rules);
+              }
             });
           });
         }
@@ -2245,10 +2263,11 @@ class PropertyAPI {
     hostnames = names[1];
     return new Promise((resolve, reject) => {
       fs.readFile(untildify(srcFile), (err, data) => {
-        if (err)
+        if (err) {
           reject(err);
-        else
+        } else {
           resolve(JSON.parse(data));
+        }
       });
     })
       .then(rules => {
