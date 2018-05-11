@@ -30,6 +30,7 @@
     "pkg": "^4.3.0-beta.5",
     "request": "^2.74.0",
     "safe-buffer": "^5.1.1",
+    "sleep-promise": "^6.0.0",
     "sywac": "^1.2.0",
     "untildify": "*",
     "yargonaut": "^1.1.2",

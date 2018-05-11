@@ -17,6 +17,7 @@ const EdgeGrid = require('edgegrid');
 const untildify = require('untildify');
 const md5 = require('md5');
 const fs = require('fs');
+const sleep = require('sleep-promise');
 
 // export
 const LATEST_VERSION = {
@@ -30,10 +31,6 @@ const AKAMAI_ENV = {
   STAGING: 'STAGING',
   PRODUCTION: 'PRODUCTION',
 };
-
-function sleep(time) {
-  return new Promise(resolve => setTimeout(resolve, time));
-}
 
 /**
  * PropertyAPI configuration and manipulation. Use this class to control the workflow of your Akamai configuration for which
