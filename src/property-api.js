@@ -1542,8 +1542,6 @@ class PropertyAPI {
   }
 
   createNewPropertyVersion(propertyLookup) {
-    let property = propertyLookup;
-
     return this._getProperty(propertyLookup)
       .then(property => {
         let propertyName = property.propertyName;
