@@ -112,6 +112,9 @@ class PropertyAPI {
         }));
       })
       .then(propList => {
+        const toString = function () {
+          return this.propertyName;
+        };
         propList.map(v => {
           if (!v || !v.properties || !v.properties.items) {
             return;
@@ -120,10 +123,7 @@ class PropertyAPI {
             let configName = item.propertyName;
             configName = configName.replace(/[^\w.-]/gi, '_');
             item.propertyName = configName;
-            // TODO: should use toJSON() instead of the primitive toString()
-            item.toString = function() {
-              return this.propertyName;
-            };
+            item.toString = item.toJSON = toString;
             this._propertyByName[item.propertyName] = item;
             this._propertyById[item.propertyId] = item;
             if (item.propertyName == propertyLookup) {
