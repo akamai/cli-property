@@ -48,8 +48,7 @@ class PropertyAPI {
   constructor(auth = {path: '~/.edgerc', section: 'default', debug: false, default: true}) {
     if (auth.clientToken && auth.clientSecret && auth.accessToken && auth.host) {
       this._edge = new EdgeGrid(auth.clientToken, auth.clientSecret, auth.accessToken, auth.host, auth.debug);
-    }
-    else {
+    } else {
       this._edge = new EdgeGrid({
         path: untildify(auth.path),
         section: auth.section,
@@ -112,7 +111,7 @@ class PropertyAPI {
         }));
       })
       .then(propList => {
-        const toString = function () {
+        const toString = function() {
           return this.propertyName;
         };
         propList.map(v => {
