@@ -432,6 +432,32 @@ class WebSite {
         })
     }
 
+    _listProperties(groupId, contractId){
+        return new Promise((resolve, reject) => {
+            if(!groupId && !contractId){
+                reject("Please specify a Group and a Contract");
+            }else if(!groupId){
+                reject("Please specify a Group")
+            }else if(!contractId){
+                reject("Please specify a Contract")
+            }
+            console.error('... retrieving list of Properties for this group and contract');
+            let request = {
+                method: 'GET',
+                path: `/papi/v1/properties?contractId=${contractId}&groupId=${groupId}`
+            }
+            this._edge.auth(request);
+            this._edge.send(function(data, response) {
+                if (response && response.statusCode >= 200 && response.statusCode < 400) {
+                    let parsed = JSON.parse(response.body);
+                    resolve(parsed);
+                } else {
+                    reject(response);
+                }
+            })
+        })
+    }
+
     _getPropertyMetadata(propertyId, groupId, contractId) {
          return new Promise((resolve, reject) => {
             console.error('... getting info for ' + propertyId);
@@ -1475,6 +1501,27 @@ class WebSite {
             .then(result => {
                 return result;
             })
+    }
+
+    listProperties(groupId, contractId) {
+        return this._listProperties(groupId, contractId)
+        .then(result => {
+            return result;
+        })
+    }
+
+    listPropertiesToFile(groupId, contractId, toFile) {
+        return this._listProperties(groupId, contractId)
+        .then(result => {
+            return new Promise((resolve, reject) => {
+                fs.writeFile(untildify(toFile), JSON.stringify(result, '', 2), (err) => {
+                    if (err)
+                        reject(err);
+                    else
+                        resolve(result);
+                });
+            });
+        })
     }
 
     retrieveGroups() {
