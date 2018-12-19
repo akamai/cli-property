@@ -210,6 +210,17 @@ function searchProperties(app, searchString, options) {
     })
 }
 
+function listProperties(app, group, contract, toFile) {
+    if(toFile){
+        return app.listPropertiesToFile(group, contract, toFile)
+    }else{
+        return app.listProperties(group, contract)
+        .then(data => {
+            console.log(JSON.stringify(data,'',2))
+        })
+    }    
+}
+
 function retrieveFormats(app, options) {
     return app.retrieveFormats()
     .then(data => {
@@ -335,6 +346,27 @@ function main () {
             }
           }
 
+      })
+      .command('list', {
+        desc: 'list properties in a group',
+        setup: sywac => {
+            sywac
+                .string('--contract <contract>', {
+                    desc: 'Contract to list properties from',
+                    group: 'Location options:'
+                })
+                .string('--group <group>', {
+                    desc: 'Group to list properties from',
+                    group: 'Location options:'
+                })
+                .file('--file <path>', {
+                    desc: 'Output file'
+                })
+        },
+        run: options => {
+            let app = new WebSite({path:options.config, section: options.section, debug: options.debug});
+            return listProperties(app, options.group, options.contract, options.file)
+        }
       })
       .command('search <property>', { 
         desc: 'search for a property name',
