@@ -418,11 +418,14 @@ class WebSite {
     _listProperties(groupId, contractId){
         return new Promise((resolve, reject) => {
             if(!groupId && !contractId){
-                reject("Please specify a Group and a Contract");
+                console.error("Please specify a Group and a Contract");
+                reject(null);
             }else if(!groupId){
-                reject("Please specify a Group")
+                console.error("Please specify a Group");
+                reject(null);
             }else if(!contractId){
-                reject("Please specify a Contract")
+                console.error("Please specify a Contract");
+                reject(null);
             }
             console.error('... retrieving list of Properties for this group and contract');
             let request = {
@@ -434,6 +437,9 @@ class WebSite {
                 if (response && response.statusCode >= 200 && response.statusCode < 400) {
                     let parsed = JSON.parse(response.body);
                     resolve(parsed);
+                } else if(response.statusCode === 403){
+                    console.error('... your client credentials have no access to this group, skipping {%s : %s}', contractId, groupId);
+                    reject(null);
                 } else {
                     reject(response);
                 }
