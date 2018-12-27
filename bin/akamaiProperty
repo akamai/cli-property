@@ -380,17 +380,6 @@ function main () {
                     desc: 'Output file'
                 })
         },        
-<<<<<<< HEAD
-=======
-        run: options => {
-            let app = new WebSite({path:options.config, section: options.section, debug: options.debug});
-            return listProperties(app, options.group, options.contract, options.file)
-        }
-      })
-      .command('search <property>', { 
-        desc: 'search for a property name',
-        paramsDesc: 'Enter a string to search for.',
->>>>>>> 2551ecf22f7078ba7f45030071949a83da5fe0b8
         run: options => {
             let app = new WebSite({path:options.config, section: options.section, debug: options.debug});
             return listProperties(app, options.group, options.contract, options.file)
