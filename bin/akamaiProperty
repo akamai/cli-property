@@ -395,7 +395,7 @@ function main () {
           try {
             let app = new WebSite({path: options.config, section: options.section, debug: options.debug});
             options.property = options.property || process.env.AKAMAI_PAPI_PROPERTY;
-            return searchProperties(app, options.string)
+            return searchProperties(app, context.args[1])
           } catch (error) {
             return errorMessage(error, context);
           }
