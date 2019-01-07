@@ -124,7 +124,7 @@ class WebSite {
             })
             .then(propList => {
                 let promiseList = [];
-                
+
                 propList.map(v => {
                     if (!v || !v.properties || !v.properties.items) return;
                     return v.properties.items.map(item => {
@@ -796,7 +796,7 @@ class WebSite {
                                 body: rules
                         }
                     }
-                    
+
                     this._edge.auth(request);
 
                     this._edge.send(function (data, response) {
@@ -886,12 +886,11 @@ class WebSite {
      * @param notes
      * @param email
      * @param acknowledgeWarnings
-     * @param autoAcceptWarnings
      * @param showWarnings
      * @returns {Promise.<TResult>}
      * @private
      */
-    _activateProperty(propertyLookup, versionId, env = LATEST_VERSION.STAGING, notes = '', email = ['test@example.com'], acknowledgeWarnings = [], autoAcceptWarnings = true, showWarnings = true) {
+    _activateProperty(propertyLookup, versionId, env = LATEST_VERSION.STAGING, notes = '', email = ['test@example.com'], acknowledgeWarnings = [], showWarnings = true) {
         return this._getProperty(propertyLookup)
             .then((data) => {
                 //set basic data like contract & group
