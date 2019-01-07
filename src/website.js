@@ -1906,37 +1906,33 @@ class WebSite {
             })
     }
 
-    delHostnames(propertyLookup, version, hostnames) {
+    delHostnames(propertyLookup, version = 0, hostnames) {
         let contractId,
             groupId,
-            productId,
             propertyId,
-            configName,
-            hostlist;
+            configName;
 
         let names = this._getConfigAndHostname(propertyLookup, hostnames);
         configName = names[0];
         hostnames = names[1];
 
-
         return this._getProperty(propertyLookup)
             .then(data => {
-                version = WebSite._getLatestVersion(data, 0)
+                version = version || WebSite._getLatestVersion(data, version)
                 contractId = data.contractId;
                 groupId = data.groupId;
                 configName = data.propertyName;
                 propertyId = data.propertyId;
-                return this._getHostnameList(configName, version)
-            })
-            .then(hostnamelist => {
-                hostlist = hostnamelist.hostnames.items;
+                
                 return this._assignHostnames(groupId,
                     contractId,
                     configName,
                     null,
                     propertyId,
                     null,
-                    hostnames);
+                    hostnames,
+                    false,
+                    version);
             }).then(data => {
                 return Promise.resolve();
             })

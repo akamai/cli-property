@@ -251,7 +251,7 @@ function modifyProperty(app, targetProperty, options, command) {
             return app.addHostnames(targetProperty, version, options.addhosts, options.edgehostname);
         } 
     if (options.delhosts.length > 0) {
-            return app.delHostnames(targetProperty, version, options.delhosts, options.edgehostname)
+            return app.delHostnames(targetProperty, version, options.delhosts)
         }
     if (options.origin || options.forward) {
             return app.setOrigin(targetProperty, version, options.origin, options.forward);
