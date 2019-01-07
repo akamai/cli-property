@@ -57,37 +57,41 @@ describe('Modify property', function () {
         })
     })
 
-    it ('should add and delete hosts', function() {
-        let host = `fancynew.akamaiapibootcamp.com`
-        return akamaiweb.addHostnames(propertyName, 0, host)
-        .then(() => {
-            return akamaiweb.retrieve(propertyName, 0, true)
-        })
-        .then(rules => {
-            let hostnames = rules.hostnames.items
-            let contained = 0
-            hostnames.map(entry => {
-                if (entry.cnameFrom == host) contained=1
+    let versions = [0, 22];
+
+    versions.forEach( version => {
+        it(`should add and delete hosts on version ${ version ? version: 'latest' }`, function() {
+            let host = `fancynew.akamaiapibootcamp.com`
+            return akamaiweb.addHostnames(propertyName, version, host)
+            .then(() => {
+                return akamaiweb.retrieve(propertyName, version, true)
             })
-            assert(contained == 1)
-            return akamaiweb.delHostnames(propertyName, 0, host)
-        })
-        .then(() => {
-            return akamaiweb.retrieve(propertyName, 0, true)
-        })
-        .then(rules => {
-            let hostnames = rules.hostnames.items
-            let contained = 0
-            hostnames.map(entry => {
-                if (entry.cnameFrom == host) {
-                    console.log(entry)
-                    contained=1
-                }
+            .then(rules => {
+                let hostnames = rules.hostnames.items
+                let contained = 0
+                hostnames.map(entry => {
+                    if (entry.cnameFrom == host) contained=1
+                })
+                assert(contained == 1)
+                return akamaiweb.delHostnames(propertyName, version, host)
             })
-            assert(contained == 0)
-        })
-        .catch((error) => {
-            console.log(error)
+            .then(() => {
+                return akamaiweb.retrieve(propertyName, version, true)
+            })
+            .then(rules => {
+                let hostnames = rules.hostnames.items
+                let contained = 0
+                hostnames.map(entry => {
+                    if (entry.cnameFrom == host) {
+                        console.log(entry)
+                        contained=1
+                    }
+                })
+                assert(contained == 0)
+            })
+            .catch((error) => {
+                console.log(error)
+            })
         })
     })
 
