@@ -384,13 +384,9 @@ function main () {
             return listProperties(app, options.group, options.contract, options.file)
         }
       })
-      .command('search ' + ( process.env.AKAMAI_PAPI_PROPERTY ? '[property]' : '<property>' ), { 
+      .command('search <string>', {
         desc: 'search for a property name',
-        default: process.env.AKAMAI_PROPERTY_SEARCH_STRING,
         paramsDesc: 'Enter a string to search for.',
-        setup: sywac => {
-            sywac.usage('Usage: $0 <property>(default: [$AKAMAI_PAPI_PROPERTY]) [options]')
-        },
         run: (options, context) => {
           try {
             let app = new WebSite({path: options.config, section: options.section, debug: options.debug});
