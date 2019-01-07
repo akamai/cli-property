@@ -235,8 +235,8 @@ function retrieveFormats(app, options) {
     })
 }
 
-function retrieveHostnames(app, targetProperty) {
-    return app.retrieve(targetProperty, 0, true)
+function retrieveHostnames(app, targetProperty, version) {
+    return app.retrieve(targetProperty, version, true)
     .then(data => {
         console.log(JSON.stringify(data.hostnames.items, '', 2));
     })
@@ -678,7 +678,7 @@ function main () {
             let app = new WebSite({path: options.config, section: options.section, debug: options.debug});
             options.property = options.property || process.env.AKAMAI_PAPI_PROPERTY;
             if (options.hostnames) {
-              return retrieveHostnames(app, options.property)
+              return retrieveHostnames(app, options.property, options.propver)
             } else {
               return retrieveProperty(app, options.property, options)
             }
