@@ -1,5 +1,5 @@
 'use strict';
 
 module.exports = {
-    WebSite: require('./src/website'),
+  WebSite: require('./src/website'),
 };
