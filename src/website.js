@@ -1633,7 +1633,7 @@ class WebSite {
      * @param {Object} newRules of the configuration to be updated. Only the {object}.rules will be copied.
      * @returns {Promise} with the property rules as the {TResult}
      */
-    update(propertyLookup, newRules) {
+    update(propertyLookup, newRules, comment = false) {
         let property = propertyLookup;
 
         return this._getProperty(propertyLookup)
@@ -1652,7 +1652,10 @@ class WebSite {
                 let updatedRules = newRules;
                 // fallback in case the object is just the rules and not the full proeprty manager response
                 updatedRules.rules = WebSite.mergeAdvancedUUIDRules(oldRules.rules, newRules.rules) ? newRules.rules : newRules;
-                ;
+                 if(comment) {
+                   updatedRules.comments = comment;
+                 }
+                 console.log(updatedRules)
                 return this._updatePropertyRules(property, oldRules.propertyVersion, updatedRules);
             });
     }
@@ -1668,7 +1671,7 @@ class WebSite {
      *     Only the {Object}.rules will be copied
      * @returns {Promise} returns a promise with the updated form of the
      */
-    updateFromFile(propertyLookup, srcFile) {
+    updateFromFile(propertyLookup, srcFile, comment = false) {
         return new Promise((resolve, reject) => {
             fs.readFile(untildify(srcFile), (err, data) => {
                 if (err) {
@@ -1680,7 +1683,7 @@ class WebSite {
 
         })
             .then(data => {
-                return this.update(propertyLookup, data)
+                return this.update(propertyLookup, data, comment)
             })
     }
 
@@ -1695,11 +1698,11 @@ class WebSite {
      * @param {string} toProperty either colloquial host name (www.example.com) or canonical PropertyId (prp_123456)
      * @returns {Promise} returns a promise with the TResult of boolean
      */
-    copy(fromProperty, fromVersion = LATEST_VERSION.LATEST, toProperty) {
+    copy(fromProperty, fromVersion = LATEST_VERSION.LATEST, toProperty, comment = false) {
         return this.retrieve(fromProperty, fromVersion)
             .then(fromRules => {
                 console.error(`Copy ${fromProperty} v${fromRules.propertyVersion} to ${toProperty}`);
-                return this.update(toProperty, fromRules)
+                return this.update(toProperty, fromRules, comment)
             });
     }
 
