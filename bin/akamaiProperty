@@ -24,6 +24,7 @@
 
 var path = require('path');
 var fs = require('fs');
+var chalk = require('chalk');
 let untildify = require('untildify');
 let WebSite = require('../index').WebSite;
 
