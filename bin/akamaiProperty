@@ -24,7 +24,7 @@
 
 var path = require('path');
 var fs = require('fs');
-var chalk = require('chalk');
+const chalk = require('chalk');
 let untildify = require('untildify');
 let WebSite = require('../index').WebSite;
 
@@ -319,7 +319,6 @@ const variableFileExample = [{
 function main () {
     process.argv[1] = 'akamai property'
     const NETWORK_CHOICES = ['PROD', 'STAGING', 'BOTH']
-    const chalk = require('chalk')
     return require('sywac')
       .file('--config <config>', { 
           desc: 'Config file ',
