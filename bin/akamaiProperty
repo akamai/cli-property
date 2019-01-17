@@ -52,8 +52,10 @@ function errorMessage(error, context) {
 }
 
 function activateProperty(app, targetProperty, options) {
-    
+
     let env = options.network.toUpperCase();
+    let showWarnings = !options.nowarnings;
+
     return Promise.resolve()
         .then(() => {
             return app.lookupPropertyIdFromHost(targetProperty);
@@ -63,19 +65,19 @@ function activateProperty(app, targetProperty, options) {
                 options.propver = data.propertyVersion;
             }
             if ("BOTH" === env || env.startsWith("STAG"))
-                return app.activate(   targetProperty, 
-                                            numberVersion(options.propver), 
+                return app.activate(   targetProperty,
+                                            numberVersion(options.propver),
                                             WebSite.AKAMAI_ENV.STAGING,
-                                            options.notes || "Updated Automatically to staging.", 
+                                            options.notes || "Updated Automatically to staging.",
                                             options.email);
             return Promise.resolve(data);
         })
         .then(data => {
             if ("BOTH" === env || env.startsWith("PROD"))
-                return app.activate(   targetProperty, 
-                                            numberVersion(options.propver), 
+                return app.activate(   targetProperty,
+                                            numberVersion(options.propver),
                                             WebSite.AKAMAI_ENV.PRODUCTION,
-                                            options.notes || "Updated Automatically to prod.", 
+                                            options.notes || "Updated Automatically to prod.",
                                             options.email);
             return Promise.resolve(data);
         });
@@ -88,17 +90,17 @@ function deactivateProperty(app, targetProperty, options) {
     return Promise.resolve()
         .then(() => {
             if ("BOTH" === env || env.startsWith("STAG"))
-               return app.deactivate(  targetProperty, 
+               return app.deactivate(  targetProperty,
                                             WebSite.AKAMAI_ENV.STAGING,
-                                            options.notes || "Automatically deactivating on staging.", 
+                                            options.notes || "Automatically deactivating on staging.",
                                             options.email);
             return Promise.resolve();
         })
         .then(() => {
             if ("BOTH" === env || env.startsWith("PROD"))
-                return app.deactivate( targetProperty, 
+                return app.deactivate( targetProperty,
                                             WebSite.AKAMAI_ENV.PRODUCTION,
-                                            options.notes || "Automatically deactivating on prod.", 
+                                            options.notes || "Automatically deactivating on prod.",
                                             options.email);
             return Promise.resolve();
         });
@@ -133,10 +135,10 @@ function createProperty(app, targetProperty, options) {
     .then(() => {
         if (!options.clone) {
             if (options.file) {
-            return app.createFromFile(hostnames, 
+            return app.createFromFile(hostnames,
                                             options.file,
                                             targetProperty,
-                                            options.contract, 
+                                            options.contract,
                                             options.group,
                                             options.cpcode,
                                             options.origin,
@@ -145,10 +147,10 @@ function createProperty(app, targetProperty, options) {
                                             options.product);
 
             } else {
-                return app.create(hostnames, 
+                return app.create(hostnames,
                                             options.cpcode,
                                             targetProperty,
-                                            options.contract, 
+                                            options.contract,
                                             options.group,
                                             null,
                                             options.origin,
@@ -181,15 +183,11 @@ function retrieveProperty(app, targetProperty, options) {
     if (options.variables) {
         return app.getVariables(targetProperty, numberVersion(options.propver), options.file)
     } else if (options.file) {
-        return app.retrieveToFile( targetProperty, 
-                                        options.file, 
-                                        numberVersion(options.propver));
+        return app.retrieveToFile( targetProperty, options.file, numberVersion(options.propver));
     } else if (options.format) {
         return app.retrievePropertyRuleFormat(targetProperty, numberVersion(options.propver))
     }  else {
-        return app.retrieve(targetProperty, 
-                                numberVersion(options.propver),
-                                false)
+        return app.retrieve(targetProperty, numberVersion(options.propver), false)
         .then(data => {
             console.log(JSON.stringify(data,'',2));
             return Promise.resolve();
@@ -226,7 +224,7 @@ function listProperties(app, group, contract, toFile) {
         .then(data => {
             console.log(JSON.stringify(data,'',2))
         })
-    }    
+    }
 }
 
 function retrieveFormats(app, options) {
@@ -250,7 +248,7 @@ function modifyProperty(app, targetProperty, options, command) {
         }
     if (options.addhosts.length > 0) {
             return app.addHostnames(targetProperty, version, options.addhosts, options.edgehostname);
-        } 
+        }
     if (options.delhosts.length > 0) {
             return app.delHostnames(targetProperty, version, options.delhosts)
         }
@@ -262,7 +260,7 @@ function modifyProperty(app, targetProperty, options, command) {
         }
     if (options.notes) {
             return app.setComments(targetProperty, version, options.notes);
-        } 
+        }
     if (options.variables) {
             return app.setVariables(targetProperty, version, options.variables);
         }
@@ -274,11 +272,11 @@ function modifyProperty(app, targetProperty, options, command) {
         }
     if (options.ruleformat) {
             return app.setRuleFormat(targetProperty, version, options.ruleformat)
-        } 
+        }
     if (options.sureroutemap || options.surerouteto || options.sureroutetohost) {
             return app.setSureRoute(targetProperty,
-                                            version, 
-                                            options.sureroutemap, 
+                                            version,
+                                            options.sureroutemap,
                                             options.surerouteto,
                                             options.sureroutetohost);
         }
@@ -288,7 +286,7 @@ function numberVersion(version) {
     if (version == null) {
         return 0;
     }
-    
+
     let versionstring = version.toString();
     let returnstring;
 
@@ -320,17 +318,17 @@ function main () {
     process.argv[1] = 'akamai property'
     const NETWORK_CHOICES = ['PROD', 'STAGING', 'BOTH']
     return require('sywac')
-      .file('--config <config>', { 
+      .file('--config <config>', {
           desc: 'Config file ',
           defaultValue: config,
           group: "Command options:"
       })
-      .string('--section <section>', { 
+      .string('--section <section>', {
           desc: 'Config section ',
           defaultValue: section,
           group: "Command options:"
         })
-       .boolean('--debug <debug>', { 
+       .boolean('--debug <debug>', {
             desc: 'Turn on debugging.',
             defaultValue: false,
             group: "Command options:"
@@ -569,6 +567,9 @@ function main () {
             .string('--notes <note>', {
               desc: 'Add a note on activation'
             })
+            .boolean('--nowarnings', {
+              desc: 'Do not show warnings'
+            })
         },
         run: (options, context) => {
           try {
@@ -720,7 +721,7 @@ function main () {
             if(result.argv.version && result.output === 'Version unknown'){
               try{
                 var version = JSON.parse(fs.readFileSync("package.json")).version;
-                console.log(version); 
+                console.log(version);
               }catch(e){
                 console.log(result.output)
               }
@@ -733,7 +734,7 @@ function main () {
 }
   console.time(app);
   var begin=Date.now();
-  
+
   main().then(options => {
     var end=Date.now();
     var timeSpent=((end-begin)/1000/60).toPrecision(2) +" mins";

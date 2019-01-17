@@ -124,7 +124,7 @@ class WebSite {
             })
             .then(propList => {
                 let promiseList = [];
-                
+
                 propList.map(v => {
                     if (!v || !v.properties || !v.properties.items) return;
                     return v.properties.items.map(item => {
@@ -175,7 +175,7 @@ class WebSite {
         let contractId,
             groupId,
             productId,
-            edgeHostnameId, 
+            edgeHostnameId,
             hosts;
 
         return this._getProperty(srcProperty, srcVersion)
@@ -201,7 +201,7 @@ class WebSite {
                     contractId: contractId,
                     edgeHostnameId: edgeHostnameId
                 };
-                
+
                 return WebSite._getLatestVersion(cloneFromProperty, srcVersion)
             })
             .then(version => {
@@ -301,7 +301,7 @@ class WebSite {
         return this._getProperty(propertyId)
             .then(property => {
                 let version = WebSite._getLatestVersion(property, versionLookup)
-                
+
                 //set basic data like contract & group
                 const contractId = property.contractId;
                 const groupId = property.groupId;
@@ -360,7 +360,7 @@ class WebSite {
             this._edge.send(function (data, response) {
                 if (response && response.statusCode >= 200 && response.statusCode < 400) {
                     let parsed = JSON.parse(response.body);
-                                        
+
                     productId ?
                     parsed.products.items.map( item => {
                         if( productId === item.productId) {
@@ -626,7 +626,7 @@ class WebSite {
                     this._edge.send(function (data, response) {
                         if (!response && fallThrough) {
                             reject("No response from server.  Please retry.");
-                        } 
+                        }
                         if (response && response.statusCode >= 200 && response.statusCode < 400) {
                             let parsed = JSON.parse(response.body);
                             resolve(parsed);
@@ -638,7 +638,7 @@ class WebSite {
             });
     }
 
-    static _getLatestVersion(property, env = LATEST_VERSION) { 
+    static _getLatestVersion(property, env = LATEST_VERSION) {
        if (env === LATEST_VERSION.PRODUCTION)
             return property.productionVersion;
         else if (env === LATEST_VERSION.STAGING)
@@ -695,7 +695,7 @@ class WebSite {
             if (cloneFrom) {
                 productId = cloneFrom.productId;
             }
-            
+
             let propertyObj = {
                 "cloneFrom": cloneFrom,
                 "productId": productId,
@@ -763,7 +763,7 @@ class WebSite {
                 rules.rules.options = { "is_secure": true }
             }
             rules.rules.children.behaviors = children_behaviors;
-            
+
             delete rules.errors;
             resolve(rules);
         })
@@ -796,7 +796,7 @@ class WebSite {
                                 body: rules
                         }
                     }
-                    
+
                     this._edge.auth(request);
 
                     this._edge.send(function (data, response) {
@@ -886,11 +886,11 @@ class WebSite {
      * @param notes
      * @param email
      * @param acknowledgeWarnings
-     * @param autoAcceptWarnings
+     * @param showWarnings
      * @returns {Promise.<TResult>}
      * @private
      */
-    _activateProperty(propertyLookup, versionId, env = LATEST_VERSION.STAGING, notes = '', email = ['test@example.com'], acknowledgeWarnings = [], autoAcceptWarnings = true) {
+    _activateProperty(propertyLookup, versionId, env = LATEST_VERSION.STAGING, notes = '', email = ['test@example.com'], acknowledgeWarnings = [], showWarnings = true) {
         return this._getProperty(propertyLookup)
             .then((data) => {
                 //set basic data like contract & group
@@ -910,7 +910,7 @@ class WebSite {
                             noncomplianceReason: 'NO_PRODUCTION_TRAFFIC'
                         }
                     };
-                    
+
                     let request = {
                         method: 'POST',
                         path: `/papi/v1/properties/${propertyId}/activations?contractId=${contractId}&groupId=${groupId}`,
@@ -934,13 +934,15 @@ class WebSite {
                     let messages = [];
                     console.error('... automatically acknowledging %s warnings!', body.warnings.length);
                     body.warnings.map(warning => {
-                        console.error('Warnings: %s', warning.detail);
+                        if (showWarnings){
+                          console.error('Warnings: %s', warning.detail);
+                        }
                         //TODO report these warnings?
                         //console.trace(body.warnings[i]);
                         messages.push(warning.messageId);
                     });
                     //TODO: check that this doesn't happen more than once...
-                    return this._activateProperty(propertyLookup, versionId, env, notes, email, messages);
+                    return this._activateProperty(propertyLookup, versionId, env, notes, email, messages, showWarnings);
                 } else
                     //TODO what about errors?
                     return new Promise((resolve, reject) => {
@@ -1188,7 +1190,7 @@ class WebSite {
                             edgeHostnameId = host.cnameTo ? host.cnameTo : host.edgeHostnameId
                         }
                     })
-                } 
+                }
                 property = this._propertyById[propertyId];
                 version = version || property.latestVersion;
                 if (!edgeHostnameId) {
@@ -1216,7 +1218,7 @@ class WebSite {
 
                     let hostSet = new Set(hostsToProcess)
                     let hostNamelist = []
-                    
+
                     hostSet.forEach(hostname => {
                         let assignHostnameObj;
                         let skip = 0;
@@ -1252,7 +1254,7 @@ class WebSite {
                         path: `/papi/v1/properties/${propertyId}/versions/${version}/hostnames/?contractId=${contractId}&groupId=${groupId}`,
                         body: newHostnameArray
                     }
-                    
+
                     this._edge.auth(request);
                     this._edge.send((data, response) => {
                         if (response.statusCode >= 200 && response.statusCode < 400) {
@@ -1308,7 +1310,7 @@ class WebSite {
         } else if (!hostnames || hostnames.length == 0) {
             // TODO: Does this look like a hostname?
             hostnames = [configName]
-        } 
+        }
         if (!configName)
             configName = hostnames[0]
         let letters = "/^[0-9a-zA-Z\\_\\-\\.]+$/";
@@ -1320,7 +1322,7 @@ class WebSite {
     }
 
     _setRules(groupId, contractId, productId, configName, cpcode = null, hostnames = [], origin = null, secure = false, baserules=null) {
-        
+
         return new Promise((resolve, reject) => {
             if (cpcode) {
                 return resolve(cpcode)
@@ -1490,7 +1492,7 @@ class WebSite {
             })
         })
     }
-    
+
     searchProperties(searchString, options) {
         let searchObj = {"propertyName" : searchString}
         return this._searchByValue(searchObj)
@@ -1625,7 +1627,7 @@ class WebSite {
                 return this._copyPropertyVersion(property, version);
         })
     }
- 
+
     /**
      *
      * @param {string} propertyLookup either colloquial host name (www.example.com) or canonical PropertyId (prp_123456).
@@ -1743,9 +1745,10 @@ class WebSite {
      * @param {string[]} email notivation email addresses
      * @param {boolean} wait whether the Promise should return after activation is completed across the Akamai
      *     platform (wait=true) or if it should return immediately after submitting the job (wait=false)
+     * @param {boolean} showWarnings whether to show warnings
      * @returns {Promise} returns a promise with the TResult of boolean
      */
-    activate(propertyLookup, version = LATEST_VERSION.LATEST, networkEnv = AKAMAI_ENV.STAGING, notes = '', email = ['test@example.com'], wait = true) {
+    activate(propertyLookup, version = LATEST_VERSION.LATEST, networkEnv = AKAMAI_ENV.STAGING, notes = '', email = ['test@example.com'], wait = true, showWarnings = true) {
         //todo: change the version lookup
 
         let emailNotification = email;
@@ -1761,7 +1764,7 @@ class WebSite {
                     activationVersion = WebSite._getLatestVersion(property, version);
 
                 console.error(`Activating ${propertyLookup} to ${networkEnv}`);
-                return this._activateProperty(propertyLookup, activationVersion, networkEnv, notes, emailNotification)
+                return this._activateProperty(propertyLookup, activationVersion, networkEnv, notes, emailNotification, [], showWarnings)
             })
             .then(activationId => {
                 if (networkEnv === AKAMAI_ENV.STAGING)
@@ -1871,7 +1874,7 @@ class WebSite {
     }
 
     setRuleFormat(propertyLookup, version, ruleformat) {
-        
+
         return this._getProperty(propertyLookup)
             .then(data => {
                 version = WebSite._getLatestVersion(data, version)
@@ -1903,7 +1906,7 @@ class WebSite {
                     let behavior = { "name":"cpCode", "options": { "value" : { "id": Number(cpcode) } } }
                     behaviors.push(behavior);
                 }
-     
+
                 rules.rules.behaviors = behaviors;
                 return this._updatePropertyRules(propertyLookup, version, rules);
             })
@@ -1948,7 +1951,7 @@ class WebSite {
             propertyId,
             configName,
             hostlist;
-            
+
         let names = this._getConfigAndHostname(propertyLookup, hostnames);
         configName = names[0];
         hostnames = names[1];
@@ -2072,7 +2075,7 @@ class WebSite {
             })
     }
 
-    getVariables(propertyLookup, versionLookup=0, filename=null) {       
+    getVariables(propertyLookup, versionLookup=0, filename=null) {
         return this._getProperty(propertyLookup)
             .then(property => {
                     let version = (versionLookup && versionLookup > 0) ? versionLookup : WebSite._getLatestVersion(property, versionLookup)
@@ -2111,11 +2114,11 @@ class WebSite {
                 return this._updatePropertyRules(propertyLookup, version, rules);
             })
     }
-    
+
     setOrigin(propertyLookup, version = 0, origin, forward) {
         let forwardHostHeader;
         let customForward = "";
-        
+
         if (forward == "origin") {
             forwardHostHeader = "ORIGIN_HOSTNAME"
         } else if (forward == "incoming") {
@@ -2184,18 +2187,18 @@ class WebSite {
                     child.behaviors = behaviors;
                     children.push(child)
                 })
-                
+
                 data.rules.children = children;
-                return Promise.resolve(data);   
+                return Promise.resolve(data);
             })
             .then(rules => {
                 return this._updatePropertyRules(propertyLookup,version,rules);
             })
     }
 
-    /** 
+    /**
      * Adds specified hostnames to the property
-     * 
+     *
      * @param {string}
     */
 
@@ -2211,13 +2214,13 @@ class WebSite {
      * @param {string} origin
      */
 
-    create(hostnames = [],  cpcode = null, 
-                            configName = null, 
-                            contractId = null, 
-                            groupId = null, 
-                            newRules = null, 
-                            origin = null, 
-                            edgeHostname = null, 
+    create(hostnames = [],  cpcode = null,
+                            configName = null,
+                            contractId = null,
+                            groupId = null,
+                            newRules = null,
+                            origin = null,
+                            edgeHostname = null,
                             secure = false,
                             productId = null) {
 
@@ -2238,11 +2241,11 @@ class WebSite {
         let names = this._getConfigAndHostname(configName, hostnames);
         configName = names[0];
         hostnames = names[1];
-        
+
         if (!origin) {
             origin = "origin-" + configName;
         }
-        
+
         let propertyId,
         edgeHostnameId;
 
@@ -2264,7 +2267,7 @@ class WebSite {
                 propertyId = data["versions"]["items"][0]["propertyId"]
                 contractId = data["versions"]["items"][0]["contractId"]
                 groupId = data["versions"]["items"][0]["groupId"]
-                
+
                 return this._getNewProperty(propertyId, groupId, contractId);
             })
             .then(data => {
@@ -2290,7 +2293,7 @@ class WebSite {
                         ehn_exists = 1;
                     }
                 })
-                
+
                 if (edgeHostname) {
                     if (edgeHostname.indexOf("edgekey") > -1) {
                         secure = true;
@@ -2373,7 +2376,7 @@ class WebSite {
         let cpcode = options.cpcode || null
         let ruleformat = options.ruleformat || null
         let secure = options.secure || false
-        
+
         let names = this._getConfigAndHostname(configName, hostnames);
         configName = names[0];
         hostnames = names[1];
@@ -2393,7 +2396,7 @@ class WebSite {
             .then(data => {
                 cloneFrom = data;
                 productId = data.productId;
-                
+
                 if (!cpcode) {
                     cpcode = data.cpcode;
                 }
@@ -2411,7 +2414,7 @@ class WebSite {
                 }
                 return this._getEHNId(data.propertyId, data.version, groupId, contractId)
             })
-               
+
             .then(clone_ehn =>{
                 if ((clone_ehn.hostnames.items) && (!edgeHostnameId)) {
                         edgeHostnameId = clone_ehn.hostnames.items[0].cnameTo || clone_ehn.hostnames.items[0].edgeHostnameId;
@@ -2464,7 +2467,7 @@ class WebSite {
                         hostnames,
                         false,
                         true);
-                        
+
             })*/
             .then(data => {
                 return Promise.resolve();
