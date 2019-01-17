@@ -107,16 +107,16 @@ function deactivateProperty(app, targetProperty, options) {
 
 function updateProperty(app, targetProperty, options) {
     section = options.section || section;
- 
+
     if (options.file)
-        return app.updateFromFile( targetProperty, 
-                                        options.file, 
-                                        options.origin);
-    
+        return app.updateFromFile( targetProperty,
+                                        options.file,
+                                        options.notes);
+
     if (options.srcprop)
-        return app.copy(   options.srcprop, 
-                                numberVersion(options.srcver), 
-                                targetProperty);
+        return app.copy(   options.srcprop,
+                                numberVersion(options.srcver),
+                                targetProperty, options.notes);
     return Promise.resolve();
 }
 
@@ -641,6 +641,9 @@ function main () {
             .file('--file <path>', {
               desc: 'File with JSON rules',
               mustExist: true // again, assuming this is what you want
+            })
+            .string('--notes <notes>', {
+                desc: 'Version notes for the property version'
             })
         },
         run: (options, context) => {
