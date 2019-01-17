@@ -1170,11 +1170,11 @@ class WebSite {
         })
     }
 
-    _assignHostnames(groupId, contractId, configName, edgeHostnameId, propertyId, hostnames, deleteHosts=null, newConfig = false) {
+    _assignHostnames(groupId, contractId, configName, edgeHostnameId, propertyId, hostnames, deleteHosts=null, newConfig = false, version = false) {
         let assignHostnameArray, myDelete = false;
         let newHostnameArray = [];
-        let hostsToProcess = []
-        let version, property;
+        let hostsToProcess = [];
+        let property;
         if (!hostnames) {
             hostnames = []
         }
@@ -1190,7 +1190,7 @@ class WebSite {
                     })
                 } 
                 property = this._propertyById[propertyId];
-                version = property.latestVersion;
+                version = version || property.latestVersion;
                 if (!edgeHostnameId) {
                     return Promise.reject("\n\nNo edgehostnames found for property.  Please specify edgehostname.\n\n")
                  }
@@ -1822,7 +1822,7 @@ class WebSite {
 
         return this._getProperty(propertyLookup)
             .then(data => {
-                version = WebSite._getLatestVersion(data, version)
+                version = version || WebSite._getLatestVersion(data, version);
                 contractId = data.contractId;
                 groupId = data.groupId;
                 configName = data.propertyName;
@@ -1833,7 +1833,10 @@ class WebSite {
                     edgeHostname,
                     propertyId,
                     null,
-                    null);
+                    null,
+                    null,
+                    false,
+                    version);
             }).then(data => {
                 return Promise.resolve();
             })
@@ -1906,37 +1909,33 @@ class WebSite {
             })
     }
 
-    delHostnames(propertyLookup, version, hostnames) {
+    delHostnames(propertyLookup, version = 0, hostnames) {
         let contractId,
             groupId,
-            productId,
             propertyId,
-            configName,
-            hostlist;
+            configName;
 
         let names = this._getConfigAndHostname(propertyLookup, hostnames);
         configName = names[0];
         hostnames = names[1];
 
-
         return this._getProperty(propertyLookup)
             .then(data => {
-                version = WebSite._getLatestVersion(data, 0)
+                version = version || WebSite._getLatestVersion(data, version)
                 contractId = data.contractId;
                 groupId = data.groupId;
                 configName = data.propertyName;
                 propertyId = data.propertyId;
-                return this._getHostnameList(configName, version)
-            })
-            .then(hostnamelist => {
-                hostlist = hostnamelist.hostnames.items;
+                
                 return this._assignHostnames(groupId,
                     contractId,
                     configName,
                     null,
                     propertyId,
                     null,
-                    hostnames);
+                    hostnames,
+                    false,
+                    version);
             }).then(data => {
                 return Promise.resolve();
             })
@@ -1985,7 +1984,10 @@ class WebSite {
                     configName,
                     edgeHostnameId,
                     propertyId,
-                    hostnames);
+                    hostnames,
+                    null,
+                    false,
+                    version);
             }).then(data => {
                 return Promise.resolve();
             })
