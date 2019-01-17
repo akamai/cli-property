@@ -178,15 +178,15 @@ function createProperty(app, targetProperty, options) {
 }
 
 function retrieveProperty(app, targetProperty, options) {
-    if (options.file) {
+    if (options.variables) {
+        return app.getVariables(targetProperty, numberVersion(options.propver), options.file)
+    } else if (options.file) {
         return app.retrieveToFile( targetProperty, 
                                         options.file, 
                                         numberVersion(options.propver));
     } else if (options.format) {
         return app.retrievePropertyRuleFormat(targetProperty, numberVersion(options.propver))
-    } else if (options.variables) {
-        return app.getVariables(targetProperty, numberVersion(options.propver), options.file)
-    } else {
+    }  else {
         return app.retrieve(targetProperty, 
                                 numberVersion(options.propver),
                                 false)
