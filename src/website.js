@@ -2080,6 +2080,8 @@ class WebSite {
                     return this._getPropertyRules(property.propertyId, version)
             })
             .then(rules => {
+                //fix so that modify command can be run from retrieve saved file
+                rules.rules.variables[0].action = [ "update" ];
                 if (!filename) {
                     console.log(JSON.stringify(rules.rules.variables, '', 2));
                     return Promise.resolve();
