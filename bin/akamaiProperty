@@ -52,54 +52,58 @@ function errorMessage(error, context) {
 }
 
 function activateProperty(app, targetProperty, options) {
-    
+    let accountKey = getOptionAccountKey(options);
     let env = options.network.toUpperCase();
     return Promise.resolve()
         .then(() => {
-            return app.lookupPropertyIdFromHost(targetProperty);
+            return app.lookupPropertyIdFromHost(targetProperty, WebSite.LATEST_VERSION.PRODUCTION, accountKey);
         })
         .then(data => {
             if (!numberVersion(options.propver)) {
                 options.propver = data.propertyVersion;
             }
             if ("BOTH" === env || env.startsWith("STAG"))
-                return app.activate(   targetProperty, 
-                                            numberVersion(options.propver), 
+                return app.activate(   targetProperty,
+                                            numberVersion(options.propver),
                                             WebSite.AKAMAI_ENV.STAGING,
-                                            options.notes || "Updated Automatically to staging.", 
-                                            options.email);
+                                            options.notes || "Updated Automatically to staging.",
+                                            options.email,
+                                            accountKey);
             return Promise.resolve(data);
         })
         .then(data => {
             if ("BOTH" === env || env.startsWith("PROD"))
-                return app.activate(   targetProperty, 
-                                            numberVersion(options.propver), 
+                return app.activate(   targetProperty,
+                                            numberVersion(options.propver),
                                             WebSite.AKAMAI_ENV.PRODUCTION,
-                                            options.notes || "Updated Automatically to prod.", 
-                                            options.email);
+                                            options.notes || "Updated Automatically to prod.",
+                                            options.email,
+                                            accountKey);
             return Promise.resolve(data);
         });
 }
 
 function deactivateProperty(app, targetProperty, options) {
     section = options.section || section;
-
+    let accountKey = getOptionAccountKey(options);
     let env = options.network.toUpperCase();
     return Promise.resolve()
         .then(() => {
             if ("BOTH" === env || env.startsWith("STAG"))
-               return app.deactivate(  targetProperty, 
+               return app.deactivate(  targetProperty,
                                             WebSite.AKAMAI_ENV.STAGING,
-                                            options.notes || "Automatically deactivating on staging.", 
-                                            options.email);
+                                            options.notes || "Automatically deactivating on staging.",
+                                            options.email,
+                                            accountKey);
             return Promise.resolve();
         })
         .then(() => {
             if ("BOTH" === env || env.startsWith("PROD"))
-                return app.deactivate( targetProperty, 
+                return app.deactivate( targetProperty,
                                             WebSite.AKAMAI_ENV.PRODUCTION,
-                                            options.notes || "Automatically deactivating on prod.", 
-                                            options.email);
+                                            options.notes || "Automatically deactivating on prod.",
+                                            options.email,
+                                            accountKey);
             return Promise.resolve();
         });
 }
@@ -107,16 +111,18 @@ function deactivateProperty(app, targetProperty, options) {
 
 function updateProperty(app, targetProperty, options) {
     section = options.section || section;
-
+    let accountKey = getOptionAccountKey(options);
     if (options.file)
         return app.updateFromFile( targetProperty,
                                         options.file,
-                                        options.notes);
+                                        options.notes,
+                                        accountKey);
 
     if (options.srcprop)
         return app.copy(   options.srcprop,
                                 numberVersion(options.srcver),
-                                targetProperty, options.notes);
+                                targetProperty, options.notes,
+                                accountKey);
     return Promise.resolve();
 }
 
@@ -125,46 +131,49 @@ function deleteProperty(app, targetProperty, options) {
 }
 
 function createProperty(app, targetProperty, options) {
-    let hostnames = options.hostnames
+    let hostnames = options.hostnames;
     if (options.edgehostname) {
         process.env.USE_PROVIDED_HOSTNAME = 1;
     }
+    let accountKey = getOptionAccountKey(options);
     return Promise.resolve()
     .then(() => {
         if (!options.clone) {
             if (options.file) {
-            return app.createFromFile(hostnames, 
+            return app.createFromFile(hostnames,
                                             options.file,
                                             targetProperty,
-                                            options.contract, 
+                                            options.contract,
                                             options.group,
                                             options.cpcode,
                                             options.origin,
                                             options.edgehostname,
                                             options.ruleformat,
-                                            options.product);
+                                            options.product,
+                                            accountKey);
 
             } else {
-                return app.create(hostnames, 
+                return app.create(hostnames,
                                             options.cpcode,
                                             targetProperty,
-                                            options.contract, 
+                                            options.contract,
                                             options.group,
                                             null,
                                             options.origin,
                                             options.edgehostname,
                                             options.ruleformat,
-                                            options.product)
+                                            options.product,
+                                            accountKey);
             }
         } else {
-            options.srcver = numberVersion(options.srcver)
-            options.hostnames = hostnames
+            options.srcver = numberVersion(options.srcver);
+            options.hostnames = hostnames;
             return app.createFromExisting(targetProperty, options)
         }
     })
     .then(() => {
         if (options.retrieve) {
-            return app.retrieve(targetProperty)
+            return app.retrieve(targetProperty, WebSite.LATEST_VERSION.LATEST, false, accountKey);
         } else {
             return Promise.resolve()
         }
@@ -181,13 +190,13 @@ function retrieveProperty(app, targetProperty, options) {
     if (options.variables) {
         return app.getVariables(targetProperty, numberVersion(options.propver), options.file)
     } else if (options.file) {
-        return app.retrieveToFile( targetProperty, 
-                                        options.file, 
+        return app.retrieveToFile( targetProperty,
+                                        options.file,
                                         numberVersion(options.propver));
     } else if (options.format) {
         return app.retrievePropertyRuleFormat(targetProperty, numberVersion(options.propver))
     }  else {
-        return app.retrieve(targetProperty, 
+        return app.retrieve(targetProperty,
                                 numberVersion(options.propver),
                                 false)
         .then(data => {
@@ -197,40 +206,40 @@ function retrieveProperty(app, targetProperty, options) {
     }
 }
 
-function retrieveNewestFormat(app) {
-    return app.retrieveFormats(true)
+function retrieveNewestFormat(app, accountKey) {
+    return app.retrieveFormats(true, accountKey)
     .then(data => {
         console.log(JSON.stringify(data,'',2));
     })
 }
 
-function retrieveGroups(app) {
-    return app.retrieveGroups()
+function retrieveGroups(app, accountKey) {
+    return app.retrieveGroups(accountKey)
     .then(data => {
         console.log(JSON.stringify(data,'',2));
     })
 }
 
-function searchProperties(app, searchString, options) {
-    return app.searchProperties(searchString)
+function searchProperties(app, searchString, accountKey) {
+    return app.searchProperties(searchString, accountKey)
     .then(data => {
         console.log(JSON.stringify(data,'',2))
     })
 }
 
-function listProperties(app, group, contract, toFile) {
+function listProperties(app, group, contract, toFile, accountKey) {
     if(toFile){
-        return app.listPropertiesToFile(group, contract, toFile)
+        return app.listPropertiesToFile(group, contract, toFile, accountKey)
     }else{
-        return app.listProperties(group, contract)
+        return app.listProperties(group, contract, accountKey)
         .then(data => {
             console.log(JSON.stringify(data,'',2))
         })
-    }    
+    }
 }
 
-function retrieveFormats(app, options) {
-    return app.retrieveFormats()
+function retrieveFormats(app, accountKey) {
+    return app.retrieveFormats(accountKey)
     .then(data => {
         console.log(JSON.stringify(data,'',2))
     })
@@ -245,42 +254,44 @@ function retrieveHostnames(app, targetProperty, version) {
 
 function modifyProperty(app, targetProperty, options, command) {
     let version = numberVersion(options.propver) ? numberVersion(options.propver) : 0;
+    let accountKey = getOptionAccountKey(options);
     if (options.new) {
-            return app.createNewPropertyVersion(targetProperty)
+            return app.createNewPropertyVersion(targetProperty, accountKey)
         }
     if (options.addhosts.length > 0) {
-            return app.addHostnames(targetProperty, version, options.addhosts, options.edgehostname);
-        } 
+            return app.addHostnames(targetProperty, version, options.addhosts, options.edgehostname, accountKey);
+        }
     if (options.delhosts.length > 0) {
-            return app.delHostnames(targetProperty, version, options.delhosts)
+            return app.delHostnames(targetProperty, version, options.delhosts, accountKey)
         }
     if (options.origin || options.forward) {
-            return app.setOrigin(targetProperty, version, options.origin, options.forward);
+            return app.setOrigin(targetProperty, version, options.origin, options.forward, accountKey);
         }
     if (options.edgehostname && command != "create") {
-            return app.assignEdgeHostname(targetProperty, version, options.edgehostname, options.new);
+            return app.assignEdgeHostname(targetProperty, version, options.edgehostname, options.new, accountKey);
         }
     if (options.notes) {
-            return app.setComments(targetProperty, version, options.notes);
-        } 
+            return app.setComments(targetProperty, version, options.notes, accountKey);
+        }
     if (options.variables) {
-            return app.setVariables(targetProperty, version, options.variables);
+            return app.setVariables(targetProperty, version, options.variables, accountKey);
         }
     if (options.cpcode) {
-            return app.setCpcode(targetProperty, version, options.cpcode)
+            return app.setCpcode(targetProperty, version, options.cpcode, accountKey)
         }
     if (options.move) {
-            return app.moveProperty(targetProperty, options.move)
+            return app.moveProperty(targetProperty, options.move, accountKey)
         }
     if (options.ruleformat) {
-            return app.setRuleFormat(targetProperty, version, options.ruleformat)
-        } 
+            return app.setRuleFormat(targetProperty, version, options.ruleformat, accountKey)
+        }
     if (options.sureroutemap || options.surerouteto || options.sureroutetohost) {
             return app.setSureRoute(targetProperty,
-                                            version, 
-                                            options.sureroutemap, 
+                                            version,
+                                            options.sureroutemap,
                                             options.surerouteto,
-                                            options.sureroutetohost);
+                                            options.sureroutetohost,
+                                            accountKey);
         }
 }
 
@@ -307,6 +318,10 @@ function numberVersion(version) {
     return returnstring;
 }
 
+function getOptionAccountKey(options) {
+  return (options['account-key']) ? options['account-key'] : false;
+}
+
 const variableFileExample = [{
     name: 'PMUSER_TEST',
     value: 'Foobar',
@@ -320,17 +335,21 @@ function main () {
     process.argv[1] = 'akamai property'
     const NETWORK_CHOICES = ['PROD', 'STAGING', 'BOTH']
     return require('sywac')
-      .file('--config <config>', { 
+      .file('--config <config>', {
           desc: 'Config file ',
           defaultValue: config,
           group: "Command options:"
       })
-      .string('--section <section>', { 
+      .string('--section <section>', {
           desc: 'Config section ',
           defaultValue: section,
           group: "Command options:"
         })
-       .boolean('--debug <debug>', { 
+      .string('--account-key <section>', {
+          desc: 'Switch Account Key ',
+          group: "Command options:"
+        })
+       .boolean('--debug <debug>', {
             desc: 'Turn on debugging.',
             defaultValue: false,
             group: "Command options:"
@@ -340,7 +359,8 @@ function main () {
         run: (options, context) => {
           try {
             let app = new WebSite({path: options.config, section: options.section, debug: options.debug});
-            return retrieveGroups(app)
+            let accountKey = getOptionAccountKey(options);
+            return retrieveGroups(app, accountKey)
           } catch (error) {
             return errorMessage(error, context);
           }
@@ -351,10 +371,11 @@ function main () {
         run: (options, context) => {
           try {
             let app = new WebSite({path: options.config, section: options.section, debug: options.debug});
+            let accountKey = getOptionAccountKey(options);
             if (options.newest) {
-              return retrieveNewestFormat(app);
+              return retrieveNewestFormat(app, accountKey);
             } else {
-              return retrieveFormats(app);
+              return retrieveFormats(app, accountKey);
             }
           } catch (error) {
             return errorMessage(error, context);
@@ -381,7 +402,8 @@ function main () {
         },
         run: options => {
             let app = new WebSite({path:options.config, section: options.section, debug: options.debug});
-            return listProperties(app, options.group, options.contract, options.file)
+            let accountKey = getOptionAccountKey(options);
+            return listProperties(app, options.group, options.contract, options.file, accountKey);
         }
       })
       .command('search <string>', {
@@ -391,7 +413,8 @@ function main () {
           try {
             let app = new WebSite({path: options.config, section: options.section, debug: options.debug});
             options.property = options.property || process.env.AKAMAI_PAPI_PROPERTY;
-            return searchProperties(app, options.string)
+            let accountKey = getOptionAccountKey(options);
+            return searchProperties(app, options.string, accountKey)
           } catch (error) {
             return errorMessage(error, context);
           }
@@ -615,7 +638,7 @@ function main () {
         },
         run: (options, context) => {
           try {
-            options.network = "BOTH"
+            options.network = "BOTH";
             let app = new WebSite({path: options.config, section: options.section, debug: options.debug});
             options.property = options.property || process.env.AKAMAI_PAPI_PROPERTY;
             return deactivateProperty(app, options.property, options)
@@ -649,7 +672,7 @@ function main () {
         run: (options, context) => {
           try {
             if (!options.file && !options.srcprop) {
-              console.log("Required: srcprop or file")
+              console.log("Required: srcprop or file");
               return Promise.resolve();
             }
             let app = new WebSite({path: options.config, section: options.section, debug: options.debug});
@@ -676,8 +699,9 @@ function main () {
           try {
             let app = new WebSite({path: options.config, section: options.section, debug: options.debug});
             options.property = options.property || process.env.AKAMAI_PAPI_PROPERTY;
+            let accountKey = getOptionAccountKey(options);
             if (options.hostnames) {
-              return retrieveHostnames(app, options.property, options.propver)
+              return retrieveHostnames(app, options.property, options.propver, accountKey)
             } else {
               return retrieveProperty(app, options.property, options)
             }
@@ -720,7 +744,7 @@ function main () {
             if(result.argv.version && result.output === 'Version unknown'){
               try{
                 var version = JSON.parse(fs.readFileSync("package.json")).version;
-                console.log(version); 
+                console.log(version);
               }catch(e){
                 console.log(result.output)
               }
