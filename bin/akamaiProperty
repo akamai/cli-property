@@ -52,11 +52,10 @@ function errorMessage(error, context) {
 }
 
 function activateProperty(app, targetProperty, options) {
-    let accountKey = getOptionAccountKey(options);
     let env = options.network.toUpperCase();
     return Promise.resolve()
         .then(() => {
-            return app.lookupPropertyIdFromHost(targetProperty, WebSite.LATEST_VERSION.PRODUCTION, accountKey);
+            return app.lookupPropertyIdFromHost(targetProperty, WebSite.LATEST_VERSION.PRODUCTION, options.accountkey);
         })
         .then(data => {
             if (!numberVersion(options.propver)) {
@@ -68,7 +67,7 @@ function activateProperty(app, targetProperty, options) {
                                             WebSite.AKAMAI_ENV.STAGING,
                                             options.notes || "Updated Automatically to staging.",
                                             options.email,
-                                            accountKey);
+                                            options.accountkey);
             return Promise.resolve(data);
         })
         .then(data => {
@@ -78,14 +77,13 @@ function activateProperty(app, targetProperty, options) {
                                             WebSite.AKAMAI_ENV.PRODUCTION,
                                             options.notes || "Updated Automatically to prod.",
                                             options.email,
-                                            accountKey);
+                                            options.accountkey);
             return Promise.resolve(data);
         });
 }
 
 function deactivateProperty(app, targetProperty, options) {
     section = options.section || section;
-    let accountKey = getOptionAccountKey(options);
     let env = options.network.toUpperCase();
     return Promise.resolve()
         .then(() => {
@@ -94,7 +92,7 @@ function deactivateProperty(app, targetProperty, options) {
                                             WebSite.AKAMAI_ENV.STAGING,
                                             options.notes || "Automatically deactivating on staging.",
                                             options.email,
-                                            accountKey);
+                                            options.accountkey);
             return Promise.resolve();
         })
         .then(() => {
@@ -103,7 +101,7 @@ function deactivateProperty(app, targetProperty, options) {
                                             WebSite.AKAMAI_ENV.PRODUCTION,
                                             options.notes || "Automatically deactivating on prod.",
                                             options.email,
-                                            accountKey);
+                                            options.accountkey);
             return Promise.resolve();
         });
 }
@@ -111,18 +109,17 @@ function deactivateProperty(app, targetProperty, options) {
 
 function updateProperty(app, targetProperty, options) {
     section = options.section || section;
-    let accountKey = getOptionAccountKey(options);
     if (options.file)
         return app.updateFromFile( targetProperty,
                                         options.file,
                                         options.notes,
-                                        accountKey);
+                                        options.accountkey);
 
     if (options.srcprop)
         return app.copy(   options.srcprop,
                                 numberVersion(options.srcver),
                                 targetProperty, options.notes,
-                                accountKey);
+                                options.accountkey);
     return Promise.resolve();
 }
 
@@ -135,7 +132,6 @@ function createProperty(app, targetProperty, options) {
     if (options.edgehostname) {
         process.env.USE_PROVIDED_HOSTNAME = 1;
     }
-    let accountKey = getOptionAccountKey(options);
     return Promise.resolve()
     .then(() => {
         if (!options.clone) {
@@ -150,7 +146,7 @@ function createProperty(app, targetProperty, options) {
                                             options.edgehostname,
                                             options.ruleformat,
                                             options.product,
-                                            accountKey);
+                                            options.accountkey);
 
             } else {
                 return app.create(hostnames,
@@ -163,7 +159,7 @@ function createProperty(app, targetProperty, options) {
                                             options.edgehostname,
                                             options.ruleformat,
                                             options.product,
-                                            accountKey);
+                                            options.accountkey);
             }
         } else {
             options.srcver = numberVersion(options.srcver);
@@ -173,7 +169,7 @@ function createProperty(app, targetProperty, options) {
     })
     .then(() => {
         if (options.retrieve) {
-            return app.retrieve(targetProperty, WebSite.LATEST_VERSION.LATEST, false, accountKey);
+            return app.retrieve(targetProperty, WebSite.LATEST_VERSION.LATEST, false, options.accountkey);
         } else {
             return Promise.resolve()
         }
@@ -254,36 +250,35 @@ function retrieveHostnames(app, targetProperty, version) {
 
 function modifyProperty(app, targetProperty, options, command) {
     let version = numberVersion(options.propver) ? numberVersion(options.propver) : 0;
-    let accountKey = getOptionAccountKey(options);
     if (options.new) {
-            return app.createNewPropertyVersion(targetProperty, accountKey)
+            return app.createNewPropertyVersion(targetProperty, options.accountkey)
         }
     if (options.addhosts.length > 0) {
-            return app.addHostnames(targetProperty, version, options.addhosts, options.edgehostname, accountKey);
+            return app.addHostnames(targetProperty, version, options.addhosts, options.edgehostname, options.accountkey);
         }
     if (options.delhosts.length > 0) {
-            return app.delHostnames(targetProperty, version, options.delhosts, accountKey)
+            return app.delHostnames(targetProperty, version, options.delhosts, options.accountkey)
         }
     if (options.origin || options.forward) {
-            return app.setOrigin(targetProperty, version, options.origin, options.forward, accountKey);
+            return app.setOrigin(targetProperty, version, options.origin, options.forward, options.accountkey);
         }
     if (options.edgehostname && command != "create") {
-            return app.assignEdgeHostname(targetProperty, version, options.edgehostname, options.new, accountKey);
+            return app.assignEdgeHostname(targetProperty, version, options.edgehostname, options.new, options.accountkey);
         }
     if (options.notes) {
-            return app.setComments(targetProperty, version, options.notes, accountKey);
+            return app.setComments(targetProperty, version, options.notes, options.accountkey);
         }
     if (options.variables) {
-            return app.setVariables(targetProperty, version, options.variables, accountKey);
+            return app.setVariables(targetProperty, version, options.variables, options.accountkey);
         }
     if (options.cpcode) {
-            return app.setCpcode(targetProperty, version, options.cpcode, accountKey)
+            return app.setCpcode(targetProperty, version, options.cpcode, options.accountkey)
         }
     if (options.move) {
-            return app.moveProperty(targetProperty, options.move, accountKey)
+            return app.moveProperty(targetProperty, options.move, options.accountkey)
         }
     if (options.ruleformat) {
-            return app.setRuleFormat(targetProperty, version, options.ruleformat, accountKey)
+            return app.setRuleFormat(targetProperty, version, options.ruleformat, options.accountkey)
         }
     if (options.sureroutemap || options.surerouteto || options.sureroutetohost) {
             return app.setSureRoute(targetProperty,
@@ -291,7 +286,7 @@ function modifyProperty(app, targetProperty, options, command) {
                                             options.sureroutemap,
                                             options.surerouteto,
                                             options.sureroutetohost,
-                                            accountKey);
+                                            options.accountkey);
         }
 }
 
@@ -318,10 +313,6 @@ function numberVersion(version) {
     return returnstring;
 }
 
-function getOptionAccountKey(options) {
-  return (options['account-key']) ? options['account-key'] : false;
-}
-
 const variableFileExample = [{
     name: 'PMUSER_TEST',
     value: 'Foobar',
@@ -345,8 +336,9 @@ function main () {
           defaultValue: section,
           group: "Command options:"
         })
-      .string('--account-key <section>', {
+      .string('--accountkey <accountkey>', {
           desc: 'Switch Account Key ',
+          defaultValue: false,
           group: "Command options:"
         })
        .boolean('--debug <debug>', {
@@ -359,8 +351,7 @@ function main () {
         run: (options, context) => {
           try {
             let app = new WebSite({path: options.config, section: options.section, debug: options.debug});
-            let accountKey = getOptionAccountKey(options);
-            return retrieveGroups(app, accountKey)
+            return retrieveGroups(app, options.accountkey)
           } catch (error) {
             return errorMessage(error, context);
           }
@@ -371,11 +362,10 @@ function main () {
         run: (options, context) => {
           try {
             let app = new WebSite({path: options.config, section: options.section, debug: options.debug});
-            let accountKey = getOptionAccountKey(options);
             if (options.newest) {
-              return retrieveNewestFormat(app, accountKey);
+              return retrieveNewestFormat(app, options.accountkey);
             } else {
-              return retrieveFormats(app, accountKey);
+              return retrieveFormats(app, options.accountkey);
             }
           } catch (error) {
             return errorMessage(error, context);
@@ -402,8 +392,7 @@ function main () {
         },
         run: options => {
             let app = new WebSite({path:options.config, section: options.section, debug: options.debug});
-            let accountKey = getOptionAccountKey(options);
-            return listProperties(app, options.group, options.contract, options.file, accountKey);
+            return listProperties(app, options.group, options.contract, options.file, options.accountkey);
         }
       })
       .command('search <string>', {
@@ -413,8 +402,7 @@ function main () {
           try {
             let app = new WebSite({path: options.config, section: options.section, debug: options.debug});
             options.property = options.property || process.env.AKAMAI_PAPI_PROPERTY;
-            let accountKey = getOptionAccountKey(options);
-            return searchProperties(app, options.string, accountKey)
+            return searchProperties(app, options.string, options.accountkey)
           } catch (error) {
             return errorMessage(error, context);
           }
@@ -699,9 +687,8 @@ function main () {
           try {
             let app = new WebSite({path: options.config, section: options.section, debug: options.debug});
             options.property = options.property || process.env.AKAMAI_PAPI_PROPERTY;
-            let accountKey = getOptionAccountKey(options);
             if (options.hostnames) {
-              return retrieveHostnames(app, options.property, options.propver, accountKey)
+              return retrieveHostnames(app, options.property, options.propver, options.accountkey)
             } else {
               return retrieveProperty(app, options.property, options)
             }
