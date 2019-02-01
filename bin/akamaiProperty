@@ -122,14 +122,14 @@ function updateProperty(app, targetProperty, options) {
     if (options.srcprop)
         return app.copy(   options.srcprop,
                                 numberVersion(options.srcver),
-                                targetProperty, 
+                                targetProperty,
                                 options.notes,
                                 options.accountkey);
     return Promise.resolve();
 }
 
 function deleteProperty(app, targetProperty, options) {
-    return app.deleteProperty(targetProperty);
+    return app.deleteProperty(targetProperty, options.accountkey);
 }
 
 function createProperty(app, targetProperty, options) {
@@ -341,11 +341,6 @@ function main () {
       .string('--section <section>', {
           desc: 'Config section ',
           defaultValue: section,
-          group: "Command options:"
-        })
-      .string('--accountkey <accountkey>', {
-          desc: 'Switch Account Key ',
-          defaultValue: false,
           group: "Command options:"
         })
        .boolean('--debug <debug>', {

@@ -1819,7 +1819,8 @@ class WebSite {
      * @param {string} property Lookup either colloquial host name (www.example.com) or canonical PropertyId (prp_123456).
      *     If the host name is moving between property configurations, use lookupPropertyIdFromHost()
      */
-    deleteProperty(propertyLookup) {
+    deleteProperty(propertyLookup, accountkey) {
+      this._accountSwitchKey = accountkey;
         //TODO: deactivate first
         return this._getProperty(propertyLookup)
             .then(property => {
