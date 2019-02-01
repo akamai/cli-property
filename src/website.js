@@ -85,7 +85,7 @@ class WebSite {
             this._initComplete = true;
             return Promise.resolve();
         }
-        return this.retrieveFormats(true)
+        return this.retrieveFormats(true, this._accountSwitchKey)
             .then(format => {
                 this._newestRulesFormat = format;
                 return Promise.resolve();
