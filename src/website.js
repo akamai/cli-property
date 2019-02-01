@@ -155,7 +155,7 @@ class WebSite {
                 method: 'GET',
                 path: `/papi/v1/properties/${propertyId}?contractId=${contractId}&groupId=${groupId}`,
             };
-            request.path += this._buildAccountSwitchKeyQuery(this._accountSwitchKey);
+            request.path += this._buildAccountSwitchKeyQuery();
 
             this._edge.auth(request);
 
@@ -220,7 +220,7 @@ class WebSite {
                         path: `/papi/v1/properties/${cloneFrom.propertyId}/versions/${cloneFrom.version}?contractId=${contractId}&groupId=${groupId}`,
                         followRedirect: false
                     };
-                    //TODO request.path += this._buildAccountSwitchKeyQuery(this._accountSwitchKey);
+                    //TODO request.path += this._buildAccountSwitchKeyQuery();
                     this._edge.auth(request);
 
                     this._edge.send(function (data, response) {
@@ -244,7 +244,7 @@ class WebSite {
                         path: `/papi/v1/properties/${cloneFrom.propertyId}/versions/${cloneFrom.version}/rules?contractId=${contractId}&groupId=${groupId}`,
                         followRedirect: false
                     };
-                    request.path += this._buildAccountSwitchKeyQuery(this._accountSwitchKey);
+                    request.path += this._buildAccountSwitchKeyQuery();
                     this._edge.auth(request);
 
                     this._edge.send(function (data, response) {
@@ -278,7 +278,7 @@ class WebSite {
                 followRedirect: false,
                 followAllRedirects: false
             };
-            request.path += this._buildAccountSwitchKeyQuery(this._accountSwitchKey, true);
+            request.path += this._buildAccountSwitchKeyQuery(true);
             this._edge.auth(request);
 
             this._edge.send(function (data, response) {
@@ -325,7 +325,7 @@ class WebSite {
                             path: `/papi/v1/properties/${propertyId}/versions/${version}/hostnames/?contractId=${contractId}&groupId=${groupId}`,
                             followRedirect: false
                         };
-                        request.path += this._buildAccountSwitchKeyQuery(this._accountSwitchKey);
+                        request.path += this._buildAccountSwitchKeyQuery();
                         this._edge.auth(request);
 
                         this._edge.send((data, response) => {
@@ -362,7 +362,7 @@ class WebSite {
                 followRedirect: false,
                 followAllRedirects: false
             };
-            request.path += this._buildAccountSwitchKeyQuery(this._accountSwitchKey);
+            request.path += this._buildAccountSwitchKeyQuery();
             this._edge.auth(request);
 
             this._edge.send(function (data, response) {
@@ -427,7 +427,7 @@ class WebSite {
                 path: `/papi/v1/search/find-by-value`,
                 body: queryObj
             };
-            request.path += this._buildAccountSwitchKeyQuery(this._accountSwitchKey, true);
+            request.path += this._buildAccountSwitchKeyQuery(true);
 
             this._edge.auth(request);
             this._edge.send(function (data, response) {
@@ -451,7 +451,7 @@ class WebSite {
                 method: 'GET',
                 path: `/papi/v1/properties?contractId=${contractId}&groupId=${groupId}`
             }
-            request.path += this._buildAccountSwitchKeyQuery(this._accountSwitchKey);
+            request.path += this._buildAccountSwitchKeyQuery();
 
             this._edge.auth(request);
             this._edge.send(function(data, response) {
@@ -473,7 +473,7 @@ class WebSite {
                 method: 'GET',
                 path: `/papi/v1/properties/${propertyId}?contractId=${contractId}&groupId=${groupId}`,
             };
-            request.path += this._buildAccountSwitchKeyQuery(this._accountSwitchKey);
+            request.path += this._buildAccountSwitchKeyQuery();
 
             this._edge.auth(request);
             this._edge.send(function (data, response) {
@@ -573,7 +573,7 @@ class WebSite {
                 method: 'GET',
                 path: `/papi/v1/edgehostnames?contractId=${contractId}&groupId=${groupId}`,
             };
-            request.path += this._buildAccountSwitchKeyQuery(this._accountSwitchKey);
+            request.path += this._buildAccountSwitchKeyQuery();
 
             this._edge.auth(request);
 
@@ -600,7 +600,7 @@ class WebSite {
                 method: 'GET',
                 path: `/papi/v1/properties?contractId=${contractId}&groupId=${groupId}`,
             };
-            request.path += this._buildAccountSwitchKeyQuery(this._accountSwitchKey);
+            request.path += this._buildAccountSwitchKeyQuery();
 
             this._edge.auth(request);
             this._edge.send((data, response) => {
@@ -638,7 +638,7 @@ class WebSite {
                         path: `/papi/v1/properties/${propertyId}/versions/${version}/rules?contractId=${contractId}&groupId=${groupId}`,
                         followRedirect: false
                     };
-                    request.path += this._buildAccountSwitchKeyQuery(this._accountSwitchKey);
+                    request.path += this._buildAccountSwitchKeyQuery();
 
                     this._edge.auth(request);
 
@@ -685,7 +685,7 @@ class WebSite {
                         path: `/papi/v1/properties/${propertyId}/versions?contractId=${contractId}&groupId=${groupId}`,
                         body: body
                     };
-                    request.path += this._buildAccountSwitchKeyQuery(this._accountSwitchKey);
+                    request.path += this._buildAccountSwitchKeyQuery();
 
                     this._edge.auth(request);
 
@@ -727,7 +727,7 @@ class WebSite {
                 path: `/papi/v1/properties/?contractId=${contractId}&groupId=${groupId}`,
                 body: propertyObj
             };
-            request.path += this._buildAccountSwitchKeyQuery(this._accountSwitchKey);
+            request.path += this._buildAccountSwitchKeyQuery();
 
             this._edge.auth(request);
 
@@ -817,7 +817,7 @@ class WebSite {
                                 body: rules
                         }
                     }
-                    request.path += this._buildAccountSwitchKeyQuery(this._accountSwitchKey);
+                    request.path += this._buildAccountSwitchKeyQuery();
                     
                     this._edge.auth(request);
 
@@ -845,7 +845,7 @@ class WebSite {
                 path: `/papi/v1/cpcodes?contractId=${contractId}&groupId=${groupId}`,
                 body: cpCode
             };
-            request.path += this._buildAccountSwitchKeyQuery(this._accountSwitchKey);
+            request.path += this._buildAccountSwitchKeyQuery();
 
             this._edge.auth(request);
 
@@ -885,7 +885,7 @@ class WebSite {
                 path: `/papi/v1/edgehostnames?contractId=${contractId}&groupId=${groupId}`,
                 body: hostnameObj
             };
-            request.path += this._buildAccountSwitchKeyQuery(this._accountSwitchKey);
+            request.path += this._buildAccountSwitchKeyQuery();
 
             this._edge.auth(request);
 
@@ -940,7 +940,7 @@ class WebSite {
                         path: `/papi/v1/properties/${propertyId}/activations?contractId=${contractId}&groupId=${groupId}`,
                         body: activationData
                     };
-                    request.path += this._buildAccountSwitchKeyQuery(this._accountSwitchKey);
+                    request.path += this._buildAccountSwitchKeyQuery();
 
                     this._edge.auth(request);
 
@@ -1010,7 +1010,7 @@ class WebSite {
                         path: `/papi/v1/properties/${propertyId}/activations?contractId=${contractId}&groupId=${groupId}`,
                         body: activationData
                     };
-                    request.path += this._buildAccountSwitchKeyQuery(this._accountSwitchKey);
+                    request.path += this._buildAccountSwitchKeyQuery();
 
                     this._edge.auth(request);
 
@@ -1051,7 +1051,7 @@ class WebSite {
                         method: 'GET',
                         path: `/papi/v1/properties/${propertyId}/activations/${activationID}?contractId=${contractId}&groupId=${groupId}`,
                     };
-                    request.path += this._buildAccountSwitchKeyQuery(this._accountSwitchKey);
+                    request.path += this._buildAccountSwitchKeyQuery();
 
                     this._edge.auth(request);
 
@@ -1102,7 +1102,7 @@ class WebSite {
                 method: 'GET',
                 path: `/user-admin/v1/accounts/${accountId}/groups/${groupId}/properties`
             };
-            request.path += this._buildAccountSwitchKeyQuery(this._accountSwitchKey, true);
+            request.path += this._buildAccountSwitchKeyQuery(true);
 
             this._edge.auth(request);
 
@@ -1159,7 +1159,7 @@ class WebSite {
                         path: `/user-admin/v1/accounts/${accountId}/properties/${assetId}`,
                         body: moveData
                     };
-                    request.path += this._buildAccountSwitchKeyQuery(this._accountSwitchKey, true);
+                    request.path += this._buildAccountSwitchKeyQuery(true);
 
                     this._edge.auth(request);
 
@@ -1187,7 +1187,7 @@ class WebSite {
                 method: 'DELETE',
                 path: `/papi/v1/properties/${property.propertyId}?contractId=${property.contractId}&groupId=${property.groupId}`
             }
-            request.path += this._buildAccountSwitchKeyQuery(this._accountSwitchKey);
+            request.path += this._buildAccountSwitchKeyQuery();
 
             this._edge.auth(request);
             this._edge.send((data, response) => {
@@ -1283,7 +1283,7 @@ class WebSite {
                         path: `/papi/v1/properties/${propertyId}/versions/${version}/hostnames/?contractId=${contractId}&groupId=${groupId}`,
                         body: newHostnameArray
                     }
-                    request.path += this._buildAccountSwitchKeyQuery(this._accountSwitchKey);
+                    request.path += this._buildAccountSwitchKeyQuery();
                     
                     this._edge.auth(request);
                     this._edge.send((data, response) => {
@@ -1489,7 +1489,7 @@ class WebSite {
                 method: 'GET',
                 path: `/papi/v1/properties/${propertyId}/versions/${version}/hostnames?contractId=${contractId}&groupId=${groupId}`
             }
-            request.path += this._buildAccountSwitchKeyQuery(this._accountSwitchKey);
+            request.path += this._buildAccountSwitchKeyQuery();
 
             this._edge.auth(request);
             this._edge.send((data, response) => {
@@ -1513,7 +1513,7 @@ class WebSite {
                 method: 'GET',
                 path: `/papi/v1/rule-formats`
             }
-            request.path += this._buildAccountSwitchKeyQuery(this._accountSwitchKey, true);
+            request.path += this._buildAccountSwitchKeyQuery(true);
 
             this._edge.auth(request);
             this._edge.send((data, response) => {
@@ -1527,8 +1527,8 @@ class WebSite {
         })
     }
     
-    _buildAccountSwitchKeyQuery(accountKey, firstQueryParam = false) {
-        return accountKey ? ( ( firstQueryParam ? `?` : "&" ) + `accountSwitchKey=${accountKey}` ) : "";
+    _buildAccountSwitchKeyQuery(firstQueryParam = false) {
+        return this._accountSwitchKey ? ( ( firstQueryParam ? `?` : "&" ) + `accountSwitchKey=${this._accountSwitchKey}` ) : "";
     }
     
     searchProperties(searchString, accountKey) {
