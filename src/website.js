@@ -1396,81 +1396,6 @@ class WebSite {
     }
 
     /**
- * Advanced Metadata can't be automatically replicated, but if we preserver the UUID we can. This method loops through
- * the behaviors and matches and finds advanced entries.  The PS adv. metadata check looks at the md5() of the xml
- * and the UUID of the behavior and the rule ancestry UUID. If all of these things match then the validator will allow
- * the changes to proceed.
- * @param oldRules
- * @param newRules
- * @returns updated Rules
- */
-    static mergeAdvancedUUIDRules(oldRules, newRules) {
-        //find behavior: {name:"advanced"} and "match": { name: "matchAdvanced"}
-        //create md5 tree of ancestry ruleUUID
-        //merge over other rule matches and other behaviors
-        //flag changes that can't be promoted automatically
-
-        let search = (ruleNode, parentRules = [], found = {}) => {
-            let nodeList = ruleNode.behaviors.concat(ruleNode.criteria);
-            nodeList.forEach(advNode => {
-                //look for "advanced" behaviors
-                if (advNode && (advNode.name === "advanced"
-                    || advNode.name === "matchAdvanced")) {
-
-                    let xml = advNode.options.xml || ''
-                        + advNode.options.openXml || ''
-                        + advNode.options.closeXml || '';
-                    let newParentRules = ruleNode.uuid !== "default" ? parentRules.concat([ruleNode]) : parentRules;
-                    let foundNode = {
-                        uuid: advNode.uuid,
-                        xml: xml,
-                        advNode: advNode,
-                        parentRules: newParentRules,
-                        md5: md5(xml)
-                    };
-                    //should we allow for multiple uses of the same hash?
-                    if (!found[foundNode.md5]) found[foundNode.md5] = [];
-                    found[foundNode.md5].push(foundNode);
-                }
-            });
-
-            if (ruleNode.children) {
-                let newParentRules = ruleNode.uuid !== "default" ? parentRules.concat([ruleNode]) : parentRules;
-                ruleNode.children.forEach(childRule => {
-                    search(childRule, newParentRules, found);
-                });
-            }
-            return found;
-        };
-
-        let oldAdvMtdBehaviors = search(oldRules);
-        let newAdvMtdBehaviors = search(newRules);
-        Object.keys(newAdvMtdBehaviors).forEach(key => {
-            newAdvMtdBehaviors[key].forEach(newAdvObject => {
-                let oldAdvObjectList = oldAdvMtdBehaviors[key] || [];
-                let oldAdvObject = oldAdvObjectList.find(x => newAdvObject.parentRules.length === x.parentRules.length);
-
-                if (oldAdvObject) {
-                    //copy the chain of rules UUIDs over
-                    for (let i = 0; i < newAdvObject.parentRules.length; i++) {
-
-                        newAdvObject.parentRules[i].uuid = oldAdvObject.parentRules[i].uuid;
-                    }
-                    // copy the behavior UUID
-                    newAdvObject.advNode.uuid = oldAdvObject.advNode.uuid;
-
-                    //cleanup items in our array
-                    oldAdvMtdBehaviors[key] = oldAdvMtdBehaviors[key].filter(x => x != oldAdvObject);
-                } else {
-                    throw Error("Cannot find Advanced Metadata in the destination rules. For safety, the Advanced behavior has to have been previously pushed on the destination config: " + newAdvObject.xml);
-                }
-            });
-        });
-
-        return newRules;
-    }
-
-    /**
      * Lookup the PropertyId using the associated Host name. Provide the environment if the Hostname association is
      * moving between configurations.
      *
@@ -1693,17 +1618,11 @@ class WebSite {
             })
             .then(newVersionId => {
                 property.latestVersion = newVersionId;
-                return this.retrieve(property, newVersionId);
-            })
-            .then(oldRules => {
-                let updatedRules = newRules;
-                // fallback in case the object is just the rules and not the full proeprty manager response
-                updatedRules.rules = WebSite.mergeAdvancedUUIDRules(oldRules.rules, newRules.rules) ? newRules.rules : newRules;
-                 if(comment) {
-                   updatedRules.comments = comment;
+                if(comment) {
+                   newRules.comments = comment;
                  }
-                 console.log(updatedRules)
-                return this._updatePropertyRules(property, oldRules.propertyVersion, updatedRules);
+                 console.log(newRules)
+                return this._updatePropertyRules(property, property.latestVersion, newRules);
             });
     }
 
