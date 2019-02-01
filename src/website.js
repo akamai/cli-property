@@ -220,7 +220,7 @@ class WebSite {
                         path: `/papi/v1/properties/${cloneFrom.propertyId}/versions/${cloneFrom.version}?contractId=${contractId}&groupId=${groupId}`,
                         followRedirect: false
                     };
-                    //TODO request.path += this._buildAccountSwitchKeyQuery();
+                    request.path += this._buildAccountSwitchKeyQuery();
                     this._edge.auth(request);
 
                     this._edge.send(function (data, response) {
