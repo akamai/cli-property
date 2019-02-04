@@ -1368,7 +1368,7 @@ class WebSite {
                 if (baserules) {
                     return Promise.resolve(baserules)
                 } else {
-                    return this.retrieve(configName)
+                    return this.retrieve(configName, LATEST_VERSION.LATEST, false, this._accountSwitchKey)
                 }
             })
             .then(rules => {
@@ -1499,7 +1499,7 @@ class WebSite {
     retrieveFormats(latest=false, accountKey) {
         let latestRule;
         this._accountSwitchKey = accountKey;
-        return this._retrieveFormats()
+        return this._retrieveFormats(false, this._accountSwitchKey)
             .then(result => {
                 if (!latest) {
                     return Promise.resolve(result.ruleFormats.items)
@@ -1554,7 +1554,7 @@ class WebSite {
 
     retrieveToFile(propertyLookup, toFile, versionLookup = LATEST_VERSION.LATEST, accountKey) {
         this._accountSwitchKey = accountKey;
-        return this.retrieve(propertyLookup, versionLookup)
+        return this.retrieve(propertyLookup, versionLookup, false, this._accountSwitchKey)
             .then(data => {
                 console.error(`Writing ${propertyLookup} rules to ${toFile}`);
                 if (toFile === '-') {
@@ -1579,7 +1579,7 @@ class WebSite {
 
     retrievePropertyRuleFormat(propertyLookup, versionLookup = LATEST_VERSION.LATEST, accountKey) {
         this._accountSwitchKey = accountKey;
-        return this.retrieve(propertyLookup, versionLookup)
+        return this.retrieve(propertyLookup, versionLookup, false, this._accountSwitchKey)
             .then(data => {
                 console.log(JSON.stringify(data.ruleFormat));
                 return Promise.resolve(data);
@@ -1667,7 +1667,7 @@ class WebSite {
      */
     copy(fromProperty, fromVersion = LATEST_VERSION.LATEST, toProperty, comment = false, accountKey) {
         this._accountSwitchKey = accountKey;
-        return this.retrieve(fromProperty, fromVersion)
+        return this.retrieve(fromProperty, fromVersion, false, this._accountSwitchKey)
             .then(fromRules => {
                 console.error(`Copy ${fromProperty} v${fromRules.propertyVersion} to ${toProperty}`);
                 return this.update(toProperty, fromRules, comment)
@@ -1693,7 +1693,7 @@ class WebSite {
                 if (!property.stagingVersion)
                     new Promise((resolve, reject) => reject(`No version in Staging for ${propertyLookup}`));
                 else if (property.productionVersion !== property.stagingVersion)
-                    return this.activate(propertyLookup, stagingVersion, AKAMAI_ENV.PRODUCTION, notes, email);
+                    return this.activate(propertyLookup, stagingVersion, AKAMAI_ENV.PRODUCTION, notes, email, this._accountSwitchKey);
                 else
                     new Promise(resolve => resolve(true));
             });
@@ -2246,7 +2246,7 @@ class WebSite {
             })
             .then(data => {
                 propertyId = data;
-                return this.searchProperties(configName);
+                return this.searchProperties(configName, this._accountSwitchKey);
             })
             .then(data => {
                 propertyId = data["versions"]["items"][0]["propertyId"]
@@ -2346,7 +2346,7 @@ class WebSite {
                    cpcode = behavior.options.value.id
                 }
             })
-            return this.create(hostnames, cpcode, configName, contractId, groupId, rules, origin, edgeHostname, ruleformat, productId);
+            return this.create(hostnames, cpcode, configName, contractId, groupId, rules, origin, edgeHostname, ruleformat, productId, this._accountSwitchKey);
         })
     }
 
@@ -2434,7 +2434,7 @@ class WebSite {
                 this._propertyByName[propInfo.propertyName] = propInfo;
                 this._propertyById[propInfo.propertyId] = propInfo;
                 this._propertyByName[configName] = propInfo;
-                return this.retrieveFormats(true)
+                return this.retrieveFormats(true, this._accountSwitchKey)
             })
             .then(format => {
                 latestFormat = format;
