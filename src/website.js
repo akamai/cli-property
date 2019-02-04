@@ -1499,7 +1499,7 @@ class WebSite {
     retrieveFormats(latest=false, accountKey) {
         let latestRule;
         this._accountSwitchKey = accountKey;
-        return this._retrieveFormats(false, this._accountSwitchKey)
+        return this._retrieveFormats()
             .then(result => {
                 if (!latest) {
                     return Promise.resolve(result.ruleFormats.items)
