@@ -55,7 +55,7 @@ function activateProperty(app, targetProperty, options) {
     let env = options.network.toUpperCase();
     return Promise.resolve()
         .then(() => {
-            return app.lookupPropertyIdFromHost(targetProperty, WebSite.LATEST_VERSION.PRODUCTION, options.accountkey);
+            return app.lookupPropertyIdFromHost(targetProperty, WebSite.LATEST_VERSION.PRODUCTION, options["account-key"]);
         })
         .then(data => {
             if (!numberVersion(options.propver)) {
@@ -68,7 +68,7 @@ function activateProperty(app, targetProperty, options) {
                                             options.notes || "Updated Automatically to staging.",
                                             options.email,
                                             true,
-                                            options.accountkey);
+                                            options["account-key"]);
             return Promise.resolve(data);
         })
         .then(data => {
@@ -79,7 +79,7 @@ function activateProperty(app, targetProperty, options) {
                                             options.notes || "Updated Automatically to prod.",
                                             options.email,
                                             true,
-                                            options.accountkey);
+                                            options["account-key"]);
             return Promise.resolve(data);
         });
 }
@@ -95,7 +95,7 @@ function deactivateProperty(app, targetProperty, options) {
                                             options.notes || "Automatically deactivating on staging.",
                                             options.email,
                                             true,
-                                            options.accountkey);
+                                            options["account-key"]);
             return Promise.resolve();
         })
         .then(() => {
@@ -105,31 +105,32 @@ function deactivateProperty(app, targetProperty, options) {
                                             options.notes || "Automatically deactivating on prod.",
                                             options.email,
                                             true,
-                                            options.accountkey);
+                                            options["account-key"]);
             return Promise.resolve();
         });
 }
 
 
 function updateProperty(app, targetProperty, options) {
+  console.log(options["account-key"]);
     section = options.section || section;
     if (options.file)
         return app.updateFromFile( targetProperty,
                                         options.file,
                                         options.notes,
-                                        options.accountkey);
+                                        options["account-key"]);
 
     if (options.srcprop)
         return app.copy(   options.srcprop,
                                 numberVersion(options.srcver),
                                 targetProperty,
                                 options.notes,
-                                options.accountkey);
+                                options["account-key"]);
     return Promise.resolve();
 }
 
 function deleteProperty(app, targetProperty, options) {
-    return app.deleteProperty(targetProperty, options.accountkey);
+    return app.deleteProperty(targetProperty, options["account-key"]);
 }
 
 function createProperty(app, targetProperty, options) {
@@ -151,7 +152,7 @@ function createProperty(app, targetProperty, options) {
                                             options.edgehostname,
                                             options.ruleformat,
                                             options.product,
-                                            options.accountkey);
+                                            options["account-key"]);
 
             } else {
                 return app.create(hostnames,
@@ -164,7 +165,7 @@ function createProperty(app, targetProperty, options) {
                                             options.edgehostname,
                                             options.ruleformat,
                                             options.product,
-                                            options.accountkey);
+                                            options["account-key"]);
             }
         } else {
             options.srcver = numberVersion(options.srcver);
@@ -174,7 +175,7 @@ function createProperty(app, targetProperty, options) {
     })
     .then(() => {
         if (options.retrieve) {
-            return app.retrieve(targetProperty, WebSite.LATEST_VERSION.LATEST, false, options.accountkey);
+            return app.retrieve(targetProperty, WebSite.LATEST_VERSION.LATEST, false, options["account-key"]);
         } else {
             return Promise.resolve()
         }
@@ -189,19 +190,19 @@ function createProperty(app, targetProperty, options) {
 
 function retrieveProperty(app, targetProperty, options) {
     if (options.variables) {
-        return app.getVariables(targetProperty, numberVersion(options.propver), options.file, options.accountkey)
+        return app.getVariables(targetProperty, numberVersion(options.propver), options.file, options["account-key"])
     } else if (options.file) {
         return app.retrieveToFile( targetProperty,
                                         options.file,
                                         numberVersion(options.propver),
-                                        options.accountkey);
+                                        options["account-key"]);
     } else if (options.format) {
-        return app.retrievePropertyRuleFormat(targetProperty, numberVersion(options.propver), options.accountkey)
+        return app.retrievePropertyRuleFormat(targetProperty, numberVersion(options.propver), options["account-key"])
     }  else {
         return app.retrieve(targetProperty,
                                 numberVersion(options.propver),
                                 false, 
-                                options.accountkey)
+                                options["account-key"])
         .then(data => {
             console.log(JSON.stringify(data,'',2));
             return Promise.resolve();
@@ -258,34 +259,34 @@ function retrieveHostnames(app, targetProperty, version, accountKey) {
 function modifyProperty(app, targetProperty, options, command) {
     let version = numberVersion(options.propver) ? numberVersion(options.propver) : 0;
     if (options.new) {
-            return app.createNewPropertyVersion(targetProperty, options.accountkey)
+            return app.createNewPropertyVersion(targetProperty, options["account-key"])
         }
     if (options.addhosts.length > 0) {
-            return app.addHostnames(targetProperty, version, options.addhosts, options.edgehostname, options.accountkey);
+            return app.addHostnames(targetProperty, version, options.addhosts, options.edgehostname, options["account-key"]);
         }
     if (options.delhosts.length > 0) {
-            return app.delHostnames(targetProperty, version, options.delhosts, options.accountkey)
+            return app.delHostnames(targetProperty, version, options.delhosts, options["account-key"])
         }
     if (options.origin || options.forward) {
-            return app.setOrigin(targetProperty, version, options.origin, options.forward, options.accountkey);
+            return app.setOrigin(targetProperty, version, options.origin, options.forward, options["account-key"]);
         }
     if (options.edgehostname && command != "create") {
-            return app.assignEdgeHostname(targetProperty, version, options.edgehostname, options.accountkey); // removed options.new as was not declared as expected parameter
+            return app.assignEdgeHostname(targetProperty, version, options.edgehostname, options["account-key"]); // removed options.new as was not declared as expected parameter
         }
     if (options.notes) {
-            return app.setComments(targetProperty, version, options.notes, options.accountkey);
+            return app.setComments(targetProperty, version, options.notes, options["account-key"]);
         }
     if (options.variables) {
-            return app.setVariables(targetProperty, version, options.variables, options.accountkey);
+            return app.setVariables(targetProperty, version, options.variables, options["account-key"]);
         }
     if (options.cpcode) {
-            return app.setCpcode(targetProperty, version, options.cpcode, options.accountkey)
+            return app.setCpcode(targetProperty, version, options.cpcode, options["account-key"])
         }
     if (options.move) {
-            return app.moveProperty(targetProperty, options.move, options.accountkey)
+            return app.moveProperty(targetProperty, options.move, options["account-key"])
         }
     if (options.ruleformat) {
-            return app.setRuleFormat(targetProperty, version, options.ruleformat, options.accountkey)
+            return app.setRuleFormat(targetProperty, version, options.ruleformat, options["account-key"])
         }
     if (options.sureroutemap || options.surerouteto || options.sureroutetohost) {
             return app.setSureRoute(targetProperty,
@@ -293,7 +294,7 @@ function modifyProperty(app, targetProperty, options, command) {
                                             options.sureroutemap,
                                             options.surerouteto,
                                             options.sureroutetohost,
-                                            options.accountkey);
+                                            options["account-key"]);
         }
 }
 
@@ -353,7 +354,7 @@ function main () {
         run: (options, context) => {
           try {
             let app = new WebSite({path: options.config, section: options.section, debug: options.debug});
-            return retrieveGroups(app, options.accountkey)
+            return retrieveGroups(app, options["account-key"])
           } catch (error) {
             return errorMessage(error, context);
           }
@@ -365,9 +366,9 @@ function main () {
           try {
             let app = new WebSite({path: options.config, section: options.section, debug: options.debug});
             if (options.newest) {
-              return retrieveNewestFormat(app, options.accountkey);
+              return retrieveNewestFormat(app, options["account-key"]);
             } else {
-              return retrieveFormats(app, options.accountkey);
+              return retrieveFormats(app, options["account-key"]);
             }
           } catch (error) {
             return errorMessage(error, context);
@@ -394,7 +395,7 @@ function main () {
         },
         run: options => {
             let app = new WebSite({path:options.config, section: options.section, debug: options.debug});
-            return listProperties(app, options.group, options.contract, options.file, options.accountkey);
+            return listProperties(app, options.group, options.contract, options.file, options["account-key"]);
         }
       })
       .command('search <string>', {
@@ -404,7 +405,7 @@ function main () {
           try {
             let app = new WebSite({path: options.config, section: options.section, debug: options.debug});
             options.property = options.property || process.env.AKAMAI_PAPI_PROPERTY;
-            return searchProperties(app, options.string, options.accountkey)
+            return searchProperties(app, options.string, options["account-key"])
           } catch (error) {
             return errorMessage(error, context);
           }
@@ -690,7 +691,7 @@ function main () {
             let app = new WebSite({path: options.config, section: options.section, debug: options.debug});
             options.property = options.property || process.env.AKAMAI_PAPI_PROPERTY;
             if (options.hostnames) {
-              return retrieveHostnames(app, options.property, options.propver, options.accountkey)
+              return retrieveHostnames(app, options.property, options.propver, options["account-key"])
             } else {
               return retrieveProperty(app, options.property, options)
             }

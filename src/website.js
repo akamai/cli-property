@@ -2367,7 +2367,7 @@ class WebSite {
         configName = names[0];
         hostnames = names[1];
 
-        this._accountSwitchKey = options.accountKey;
+        this._accountSwitchKey = options["account-key"];
 
         let cloneFrom,
             productId,
