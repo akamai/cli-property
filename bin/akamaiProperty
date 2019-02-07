@@ -52,80 +52,89 @@ function errorMessage(error, context) {
 }
 
 function activateProperty(app, targetProperty, options) {
-    
     let env = options.network.toUpperCase();
     return Promise.resolve()
         .then(() => {
-            return app.lookupPropertyIdFromHost(targetProperty);
+            return app.lookupPropertyIdFromHost(targetProperty, WebSite.LATEST_VERSION.PRODUCTION, options["account-key"]);
         })
         .then(data => {
             if (!numberVersion(options.propver)) {
                 options.propver = data.propertyVersion;
             }
             if ("BOTH" === env || env.startsWith("STAG"))
-                return app.activate(   targetProperty, 
-                                            numberVersion(options.propver), 
+                return app.activate(   targetProperty,
+                                            numberVersion(options.propver),
                                             WebSite.AKAMAI_ENV.STAGING,
-                                            options.notes || "Updated Automatically to staging.", 
-                                            options.email);
+                                            options.notes || "Updated Automatically to staging.",
+                                            options.email,
+                                            true,
+                                            options["account-key"]);
             return Promise.resolve(data);
         })
         .then(data => {
             if ("BOTH" === env || env.startsWith("PROD"))
-                return app.activate(   targetProperty, 
-                                            numberVersion(options.propver), 
+                return app.activate(   targetProperty,
+                                            numberVersion(options.propver),
                                             WebSite.AKAMAI_ENV.PRODUCTION,
-                                            options.notes || "Updated Automatically to prod.", 
-                                            options.email);
+                                            options.notes || "Updated Automatically to prod.",
+                                            options.email,
+                                            true,
+                                            options["account-key"]);
             return Promise.resolve(data);
         });
 }
 
 function deactivateProperty(app, targetProperty, options) {
     section = options.section || section;
-
     let env = options.network.toUpperCase();
     return Promise.resolve()
         .then(() => {
             if ("BOTH" === env || env.startsWith("STAG"))
-               return app.deactivate(  targetProperty, 
+               return app.deactivate(  targetProperty,
                                             WebSite.AKAMAI_ENV.STAGING,
-                                            options.notes || "Automatically deactivating on staging.", 
-                                            options.email);
+                                            options.notes || "Automatically deactivating on staging.",
+                                            options.email,
+                                            true,
+                                            options["account-key"]);
             return Promise.resolve();
         })
         .then(() => {
             if ("BOTH" === env || env.startsWith("PROD"))
-                return app.deactivate( targetProperty, 
+                return app.deactivate( targetProperty,
                                             WebSite.AKAMAI_ENV.PRODUCTION,
-                                            options.notes || "Automatically deactivating on prod.", 
-                                            options.email);
+                                            options.notes || "Automatically deactivating on prod.",
+                                            options.email,
+                                            true,
+                                            options["account-key"]);
             return Promise.resolve();
         });
 }
 
 
 function updateProperty(app, targetProperty, options) {
+  console.log(options["account-key"]);
     section = options.section || section;
-
     if (options.file)
         return app.updateFromFile( targetProperty,
                                         options.file,
-                                        options.notes);
+                                        options.notes,
+                                        options["account-key"]);
 
     if (options.srcprop)
         return app.copy(   options.srcprop,
                                 numberVersion(options.srcver),
-                                targetProperty, options.notes);
+                                targetProperty,
+                                options.notes,
+                                options["account-key"]);
     return Promise.resolve();
 }
 
 function deleteProperty(app, targetProperty, options) {
-    return app.deleteProperty(targetProperty);
+    return app.deleteProperty(targetProperty, options["account-key"]);
 }
 
 function createProperty(app, targetProperty, options) {
-    let hostnames = options.hostnames
+    let hostnames = options.hostnames;
     if (options.edgehostname) {
         process.env.USE_PROVIDED_HOSTNAME = 1;
     }
@@ -133,38 +142,40 @@ function createProperty(app, targetProperty, options) {
     .then(() => {
         if (!options.clone) {
             if (options.file) {
-            return app.createFromFile(hostnames, 
+            return app.createFromFile(hostnames,
                                             options.file,
                                             targetProperty,
-                                            options.contract, 
+                                            options.contract,
                                             options.group,
                                             options.cpcode,
                                             options.origin,
                                             options.edgehostname,
                                             options.ruleformat,
-                                            options.product);
+                                            options.product,
+                                            options["account-key"]);
 
             } else {
-                return app.create(hostnames, 
+                return app.create(hostnames,
                                             options.cpcode,
                                             targetProperty,
-                                            options.contract, 
+                                            options.contract,
                                             options.group,
                                             null,
                                             options.origin,
                                             options.edgehostname,
                                             options.ruleformat,
-                                            options.product)
+                                            options.product,
+                                            options["account-key"]);
             }
         } else {
-            options.srcver = numberVersion(options.srcver)
-            options.hostnames = hostnames
+            options.srcver = numberVersion(options.srcver);
+            options.hostnames = hostnames;
             return app.createFromExisting(targetProperty, options)
         }
     })
     .then(() => {
         if (options.retrieve) {
-            return app.retrieve(targetProperty)
+            return app.retrieve(targetProperty, WebSite.LATEST_VERSION.LATEST, false, options["account-key"]);
         } else {
             return Promise.resolve()
         }
@@ -179,17 +190,19 @@ function createProperty(app, targetProperty, options) {
 
 function retrieveProperty(app, targetProperty, options) {
     if (options.variables) {
-        return app.getVariables(targetProperty, numberVersion(options.propver), options.file)
+        return app.getVariables(targetProperty, numberVersion(options.propver), options.file, options["account-key"])
     } else if (options.file) {
-        return app.retrieveToFile( targetProperty, 
-                                        options.file, 
-                                        numberVersion(options.propver));
+        return app.retrieveToFile( targetProperty,
+                                        options.file,
+                                        numberVersion(options.propver),
+                                        options["account-key"]);
     } else if (options.format) {
-        return app.retrievePropertyRuleFormat(targetProperty, numberVersion(options.propver))
+        return app.retrievePropertyRuleFormat(targetProperty, numberVersion(options.propver), options["account-key"])
     }  else {
-        return app.retrieve(targetProperty, 
+        return app.retrieve(targetProperty,
                                 numberVersion(options.propver),
-                                false)
+                                false, 
+                                options["account-key"])
         .then(data => {
             console.log(JSON.stringify(data,'',2));
             return Promise.resolve();
@@ -197,47 +210,47 @@ function retrieveProperty(app, targetProperty, options) {
     }
 }
 
-function retrieveNewestFormat(app) {
-    return app.retrieveFormats(true)
+function retrieveNewestFormat(app, accountKey) {
+    return app.retrieveFormats(true, accountKey)
     .then(data => {
         console.log(JSON.stringify(data,'',2));
     })
 }
 
-function retrieveGroups(app) {
-    return app.retrieveGroups()
+function retrieveGroups(app, accountKey) {
+    return app.retrieveGroups(accountKey)
     .then(data => {
         console.log(JSON.stringify(data,'',2));
     })
 }
 
-function searchProperties(app, searchString, options) {
-    return app.searchProperties(searchString)
+function searchProperties(app, searchString, accountKey) {
+    return app.searchProperties(searchString, accountKey)
     .then(data => {
         console.log(JSON.stringify(data,'',2))
     })
 }
 
-function listProperties(app, group, contract, toFile) {
+function listProperties(app, group, contract, toFile, accountKey) {
     if(toFile){
-        return app.listPropertiesToFile(group, contract, toFile)
+        return app.listPropertiesToFile(group, contract, toFile, accountKey)
     }else{
-        return app.listProperties(group, contract)
+        return app.listProperties(group, contract, accountKey)
         .then(data => {
             console.log(JSON.stringify(data,'',2))
         })
-    }    
+    }
 }
 
-function retrieveFormats(app, options) {
-    return app.retrieveFormats()
+function retrieveFormats(app, accountKey) {
+    return app.retrieveFormats(false, accountKey)
     .then(data => {
         console.log(JSON.stringify(data,'',2))
     })
 }
 
-function retrieveHostnames(app, targetProperty, version) {
-    return app.retrieve(targetProperty, version, true)
+function retrieveHostnames(app, targetProperty, version, accountKey) {
+    return app.retrieve(targetProperty, version, true, accountKey)
     .then(data => {
         console.log(JSON.stringify(data.hostnames.items, '', 2));
     })
@@ -246,41 +259,42 @@ function retrieveHostnames(app, targetProperty, version) {
 function modifyProperty(app, targetProperty, options, command) {
     let version = numberVersion(options.propver) ? numberVersion(options.propver) : 0;
     if (options.new) {
-            return app.createNewPropertyVersion(targetProperty)
+            return app.createNewPropertyVersion(targetProperty, options["account-key"])
         }
     if (options.addhosts.length > 0) {
-            return app.addHostnames(targetProperty, version, options.addhosts, options.edgehostname);
-        } 
+            return app.addHostnames(targetProperty, version, options.addhosts, options.edgehostname, options["account-key"]);
+        }
     if (options.delhosts.length > 0) {
-            return app.delHostnames(targetProperty, version, options.delhosts)
+            return app.delHostnames(targetProperty, version, options.delhosts, options["account-key"])
         }
     if (options.origin || options.forward) {
-            return app.setOrigin(targetProperty, version, options.origin, options.forward);
+            return app.setOrigin(targetProperty, version, options.origin, options.forward, options["account-key"]);
         }
     if (options.edgehostname && command != "create") {
-            return app.assignEdgeHostname(targetProperty, version, options.edgehostname, options.new);
+            return app.assignEdgeHostname(targetProperty, version, options.edgehostname, options["account-key"]); // removed options.new as was not declared as expected parameter
         }
     if (options.notes) {
-            return app.setComments(targetProperty, version, options.notes);
-        } 
+            return app.setComments(targetProperty, version, options.notes, options["account-key"]);
+        }
     if (options.variables) {
-            return app.setVariables(targetProperty, version, options.variables);
+            return app.setVariables(targetProperty, version, options.variables, options["account-key"]);
         }
     if (options.cpcode) {
-            return app.setCpcode(targetProperty, version, options.cpcode)
+            return app.setCpcode(targetProperty, version, options.cpcode, options["account-key"])
         }
     if (options.move) {
-            return app.moveProperty(targetProperty, options.move)
+            return app.moveProperty(targetProperty, options.move, options["account-key"])
         }
     if (options.ruleformat) {
-            return app.setRuleFormat(targetProperty, version, options.ruleformat)
-        } 
+            return app.setRuleFormat(targetProperty, version, options.ruleformat, options["account-key"])
+        }
     if (options.sureroutemap || options.surerouteto || options.sureroutetohost) {
             return app.setSureRoute(targetProperty,
-                                            version, 
-                                            options.sureroutemap, 
+                                            version,
+                                            options.sureroutemap,
                                             options.surerouteto,
-                                            options.sureroutetohost);
+                                            options.sureroutetohost,
+                                            options["account-key"]);
         }
 }
 
@@ -320,17 +334,17 @@ function main () {
     process.argv[1] = 'akamai property'
     const NETWORK_CHOICES = ['PROD', 'STAGING', 'BOTH']
     return require('sywac')
-      .file('--config <config>', { 
+      .file('--config <config>', {
           desc: 'Config file ',
           defaultValue: config,
           group: "Command options:"
       })
-      .string('--section <section>', { 
+      .string('--section <section>', {
           desc: 'Config section ',
           defaultValue: section,
           group: "Command options:"
         })
-       .boolean('--debug <debug>', { 
+       .boolean('--debug <debug>', {
             desc: 'Turn on debugging.',
             defaultValue: false,
             group: "Command options:"
@@ -340,7 +354,7 @@ function main () {
         run: (options, context) => {
           try {
             let app = new WebSite({path: options.config, section: options.section, debug: options.debug});
-            return retrieveGroups(app)
+            return retrieveGroups(app, options["account-key"])
           } catch (error) {
             return errorMessage(error, context);
           }
@@ -352,9 +366,9 @@ function main () {
           try {
             let app = new WebSite({path: options.config, section: options.section, debug: options.debug});
             if (options.newest) {
-              return retrieveNewestFormat(app);
+              return retrieveNewestFormat(app, options["account-key"]);
             } else {
-              return retrieveFormats(app);
+              return retrieveFormats(app, options["account-key"]);
             }
           } catch (error) {
             return errorMessage(error, context);
@@ -381,7 +395,7 @@ function main () {
         },
         run: options => {
             let app = new WebSite({path:options.config, section: options.section, debug: options.debug});
-            return listProperties(app, options.group, options.contract, options.file)
+            return listProperties(app, options.group, options.contract, options.file, options["account-key"]);
         }
       })
       .command('search <string>', {
@@ -391,7 +405,7 @@ function main () {
           try {
             let app = new WebSite({path: options.config, section: options.section, debug: options.debug});
             options.property = options.property || process.env.AKAMAI_PAPI_PROPERTY;
-            return searchProperties(app, options.string)
+            return searchProperties(app, options.string, options["account-key"])
           } catch (error) {
             return errorMessage(error, context);
           }
@@ -615,7 +629,7 @@ function main () {
         },
         run: (options, context) => {
           try {
-            options.network = "BOTH"
+            options.network = "BOTH";
             let app = new WebSite({path: options.config, section: options.section, debug: options.debug});
             options.property = options.property || process.env.AKAMAI_PAPI_PROPERTY;
             return deactivateProperty(app, options.property, options)
@@ -649,7 +663,7 @@ function main () {
         run: (options, context) => {
           try {
             if (!options.file && !options.srcprop) {
-              console.log("Required: srcprop or file")
+              console.log("Required: srcprop or file");
               return Promise.resolve();
             }
             let app = new WebSite({path: options.config, section: options.section, debug: options.debug});
@@ -677,7 +691,7 @@ function main () {
             let app = new WebSite({path: options.config, section: options.section, debug: options.debug});
             options.property = options.property || process.env.AKAMAI_PAPI_PROPERTY;
             if (options.hostnames) {
-              return retrieveHostnames(app, options.property, options.propver)
+              return retrieveHostnames(app, options.property, options.propver, options["account-key"])
             } else {
               return retrieveProperty(app, options.property, options)
             }
@@ -720,7 +734,7 @@ function main () {
             if(result.argv.version && result.output === 'Version unknown'){
               try{
                 var version = JSON.parse(fs.readFileSync("package.json")).version;
-                console.log(version); 
+                console.log(version);
               }catch(e){
                 console.log(result.output)
               }
