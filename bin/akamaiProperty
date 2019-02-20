@@ -135,6 +135,7 @@ function deleteProperty(app, targetProperty, options) {
 
 function createProperty(app, targetProperty, options) {
     let hostnames = options.hostnames;
+    
     if (options.edgehostname) {
         process.env.USE_PROVIDED_HOSTNAME = 1;
     }

@@ -2363,6 +2363,7 @@ class WebSite {
         let ruleformat = options.ruleformat || null
         let secure = options.secure || false
 
+        
         let names = this._getConfigAndHostname(configName, hostnames);
         configName = names[0];
         hostnames = names[1];
@@ -2409,14 +2410,14 @@ class WebSite {
                 }
                 return Promise.resolve(edgeHostnameId)
             })
-            /*.then(edgeHostnameId => {
+            .then(edgeHostnameId => {
                 return this._createEdgeHostname(groupId,
                     contractId,
                     configName,
                     productId,
                     edgeHostnameId,
                     edgeHostname);
-            })*/
+            })
             .then(data => {
                 edgeHostnameId = data;
                 return this._createProperty(groupId,
@@ -2446,17 +2447,18 @@ class WebSite {
                     1,
                     rules);
             })
-            /*.then(property => {
+            .then(property => {
                 return this._assignHostnames(groupId,
                         contractId,
                         configName,
                         edgeHostnameId,
                         propertyId,
                         hostnames,
+                        null,
                         false,
-                        true);
+                        1);
                         
-            })*/
+            })
             .then(data => {
                 return Promise.resolve();
             })
