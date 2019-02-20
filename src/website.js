@@ -2314,7 +2314,9 @@ class WebSite {
                         propertyId,
                         hostnames,
                         false,
-                        true);
+                        true,
+                        1);
+
                     }
             }).then(() => {
                 return Promise.resolve();
