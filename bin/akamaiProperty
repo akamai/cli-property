@@ -340,6 +340,10 @@ function main () {
           defaultValue: config,
           group: "Command options:"
       })
+      .file('--edgerc <config>', {
+        desc: 'Config file ',
+        group: "Command options:"
+      })
       .string('--section <section>', {
           desc: 'Config section ',
           defaultValue: section,
@@ -354,7 +358,7 @@ function main () {
         desc: 'retrieve account groups',
         run: (options, context) => {
           try {
-            let app = new WebSite({path: options.config, section: options.section, debug: options.debug});
+            let app = new WebSite({path: options.edgerc ? options.edgerc : options.config, section: options.section, debug: options.debug});
             return retrieveGroups(app, options["account-key"])
           } catch (error) {
             return errorMessage(error, context);
@@ -365,7 +369,7 @@ function main () {
         desc: 'get rules formats',
         run: (options, context) => {
           try {
-            let app = new WebSite({path: options.config, section: options.section, debug: options.debug});
+            let app = new WebSite({path: options.edgerc ? options.edgerc : options.config, section: options.section, debug: options.debug});
             if (options.newest) {
               return retrieveNewestFormat(app, options["account-key"]);
             } else {
@@ -395,7 +399,7 @@ function main () {
                 })
         },
         run: options => {
-            let app = new WebSite({path:options.config, section: options.section, debug: options.debug});
+            let app = new WebSite({path: options.edgerc ? options.edgerc : options.config, section: options.section, debug: options.debug});
             return listProperties(app, options.group, options.contract, options.file, options["account-key"]);
         }
       })
@@ -404,7 +408,7 @@ function main () {
         paramsDesc: 'Enter a string to search for.',
         run: (options, context) => {
           try {
-            let app = new WebSite({path: options.config, section: options.section, debug: options.debug});
+            let app = new WebSite({path: options.edgerc ? options.edgerc : options.config, section: options.section, debug: options.debug});
             options.property = options.property || process.env.AKAMAI_PAPI_PROPERTY;
             return searchProperties(app, options.string, options["account-key"])
           } catch (error) {
@@ -478,7 +482,7 @@ function main () {
         },
         run: (options, context) => {
           try {
-            let app = new WebSite({path: options.config, section: options.section, debug: options.debug});
+            let app = new WebSite({path: options.edgerc ? options.edgerc : options.config, section: options.section, debug: options.debug});
             options.property = options.property || process.env.AKAMAI_PAPI_PROPERTY;
             return createProperty(app, options.property, options)
             .then(() => {
@@ -555,7 +559,7 @@ function main () {
         },
         run: (options, context) => {
             try {
-              let app = new WebSite({path: options.config, section: options.section, debug: options.debug});
+              let app = new WebSite({path: options.edgerc ? options.edgerc : options.config, section: options.section, debug: options.debug});
               options.property = options.property || process.env.AKAMAI_PAPI_PROPERTY;
               return modifyProperty(app, options.property, options)
             } catch (error) {
@@ -587,7 +591,7 @@ function main () {
         },
         run: (options, context) => {
           try {
-            let app = new WebSite({path: options.config, section: options.section, debug: options.debug});
+            let app = new WebSite({path: options.edgerc ? options.edgerc : options.config, section: options.section, debug: options.debug});
             options.property = options.property || process.env.AKAMAI_PAPI_PROPERTY;
             return activateProperty(app, options.property, options)
           } catch (error) {
@@ -615,7 +619,7 @@ function main () {
         },
         run: (options, context) => {
           try {
-            let app = new WebSite({path: options.config, section: options.section, debug: options.debug});
+            let app = new WebSite({path: options.edgerc ? options.edgerc : options.config, section: options.section, debug: options.debug});
             options.property = options.property || process.env.AKAMAI_PAPI_PROPERTY;
             return deactivateProperty(app, options.property, options)
           } catch (error){
@@ -631,7 +635,7 @@ function main () {
         run: (options, context) => {
           try {
             options.network = "BOTH";
-            let app = new WebSite({path: options.config, section: options.section, debug: options.debug});
+            let app = new WebSite({path: options.edgerc ? options.edgerc : options.config, section: options.section, debug: options.debug});
             options.property = options.property || process.env.AKAMAI_PAPI_PROPERTY;
             return deactivateProperty(app, options.property, options)
             .then(() => {
@@ -667,7 +671,7 @@ function main () {
               console.log("Required: srcprop or file");
               return Promise.resolve();
             }
-            let app = new WebSite({path: options.config, section: options.section, debug: options.debug});
+            let app = new WebSite({path: options.edgerc ? options.edgerc : options.config, section: options.section, debug: options.debug});
             options.property = options.property || process.env.AKAMAI_PAPI_PROPERTY;
             return updateProperty(app, options.property, options);
           } catch (error) {
@@ -689,7 +693,7 @@ function main () {
         })},
         run: (options, context) => {
           try {
-            let app = new WebSite({path: options.config, section: options.section, debug: options.debug});
+            let app = new WebSite({path: options.edgerc ? options.edgerc : options.config, section: options.section, debug: options.debug});
             options.property = options.property || process.env.AKAMAI_PAPI_PROPERTY;
             if (options.hostnames) {
               return retrieveHostnames(app, options.property, options.propver, options["account-key"])
