@@ -38,7 +38,6 @@ Commands:
 
 Command options:
   --config <config>    Config file                [file] [default: /Users/khunter/.edgerc]
-  --edgerc <config>    Config file                                                  [file]
   --section <section>  Config section                             [string] [default: papi]
   --debug <debug>      Turn on debugging.                                        [boolean]
   --help               Show help                                [commands: help] [boolean]
@@ -95,7 +94,6 @@ General options:
 
 Command options:
   --config <config>    Config file                [file] [default: /Users/khunter/.edgerc]
-  --edgerc <config>    Config file                                                  [file]
   --section <section>  Config section                             [string] [default: papi]
   --debug <debug>      Turn on debugging.                                        [boolean]
   --help               Show help                                [commands: help] [boolean]
@@ -121,7 +119,6 @@ General options:
 
 Command options:
   --config <config>    Config file                [file] [default: /Users/khunter/.edgerc]
-  --edgerc <config>    Config file                                                  [file]
   --section <section>  Config section                             [string] [default: papi]
   --debug <debug>      Turn on debugging.                                        [boolean]
   --help               Show help                                [commands: help] [boolean]
@@ -147,7 +144,6 @@ General options:
 
 Command options:
   --config <config>    Config file                [file] [default: /Users/khunter/.edgerc]
-  --edgerc <config>    Config file                                                  [file]
   --section <section>  Config section                             [string] [default: papi]
   --debug <debug>      Turn on debugging.                                        [boolean]
   --help               Show help                                [commands: help] [boolean]
@@ -171,7 +167,6 @@ General options:
 
 Command options:
   --config <config>    Config file                [file] [default: /Users/khunter/.edgerc]
-  --edgerc <config>    Config file                                                  [file]
   --section <section>  Config section                             [string] [default: papi]
   --debug <debug>      Turn on debugging.                                        [boolean]
   --help               Show help                                [commands: help] [boolean]
@@ -225,7 +220,6 @@ Location options:
 
 Command options:
   --config <config>    Config file                [file] [default: /Users/khunter/.edgerc]
-  --edgerc <config>    Config file                                                  [file]
   --section <section>  Config section                             [string] [default: papi]
   --debug <debug>      Turn on debugging.                                        [boolean]
   --help               Show help                                [commands: help] [boolean]
