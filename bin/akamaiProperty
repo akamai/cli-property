@@ -335,7 +335,7 @@ function main () {
     process.argv[1] = 'akamai property'
     const NETWORK_CHOICES = ['PROD', 'STAGING', 'BOTH']
     return require('sywac')
-      .file('--config <config>', {
+      .file('--config, --edgerc <config>', {
           desc: 'Config file ',
           defaultValue: config,
           group: "Command options:"
