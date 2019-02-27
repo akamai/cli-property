@@ -772,9 +772,14 @@ class WebSite {
             rules.rules.children.map(child => {
                 child.behaviors.map(behavior => {
                     if (behavior.name == "sureRoute") {
-                        if (!behavior.options.sr_stat_key_mode && !behavior.options.testObjectUrl) {
-                            behavior.options.sr_stat_key_mode = "default";
-                            behavior.options.sr_test_object_url = "/akamai/sureroute-testobject.html"
+                        if (!behavior.options.testObjectUrl) {
+                            behavior.options.testObjectUrl = "/akamai/sureroute-testobject.html"
+                        }
+                        if(!behavior.options.enableCustomKey) {
+                            behavior.options.enableCustomKey = false;
+                        }
+                        if(!behavior.options.customStatKey || !behavior.options.enableCustomKey) {
+                            behavior.options.customStatKey = "default";
                         }
                     }
                     children_behaviors.push(behavior);
