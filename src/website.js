@@ -1877,7 +1877,11 @@ class WebSite {
                 rules.rules.behaviors.map(behavior => {
                     if (behavior.name == "cpCode") {
                         cpCodeExists = 1;
-                        behavior.options.value.id = cpcode
+                        if(behavior.options.value){
+                            behavior.options.value.id = cpcode
+                        }else {
+                            behavior.options.value = { id: cpcode }
+                        }
                     }
                     behaviors.push(behavior)
                 })
