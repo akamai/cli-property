@@ -37,7 +37,7 @@ Commands:
   retrieve <property>    retrieve rules from target property
 
 Command options:
-  --config <config>    Config file                [file] [default: /Users/khunter/.edgerc]
+  --config, --edgerc <config>    Config file      [file] [default: /Users/khunter/.edgerc]
   --section <section>  Config section                             [string] [default: papi]
   --debug <debug>      Turn on debugging.                                        [boolean]
   --help               Show help                                [commands: help] [boolean]
@@ -93,7 +93,7 @@ General options:
   --retrieve             Retrieve rules for created property                     [boolean]
 
 Command options:
-  --config <config>    Config file                [file] [default: /Users/khunter/.edgerc]
+  --config, --edgerc <config>    Config file      [file] [default: /Users/khunter/.edgerc]
   --section <section>  Config section                             [string] [default: papi]
   --debug <debug>      Turn on debugging.                                        [boolean]
   --help               Show help                                [commands: help] [boolean]
@@ -118,7 +118,7 @@ General options:
   --file <path>  Output file                                                        [file]
 
 Command options:
-  --config <config>    Config file                [file] [default: /Users/khunter/.edgerc]
+  --config, --edgerc <config>    Config file      [file] [default: /Users/khunter/.edgerc]
   --section <section>  Config section                             [string] [default: papi]
   --debug <debug>      Turn on debugging.                                        [boolean]
   --help               Show help                                [commands: help] [boolean]
@@ -143,7 +143,7 @@ General options:
   --file <path>         File with JSON rules                           [file] [must exist]
 
 Command options:
-  --config <config>    Config file                [file] [default: /Users/khunter/.edgerc]
+  --config, --edgerc <config>    Config file      [file] [default: /Users/khunter/.edgerc]
   --section <section>  Config section                             [string] [default: papi]
   --debug <debug>      Turn on debugging.                                        [boolean]
   --help               Show help                                [commands: help] [boolean]
@@ -166,7 +166,7 @@ General options:
   --notes <note>       Add a note on activation                                   [string]
 
 Command options:
-  --config <config>    Config file                [file] [default: /Users/khunter/.edgerc]
+  --config, --edgerc <config>    Config file      [file] [default: /Users/khunter/.edgerc]
   --section <section>  Config section                             [string] [default: papi]
   --debug <debug>      Turn on debugging.                                        [boolean]
   --help               Show help                                [commands: help] [boolean]
@@ -219,7 +219,7 @@ Location options:
   --move <move>      Group to move the property to (User Admin perms)             [string]
 
 Command options:
-  --config <config>    Config file                [file] [default: /Users/khunter/.edgerc]
+  --config, --edgerc <config>    Config file      [file] [default: /Users/khunter/.edgerc]
   --section <section>  Config section                             [string] [default: papi]
   --debug <debug>      Turn on debugging.                                        [boolean]
   --help               Show help                                [commands: help] [boolean]
