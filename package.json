@@ -19,25 +19,25 @@
     "src"
   ],
   "dependencies": {
-    "chalk": "^2.3.0",
+    "chalk": "^2.4.2",
     "child-process-promise": "^2.2.1",
-    "edgegrid": "*",
+    "edgegrid": "^3.0.5",
     "md5": "^2.2.1",
-    "nexe": "^2.0.0-rc.22",
+    "nexe": "^2.0.0-rc.34",
     "options": "0.0.6",
-    "pkg": "^4.3.0-beta.5",
-    "request": "^2.74.0",
-    "safe-buffer": "^5.1.1",
-    "sywac": "^1.2.0",
-    "untildify": "*",
-    "yargonaut": "^1.1.2",
-    "yargs": "^10.0.3"
+    "pkg": "^4.3.7",
+    "request": "^2.88.0",
+    "safe-buffer": "^5.1.2",
+    "sywac": "^1.2.1",
+    "untildify": "^3.0.3",
+    "yargonaut": "^1.1.4",
+    "yargs": "^10.1.2"
   },
   "devDependencies": {
     "eslint": "^5.10.0",
     "eslint-config-loopback": "^13.0.0",
     "gulp": "^4.0.0",
     "mocha": "^5.2.0",
-    "through2": "^2.0.1"
+    "through2": "^2.0.5"
   }
 }
