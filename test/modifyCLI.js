@@ -40,7 +40,7 @@ if (process.env.AKAMAI_TEST_HOST) {
 var akamaiweb = new WebSite({path: edgercFile, section: sectionName});
 
 
-describe('Modify property', function () {
+describe('Modify property CLI', function () {
 
     let property;
     let nextPropertyVersion;
