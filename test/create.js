@@ -47,7 +47,7 @@ describe('Create a new property from clone', function () {
                 })
         })
     })
-    it('should update the property from the rules', function () {
+    it.skip('should update the property from the rules', function () {
         return akamaiweb.updateFromFile(temp_property, 'test/new_rules.json')
             .then(data => {
                 return akamaiweb.retrieve(propertyName)
