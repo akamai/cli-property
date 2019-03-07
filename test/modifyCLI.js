@@ -106,7 +106,7 @@ describe('Modify property CLI', function () {
             it('adds a note', function(done) {
                 property
                 .then((data) => {
-                    exec(`node bin/akamaiProperty modify ${propertyName} ${ propertyName } ${ version === "new" ? "--new" : "" } ${ version !== "new" && version !== "latest" ? `--propver ${ version }` : "" } --notes ${ optionsToTest.note }`)
+                    exec(`node bin/akamaiProperty modify ${propertyName} ${ version === "new" ? "--new" : "" } ${ version !== "new" && version !== "latest" ? `--propver ${ version }` : "" } --notes ${ optionsToTest.note }`)
                     .then(response => {
                         if(version === "new"){
                             nextPropertyVersion++;
