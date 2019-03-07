@@ -697,7 +697,9 @@ class WebSite {
                             if (!matches) {
                                 reject(Error('cannot find version'));
                             } else {
-                                resolve(matches[1]);
+                                const newVersionNumber = matches[1];
+                                console.error(`Created new version for (${propertyName}) on v${newVersionNumber}`);
+                                resolve(newVersionNumber);
                             }
                         } else if (response.statusCode === 404) {
                             resolve({});
@@ -790,8 +792,18 @@ class WebSite {
             resolve(rules);
         })
     }
-
-    _updatePropertyRules(propertyLookup, version, rules) {
+    
+    /**
+     * Internal function to update a property's rules
+     *
+     * @param propertyLookup
+     * @param version
+     * @param rules
+     * @param ruleName name to log on success message about type of rules updated 
+     * @returns {Promise.<TResult>}
+     * @private
+     */
+    _updatePropertyRules(propertyLookup, version, rules, ruleName = false) {
         return this._getProperty(propertyLookup)
             .then((data) => {
                 //set basic data like contract & group
@@ -802,21 +814,14 @@ class WebSite {
                 return new Promise((resolve, reject) => {
                     console.error(`... updating property (${propertyName}) v${version}`);
 
-                    let request;
+                    let request = {
+                        method: 'PUT',
+                        path: `/papi/v1/properties/${propertyId}/versions/${version}/rules?contractId=${contractId}&groupId=${groupId}`,
+                        body: rules
+                    };
 
                     if (rules.ruleFormat && rules.ruleFormat != "latest" ) {
-                        request = {
-                                method: 'PUT',
-                                path: `/papi/v1/properties/${propertyId}/versions/${version}/rules?contractId=${contractId}&groupId=${groupId}`,
-                                body: rules,
-                                headers: {'Content-Type':'application/vnd.akamai.papirules.' + rules.ruleFormat + '+json'}
-                        }
-                    } else {
-                        request = {
-                                method: 'PUT',
-                                path: `/papi/v1/properties/${propertyId}/versions/${version}/rules?contractId=${contractId}&groupId=${groupId}`,
-                                body: rules
-                        }
+                        request.headers = {'Content-Type':'application/vnd.akamai.papirules.' + rules.ruleFormat + '+json'};
                     }
                     request.path += this._buildAccountSwitchKeyQuery();
                     
@@ -825,6 +830,7 @@ class WebSite {
                     this._edge.send(function (data, response) {
                         if (response.statusCode >= 200 && response.statusCode < 400) {
                             let newRules = JSON.parse(response.body);
+                            console.log(`Updated ${ ruleName ? ruleName : "property" } rules on v${version}`);
                             resolve(newRules);
                         } else {
                             reject(response.body);
@@ -1253,7 +1259,7 @@ class WebSite {
                         let assignHostnameObj;
                         let skip = 0;
                         if ((hostNamelist.indexOf(hostname) != -1 || hostNamelist.indexOf(hostname.cnameFrom) != -1)) {
-                            console.error("Skipping duplicate " + hostname);
+                            console.error("Skipping duplicate", hostname.cnameFrom);
                             skip = 1;
                         } else if (hostname.cnameFrom) {
                             hostNamelist.push(hostname.cnameFrom)
@@ -1285,11 +1291,12 @@ class WebSite {
                         body: newHostnameArray
                     }
                     request.path += this._buildAccountSwitchKeyQuery();
-                    
+
                     this._edge.auth(request);
                     this._edge.send((data, response) => {
                         if (response.statusCode >= 200 && response.statusCode < 400) {
                             response = JSON.parse(response.body);
+                            console.log(`Hostnames updated on v${version}`);
                             resolve(response);
                             } else if (response.statusCode == 400 || response.statusCode == 403) {
                                 reject("Unable to assign hostname.  Please try to add the hostname in 30 minutes using the --addhosts flag.")
@@ -1587,15 +1594,15 @@ class WebSite {
             });
     }
 
-    createNewPropertyVersion(propertyLookup, accountKey) {
+    createNewPropertyVersion(propertyLookup, fromVersion = false, accountKey) {
         this._accountSwitchKey = accountKey;
         return this._getProperty(propertyLookup)
             .then(property => {
                 let propertyName = property.propertyName;
-                console.error(`Creating new version for ${propertyName}`);
-                const version = WebSite._getLatestVersion(property, 0);
+                fromVersion = fromVersion || WebSite._getLatestVersion(property, 0);
+                console.error(`Creating new version for ${propertyName} from ${fromVersion}`);
                 property.latestVersion += 1;
-                return this._copyPropertyVersion(property, version);
+                return this._copyPropertyVersion(property, fromVersion);
         })
     }
  
@@ -1806,7 +1813,6 @@ class WebSite {
                     propertyId,
                     null,
                     null,
-                    null,
                     false,
                     version);
             }).then(data => {
@@ -1854,7 +1860,7 @@ class WebSite {
             })
             .then(rules => {
                 rules.ruleFormat = ruleformat;
-                return this._updatePropertyRules(propertyLookup, version, rules);
+                return this._updatePropertyRules(propertyLookup, version, rules, "Rule Format");
             })
     }
 
@@ -1871,7 +1877,11 @@ class WebSite {
                 rules.rules.behaviors.map(behavior => {
                     if (behavior.name == "cpCode") {
                         cpCodeExists = 1;
-                        behavior.options.value.id = cpcode
+                        if(behavior.options.value){
+                            behavior.options.value.id = cpcode
+                        }else {
+                            behavior.options.value = { id: cpcode }
+                        }
                     }
                     behaviors.push(behavior)
                 })
@@ -1881,7 +1891,7 @@ class WebSite {
                 }
      
                 rules.rules.behaviors = behaviors;
-                return this._updatePropertyRules(propertyLookup, version, rules);
+                return this._updatePropertyRules(propertyLookup, version, rules, "CPcode");
             })
     }
 
@@ -2049,7 +2059,7 @@ class WebSite {
                 return Promise.resolve(data);
             })
             .then(rules => {
-                return this._updatePropertyRules(propertyLookup, version, rules);
+                return this._updatePropertyRules(propertyLookup, version, rules, "variables");
             })
     }
 
@@ -2091,7 +2101,7 @@ class WebSite {
                 return Promise.resolve(data);
             })
             .then(rules => {
-                return this._updatePropertyRules(propertyLookup, version, rules);
+                return this._updatePropertyRules(propertyLookup, version, rules, "note");
             })
     }
     
@@ -2136,7 +2146,7 @@ class WebSite {
                 return Promise.resolve(data);
             })
             .then(rules => {
-                return this._updatePropertyRules(propertyLookup, version, rules);
+                return this._updatePropertyRules(propertyLookup, version, rules, "Origin/Forward");
             })
     }
 
@@ -2150,8 +2160,8 @@ class WebSite {
             .then(data => {
                 let children = [];
                 data.rules.children.map(child => {
-                    let behaviors = []
-                    child.behaviors.map(behavior => {
+                let behaviors = []
+                child.behaviors.map(behavior => {
                         if (behavior.name == "sureRoute") {
                             if (sureroutemap) {
                                 behavior.options.customMap = sureroutemap;
@@ -2175,7 +2185,7 @@ class WebSite {
                 return Promise.resolve(data);   
             })
             .then(rules => {
-                return this._updatePropertyRules(propertyLookup,version,rules);
+                return this._updatePropertyRules(propertyLookup,version,rules, "Sure Route");
             })
     }
 
