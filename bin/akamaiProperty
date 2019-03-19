@@ -738,12 +738,13 @@ function main () {
             if(result.argv.version && result.output === 'Version unknown'){
               try{
                 var version = JSON.parse(fs.readFileSync("package.json")).version;
-                console.log(version);
+                
               }catch(e){
                 console.log(result.output)
               }
             }else{
-                console.log(result.output);
+                console.log(result.output + " forked on: https://github.com/aalquist/cli-property");
+                
             }
             process.exit(result.code);
         }
