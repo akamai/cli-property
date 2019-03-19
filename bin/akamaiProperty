@@ -112,13 +112,13 @@ function deactivateProperty(app, targetProperty, options) {
 
 
 function updateProperty(app, targetProperty, options) {
-  console.log(options["account-key"]);
+    console.error(options["account-key"]);
     section = options.section || section;
     if (options.file)
         return app.updateFromFile( targetProperty,
                                         options.file,
                                         options.notes,
-                                        options["account-key"]);
+                                        options["account-key"], options.srcVer, options.srcEtag);
 
     if (options.srcprop)
         return app.copy(   options.srcprop,
@@ -652,6 +652,9 @@ function main () {
             })
             .string('--srcver <version>', {
               desc: 'Source version'
+            })
+            .string('--srcEtag <etag>', {
+              desc: 'Source version etag'
             })
             .file('--file <path>', {
               desc: 'File with JSON rules',
