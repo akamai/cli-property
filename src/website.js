@@ -744,7 +744,7 @@ class WebSite {
         })
     }
 
-    _updatePropertyBehaviors(rules, configName, hostname, cpcode, origin = null, secure = false) {
+    _updatePropertyBehaviors(rules, configName, hostname, cpcode, origin = null, secure = false, isnewcpcode = false) {
         return new Promise((resolve, reject) => {
             let behaviors = [];
             let children_behaviors = [];
@@ -756,7 +756,7 @@ class WebSite {
                 }
                 if (behavior.name == "cpCode") {
                     cpCodeExists = 1;
-                    if (behavior.options.value) {
+                    if (behavior.options.value || isnewcpcode) {
                         behavior.options.value = { "id": Number(cpcode) };
                     } else {
                         behavior.options.cpcode = { "id": Number(cpcode) };
@@ -834,12 +834,12 @@ class WebSite {
             });
     };
 
-    _createCPCode(groupId, contractId, productId, configName) {
+    _createCPCode(groupId, contractId, productId, configName, newcpcode = null) {
         return new Promise((resolve, reject) => {
             console.error('Creating new CPCode for property');
             let cpCode = {
                 "productId": productId,
-                "cpcodeName": configName
+                "cpcodeName": newcpcode ? newcpcode : configName
             };
             let request = {
                 method: 'POST',
@@ -1352,16 +1352,15 @@ class WebSite {
         return ([configName, hostnames])
     }
 
-    _setRules(groupId, contractId, productId, configName, cpcode = null, hostnames = [], origin = null, secure = false, baserules=null) {
-        
+    _setRules(groupId, contractId, productId, configName, cpcode = null, hostnames = [], origin = null, secure = false, baserules=null, newcpcode = false) {
+
         return new Promise((resolve, reject) => {
-            if (cpcode) {
+            if (cpcode && !newcpcode) {
                 return resolve(cpcode)
             } else {
-                return this._createCPCode(groupId,
-                    contractId,
-                    productId,
-                    configName)
+                return newcpcode ?  resolve(this._createCPCode(groupId, contractId, productId, configName, newcpcode))
+                                    :
+                                    resolve(this._createCPCode(groupId, contractId, productId, configName));
             }
         })
             .then(data => {
@@ -1378,7 +1377,8 @@ class WebSite {
                     hostnames[0],
                     cpcode,
                     origin,
-                    secure)
+                    secure,
+                    newcpcode ? true : false )
             })
     }
 
@@ -1392,6 +1392,7 @@ class WebSite {
             })
     }
 
+    //not being used
     createCPCode(property) {
         return this._createCPCode(property);
     }
@@ -2206,7 +2207,8 @@ class WebSite {
                             edgeHostname = null, 
                             secure = false,
                             productId = null,
-                            accountKey) {
+                            accountKey,
+                            newcpcode = null) {
 
         this._accountSwitchKey = accountKey;
 
@@ -2262,7 +2264,7 @@ class WebSite {
                 this._propertyById[propInfo.propertyId] = propInfo;
                 this._propertyByName[configName] = propInfo;
 
-                return this._setRules(groupId, contractId, productId, configName, cpcode, hostnames, origin, secure, newRules)
+                return this._setRules(groupId, contractId, productId, configName, cpcode, hostnames, origin, secure, newRules, newcpcode)
             })
             .then(rules => {
                 return this._updatePropertyRules(configName,
@@ -2324,7 +2326,7 @@ class WebSite {
             })
     }
 
-    createFromFile(hostnames = [], srcFile, configName = null, contractId = null, groupId = null, cpcode = null, origin = null, edgeHostname = null, ruleformat = null, productId = null, accountKey) {
+    createFromFile(hostnames = [], srcFile, configName = null, contractId = null, groupId = null, cpcode = null, origin = null, edgeHostname = null, ruleformat = null, productId = null, accountKey, newcpcode = null) {
         let names = this._getConfigAndHostname(configName, hostnames);
         configName = names[0];
         hostnames = names[1];
@@ -2349,7 +2351,7 @@ class WebSite {
                    cpcode = behavior.options.value.id
                 }
             })
-            return this.create(hostnames, cpcode, configName, contractId, groupId, rules, origin, edgeHostname, ruleformat, productId, this._accountSwitchKey);
+            return this.create(hostnames, cpcode, configName, contractId, groupId, rules, origin, edgeHostname, ruleformat, productId, this._accountSwitchKey, newcpcode);
         })
     }
 
@@ -2362,6 +2364,7 @@ class WebSite {
         let groupId = options.group || null
         let origin = options.origin || null
         let edgeHostname = options.edgehostname || null
+        let newcpcode = options.newcpcode || null
         let cpcode = options.cpcode || null
         let ruleformat = options.ruleformat || null
         let secure = options.secure || false
@@ -2442,7 +2445,7 @@ class WebSite {
             })
             .then(format => {
                 latestFormat = format;
-                return this._setRules(groupId, contractId, productId, configName, cpcode, hostnames, origin, secure)
+                return this._setRules(groupId, contractId, productId, configName, cpcode, hostnames, origin, secure, newcpcode)
             })
             .then(rules => {
                 rules.ruleFormat = latestFormat;
