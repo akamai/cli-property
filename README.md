@@ -83,6 +83,7 @@ Hostname options:
 
 Location options:
   --cpcode <cpcode>      Use specified cpcode for new property                    [number]
+  --newcpcode <cpcode>   Create cpcode for new property                           [number]
   --contract <contract>  Contract for new property                                [string]
   --group <group>        Group for new property                                   [string]
   --product <product>    Product for new property                                 [string]
