@@ -1034,6 +1034,9 @@ class WebSite {
                         } else if (response.body.match('property_version_not_active')) {
                             console.error("Version not active on " + env)
                             resolve();
+                        } else if (response.body.match(/Property not active in ((STAGING)|(PRODUCTION))/)) {
+                            console.error(response.body.match(/Property not active in ((STAGING)|(PRODUCTION))/)[0])
+                            resolve();
                         } else {
                             reject(response.body);
                         }
