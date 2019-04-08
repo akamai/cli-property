@@ -1878,7 +1878,7 @@ class WebSite {
                 rules.rules.behaviors.map(behavior => {
                     if (behavior.name == "cpCode") {
                         cpCodeExists = 1;
-                        behavior.options.value.id = cpcode
+                        behavior.options = { "value" : { "id": Number(cpcode) } };
                     }
                     behaviors.push(behavior)
                 })
@@ -2417,7 +2417,7 @@ class WebSite {
             })
                
             .then(clone_ehn =>{
-                if ((clone_ehn.hostnames.items) && (!edgeHostnameId)) {
+                if ((clone_ehn.hostnames.items) && (clone_ehn.hostnames.items.length > 0) && !edgeHostnameId)  {
                         edgeHostnameId = clone_ehn.hostnames.items[0].cnameTo || clone_ehn.hostnames.items[0].edgeHostnameId;
                 }
                 return Promise.resolve(edgeHostnameId)
