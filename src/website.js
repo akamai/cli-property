@@ -752,7 +752,10 @@ class WebSite {
 
             rules.rules.behaviors.map(behavior => {
                 if (behavior.name == "origin" && origin) {
-                    behavior.options.hostname = origin;
+                    var defaultOrigin = "origin-" + configName;
+                    if(origin !== defaultOrigin) {
+                        behavior.options.hostname = origin;
+                    }
                 }
                 if (behavior.name == "cpCode") {
                     cpCodeExists = 1;
@@ -803,7 +806,7 @@ class WebSite {
                     console.error(`... updating property (${propertyName}) v${version}`);
 
                     let request;
-
+                    
                     if (rules.ruleFormat && rules.ruleFormat != "latest" ) {
                         request = {
                                 method: 'PUT',
@@ -1363,7 +1366,7 @@ class WebSite {
                                     resolve(this._createCPCode(groupId, contractId, productId, configName));
             }
         })
-            .then(data => {
+        .then(data => {
                 cpcode = data;
                 if (baserules) {
                     return Promise.resolve(baserules)
