@@ -154,7 +154,7 @@ function createProperty(app, targetProperty, options) {
                                             options.ruleformat,
                                             options.product,
                                             options["account-key"],
-                                            options.newcpcode);
+                                            options.newcpcodename);
 
             } else {
                 return app.create(hostnames,
@@ -168,7 +168,7 @@ function createProperty(app, targetProperty, options) {
                                             options.ruleformat,
                                             options.product,
                                             options["account-key"],
-                                            options.newcpcode);
+                                            options.newcpcodename);
             }
         } else {
             options.srcver = numberVersion(options.srcver);
@@ -448,8 +448,8 @@ function main () {
               desc: 'Use specified cpcode for new property',
               group: 'Location options:'
             })
-            .number('--newcpcode <cpcode>', {
-              desc: 'Create cpcode for new property',
+            .string('--newcpcodename <name>', {
+              desc: 'Name for default new cpcode created',
               group: 'Location options:'
             })
             .string('--contract <contract>', {
