@@ -870,17 +870,26 @@ class WebSite {
     //TODO: should only return one edgesuite host name, even if multiple are called - should lookup to see if there is alrady an existing association
     _createEdgeHostname(groupId, contractId, configName, productId, edgeHostnameId = null, edgeHostname = null, force = false, secure = false) {
         if (edgeHostnameId) {
+
             return Promise.resolve(edgeHostnameId);
-        }
-        if (edgeHostname) {
-            return Promise.resolve(edgeHostname);
         }
         return new Promise((resolve, reject) => {
             console.error('Creating edge hostname for property: ' + configName);
+            var domainPrefix;
+            var domainSuffix;
+
+            if (edgeHostname) {
+                var edgeHostnameToArray = edgeHostname.split(".");
+                domainSuffix = edgeHostnameToArray.splice(-2).join(".");
+                domainPrefix = edgeHostnameToArray.join(".");
+            }else {
+                domainPrefix = configName;
+                domainSuffix = "edgesuite.net";
+            }
             let hostnameObj = {
                 "productId": productId,
-                "domainPrefix": configName,
-                "domainSuffix": "edgesuite.net",
+                "domainPrefix": domainPrefix,
+                "domainSuffix": domainSuffix,
                 "secure": false,
                 "ipVersionBehavior": "IPV6_COMPLIANCE",
             };
@@ -2281,9 +2290,27 @@ class WebSite {
                 return this._retrieveEdgeHostnames(contractId, groupId)
             })
             .then(data => {
+                let ehn_exists = 0;
                 if (edgeHostname) {
                     if (edgeHostname.indexOf("edgekey") > -1) {
                         secure = true;
+                    }
+                    data.edgeHostnames.items.map(hostname => {
+                        if (hostname.edgeHostnameDomain == edgeHostname) {
+                            ehn_exists = 1;
+                        }
+                    })
+                    if (!ehn_exists) {
+                        return Promise.resolve(
+                            this._createEdgeHostname(groupId,
+                                contractId,
+                                configName,
+                                productId,
+                                null,
+                                edgeHostname,
+                                false,
+                                secure)
+                            );
                     }
                     //edgeHostnameId = edgeHostname;
                     return Promise.resolve(edgeHostname);
@@ -2292,7 +2319,6 @@ class WebSite {
                     return Promise.resolve(edgeHostnameId);
                 } else {
                     //edgeHostnameId = configName;
-                    let ehn_exists = 0;
                     data.edgeHostnames.items.map(hostname => {
                         if (hostname.domainPrefix == configName) {
                             ehn_exists = 1;
