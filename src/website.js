@@ -2281,52 +2281,49 @@ class WebSite {
                 return this._retrieveEdgeHostnames(contractId, groupId)
             })
             .then(data => {
-                let ehn_exists = 0;
-                data.edgeHostnames.items.map(hostname => {
-                    if (hostname.domainPrefix = configName) {
-                        ehn_exists = 1;
-                    }
-                })
-                
                 if (edgeHostname) {
                     if (edgeHostname.indexOf("edgekey") > -1) {
                         secure = true;
                     }
-                    edgeHostnameId = edgeHostname;
+                    //edgeHostnameId = edgeHostname;
                     return Promise.resolve(edgeHostname);
                 } else if (data.edgeHostnameId) {
                     edgeHostnameId = data.edgeHostnameId;
                     return Promise.resolve(edgeHostnameId);
                 } else {
-                    edgeHostnameId = configName;
+                    //edgeHostnameId = configName;
+                    let ehn_exists = 0;
+                    data.edgeHostnames.items.map(hostname => {
+                        if (hostname.domainPrefix == configName) {
+                            ehn_exists = 1;
+                        }
+                    })
                     if (!ehn_exists) {
-                        return this._createEdgeHostname(groupId,
-                            contractId,
-                            configName,
-                            productId,
-                            null,
-                            edgeHostname);
+                        return Promise.resolve(
+                            this._createEdgeHostname(groupId,
+                                contractId,
+                                configName,
+                                productId,
+                                null,
+                                null,
+                                false,
+                                secure)
+                            );
                     } else {
                         return Promise.resolve();
                     }
                 }
             })
             .then(edgeHostnameId => {
-                if (newEdgeHostname) {
-                    console.error("Edge hostnames take 30 minutes to appear.  Please use modify to add the hostname at that point.")
-                    return Promise.resolve()
-                } else {
-                    return this._assignHostnames(groupId,
-                        contractId,
-                        configName,
-                        edgeHostnameId,
-                        propertyId,
-                        hostnames,
-                        false,
-                        true,
-                        1);
-
-                    }
+                return this._assignHostnames(groupId,
+                    contractId,
+                    configName,
+                    edgeHostnameId,
+                    propertyId,
+                    hostnames,
+                    false,
+                    true,
+                    1);
             }).then(() => {
                 return Promise.resolve();
             })
