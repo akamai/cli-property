@@ -29,7 +29,7 @@ Commands:
   formats                get rules formats
   search <property>      search for a property name
   create <property>      create a new property
-  modify <property>      Modify specified property
+  modify <property>      modify specified property
   activate <property>    activate the property
   deactivate <property>  deactivate the property
   delete <property>      delete a property
@@ -37,7 +37,7 @@ Commands:
   retrieve <property>    retrieve rules from target property
 
 Command options:
-  --config <config>    Config file                [file] [default: /Users/khunter/.edgerc]
+  --config, --edgerc <config>    Config file      [file] [default: /Users/khunter/.edgerc]
   --section <section>  Config section                             [string] [default: papi]
   --debug <debug>      Turn on debugging.                                        [boolean]
   --help               Show help                                [commands: help] [boolean]
@@ -57,7 +57,7 @@ This script wraps all of the functionality from the [library](#library) into a c
 
 ### Create
 ```
-Usage: akamai property create <property> [options]
+Usage: akamai property create <property>(default: [$AKAMAI_PAPI_PROPERTY]) [options]
 
 Arguments:
   <property>                                                           [required] [string]
@@ -85,6 +85,7 @@ Location options:
   --cpcode <cpcode>      Use specified cpcode for new property                    [number]
   --contract <contract>  Contract for new property                                [string]
   --group <group>        Group for new property                                   [string]
+  --product <product>    Product for new property                                 [string]
 
 General options:
   --ruleformat <format>  Use specified rule format                                [string]
@@ -92,7 +93,7 @@ General options:
   --retrieve             Retrieve rules for created property                     [boolean]
 
 Command options:
-  --config <config>    Config file                [file] [default: /Users/khunter/.edgerc]
+  --config, --edgerc <config>    Config file      [file] [default: /Users/khunter/.edgerc]
   --section <section>  Config section                             [string] [default: papi]
   --debug <debug>      Turn on debugging.                                        [boolean]
   --help               Show help                                [commands: help] [boolean]
@@ -104,7 +105,7 @@ Visit http://github.com/akamai/cli-property for detailed documentation
 
 ### Retrieve
 ```
-Usage: akamai property retrieve <property> [options]
+Usage: akamai property retrieve <property>(default: [$AKAMAI_PAPI_PROPERTY]) [options]
 
 Arguments:
   <property>                                                           [required] [string]
@@ -113,11 +114,11 @@ General options:
   --format       Rules format only                                               [boolean]
   --hostnames    Retrieve hostnames for property                                 [boolean]
   --variables    Retrieve user variables                                         [boolean]
-  --propver      Retrieve specified version                                      [boolean]
+  --propver      Retrieve specified version                                       [number]
   --file <path>  Output file                                                        [file]
 
 Command options:
-  --config <config>    Config file                [file] [default: /Users/khunter/.edgerc]
+  --config, --edgerc <config>    Config file      [file] [default: /Users/khunter/.edgerc]
   --section <section>  Config section                             [string] [default: papi]
   --debug <debug>      Turn on debugging.                                        [boolean]
   --help               Show help                                [commands: help] [boolean]
@@ -131,7 +132,7 @@ Visit http://github.com/akamai/cli-property for detailed documentation
 Update the current property version with the rules from a local file, or copy from another property.
 
 ```
-Usage: akamai property update <property> [options]
+Usage: akamai property update <property>(default: [$AKAMAI_PAPI_PROPERTY]) [options]
 
 Arguments:
   <property>                                                           [required] [string]
@@ -142,7 +143,7 @@ General options:
   --file <path>         File with JSON rules                           [file] [must exist]
 
 Command options:
-  --config <config>    Config file                [file] [default: /Users/khunter/.edgerc]
+  --config, --edgerc <config>    Config file      [file] [default: /Users/khunter/.edgerc]
   --section <section>  Config section                             [string] [default: papi]
   --debug <debug>      Turn on debugging.                                        [boolean]
   --help               Show help                                [commands: help] [boolean]
@@ -156,15 +157,16 @@ Visit http://github.com/akamai/cli-property for detailed documentation
 Activate the specified property version on staging, production or both.
 
 ```
-Usage: akamai property activate <property> [options]
+Usage: akamai property activate <property>(default: [$AKAMAI_PAPI_PROPERTY]) [options]
 
 General options:
   --network <network>  Network for activation      [required] [enum] [PROD, STAGING, BOTH]
-  --propver <version>  Source version to activate                                 [string]
+  --propver <version>  Source version to activate                                 [number]
   --email <address>    Email for confirmation                                     [string]
+  --notes <note>       Add a note on activation                                   [string]
 
 Command options:
-  --config <config>    Config file                [file] [default: /Users/khunter/.edgerc]
+  --config, --edgerc <config>    Config file      [file] [default: /Users/khunter/.edgerc]
   --section <section>  Config section                             [string] [default: papi]
   --debug <debug>      Turn on debugging.                                        [boolean]
   --help               Show help                                [commands: help] [boolean]
@@ -177,10 +179,10 @@ Visit http://github.com/akamai/cli-property for detailed documentation
 ### Modify
 ```
 
-Usage: akamai property modify <property> [options]
+Usage: akamai property modify <property>(default: [$AKAMAI_PAPI_PROPERTY]) [options]
 
 General options:
-  --propver <propver>        Property version - LATEST/STAG/PROD/<number>         [string]
+  --propver <propver>        Property version                                     [number]
   --ruleformat <ruleformat>  Switch property to specified rule format             [string]
   --notes <notes>            Version notes for the property version               [string]
   --new                      Create new property version.                        [boolean]
@@ -217,7 +219,7 @@ Location options:
   --move <move>      Group to move the property to (User Admin perms)             [string]
 
 Command options:
-  --config <config>    Config file                [file] [default: /Users/khunter/.edgerc]
+  --config, --edgerc <config>    Config file      [file] [default: /Users/khunter/.edgerc]
   --section <section>  Config section                             [string] [default: papi]
   --debug <debug>      Turn on debugging.                                        [boolean]
   --help               Show help                                [commands: help] [boolean]

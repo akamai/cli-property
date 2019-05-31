@@ -669,7 +669,7 @@ class WebSite {
             return env;
     };
 
-    _copyPropertyVersion(propertyLookup, versionId) {
+    _copyPropertyVersion(propertyLookup, versionId, versionEtag) {
         return this._getProperty(propertyLookup)
             .then((data) => {
                 const contractId = data.contractId;
@@ -679,6 +679,10 @@ class WebSite {
                 return new Promise((resolve, reject) => {
                     console.error(`... copy property (${propertyName}) v${versionId}`);
                     let body = {};
+
+                    if(versionEtag)
+                        body.createFromVersionEtag = versionEtag;
+                    
                     body.createFromVersion = versionId;
 
                     let request = {
@@ -1604,13 +1608,16 @@ class WebSite {
             });
     }
 
-    createNewPropertyVersion(propertyLookup, accountKey) {
+    createNewPropertyVersion(propertyLookup, accountKey, propver) {
         this._accountSwitchKey = accountKey;
         return this._getProperty(propertyLookup)
             .then(property => {
                 let propertyName = property.propertyName;
                 console.error(`Creating new version for ${propertyName}`);
-                const version = WebSite._getLatestVersion(property, 0);
+                const version = propver || WebSite._getLatestVersion(property, 0);
+
+                console.error(`Creating version from ${version}`);
+
                 property.latestVersion += 1;
                 return this._copyPropertyVersion(property, version);
         })
@@ -1623,16 +1630,23 @@ class WebSite {
      * @param {Object} newRules of the configuration to be updated. Only the {object}.rules will be copied.
      * @returns {Promise} with the property rules as the {TResult}
      */
-    update(propertyLookup, newRules, comment = false) {
+    update(propertyLookup, newRules, comment = false, srcVer, srcEtag) {
         let property = propertyLookup;
 
         return this._getProperty(propertyLookup)
             .then(localProp => {
                 property = localProp;
                 let propertyName = localProp.propertyName;
-                console.error(`Updating ${propertyName}`);
-                const version = property.latestVersion;
-                return this._copyPropertyVersion(property, version);
+                
+                var version = ( srcVer || property.latestVersion) * 1;
+                console.error(`... using version ${version} to update ${propertyName}`);
+
+                var eTag = srcEtag
+
+                if(eTag)
+                    console.error(`... using etag ${eTag} to update ${propertyName}`);
+
+                return this._copyPropertyVersion(property, version, eTag);
             })
             .then(newVersionId => {
                 property.latestVersion = newVersionId;
@@ -1655,7 +1669,7 @@ class WebSite {
      *     Only the {Object}.rules will be copied
      * @returns {Promise} returns a promise with the updated form of the
      */
-    updateFromFile(propertyLookup, srcFile, comment = false, accountKey) {
+    updateFromFile(propertyLookup, srcFile, comment = false, accountKey, srcVer, srcEtag) {
         this._accountSwitchKey = accountKey;
         return new Promise((resolve, reject) => {
             fs.readFile(untildify(srcFile), (err, data) => {
@@ -1668,7 +1682,7 @@ class WebSite {
 
         })
             .then(data => {
-                return this.update(propertyLookup, data, comment)
+                return this.update(propertyLookup, data, comment, srcVer, srcEtag)
             })
     }
 
