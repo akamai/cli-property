@@ -51,6 +51,49 @@ function errorMessage(error, context) {
   return context.cliMessage(chalk.red.bold('\nERROR: \n\t') + message + '\n');
 }
 
+/**
+ * Method to validate that if flag is present, the value for the corresponding flag is set
+ */
+function flagsAreValid(context, options) {
+  var ret = true;
+  var args = context.args;
+  // Reduce arguments to the ones that have "--" in front
+  var receivedFlags = args.filter((arg) => {
+    return arg.match(/^(-){2}/);
+  }).map((arg) => {
+    return arg.substring(2, arg.length);
+  });
+  var availableFlags = context.details.types.map((type) => {
+    return type.aliases[0];
+  });
+  // Check for arrays, strings & numbers that there is a value, Not for booleans
+  for(var flag of receivedFlags) {
+    
+    if (!availableFlags.includes(flag)) {
+      console.log(`Invalid flag --${ flag }.`);
+      ret = false;
+    }
+    if (Array.isArray(options[flag])) {
+      if(options[flag].length === 0 || options[flag][0].length === 0) {
+        console.log(`Please enter a value for --${ flag }.`);
+        ret = false;
+      }
+    }
+    else if(typeof options[flag] === "string"){
+      if (options[flag].length === 0) {
+        console.log(`Please enter a value for --${ flag }.`);
+        ret = false;
+      }
+    } else if(typeof options[flag] === "number") {
+      if(isNaN(options[flag])){
+        console.log(`Please enter a value for --${ flag }.`);
+        ret = false;
+      }
+    }
+  }
+  return ret;
+}
+
 function activateProperty(app, targetProperty, options) {
     let env = options.network.toUpperCase();
     return Promise.resolve()
@@ -478,12 +521,15 @@ function main () {
         },
         run: (options, context) => {
           try {
+            if(!flagsAreValid(context, options)){
+              return;
+            }
             let app = new WebSite({path: options.config, section: options.section, debug: options.debug});
             options.property = options.property || process.env.AKAMAI_PAPI_PROPERTY;
             return createProperty(app, options.property, options)
             .then(() => {
               if (options.forward || options.variables || options.notes) {
-                return modifyProperty(app, options.property, options, command)
+                return modifyProperty(app, options.property, options, 'create')
               } else {
                 return Promise.resolve();
               }

@@ -753,18 +753,17 @@ class WebSite {
             let behaviors = [];
             let children_behaviors = [];
             let cpCodeExists = 0;
-
+            
             rules.rules.behaviors.map(behavior => {
                 if (behavior.name == "origin" && origin) {
-                    behavior.options.hostname = origin;
+                    var defaultOrigin = "origin-" + configName;
+                    if(origin !== defaultOrigin) {
+                        behavior.options.hostname = origin;
+                    }
                 }
                 if (behavior.name == "cpCode") {
                     cpCodeExists = 1;
-                    if (behavior.options.value) {
-                        behavior.options.value = { "id": Number(cpcode) };
-                    } else {
-                        behavior.options.cpcode = { "id": Number(cpcode) };
-                    }
+                    behavior.options.value = { "id": Number(cpcode) };
                 }
                 behaviors.push(behavior);
             })
@@ -777,9 +776,14 @@ class WebSite {
             rules.rules.children.map(child => {
                 child.behaviors.map(behavior => {
                     if (behavior.name == "sureRoute") {
-                        if (!behavior.options.sr_stat_key_mode && !behavior.options.testObjectUrl) {
-                            behavior.options.sr_stat_key_mode = "default";
-                            behavior.options.sr_test_object_url = "/akamai/sureroute-testobject.html"
+                        if (!behavior.options.testObjectUrl) {
+                            behavior.options.testObjectUrl = "/akamai/sureroute-testobject.html"
+                        }
+                        if(!behavior.options.enableCustomKey) {
+                            behavior.options.enableCustomKey = false;
+                        }
+                        if(!behavior.options.customStatKey || !behavior.options.enableCustomKey) {
+                            behavior.options.customStatKey = "default";
                         }
                     }
                     children_behaviors.push(behavior);
@@ -807,7 +811,7 @@ class WebSite {
                     console.error(`... updating property (${propertyName}) v${version}`);
 
                     let request;
-
+                    
                     if (rules.ruleFormat && rules.ruleFormat != "latest" ) {
                         request = {
                                 method: 'PUT',
@@ -838,12 +842,12 @@ class WebSite {
             });
     };
 
-    _createCPCode(groupId, contractId, productId, configName) {
+    _createCPCode(groupId, contractId, productId, configName, newcpcodename = null) {
         return new Promise((resolve, reject) => {
             console.error('Creating new CPCode for property');
             let cpCode = {
                 "productId": productId,
-                "cpcodeName": configName
+                "cpcodeName": newcpcodename ? newcpcodename : configName
             };
             let request = {
                 method: 'POST',
@@ -870,17 +874,27 @@ class WebSite {
     //TODO: should only return one edgesuite host name, even if multiple are called - should lookup to see if there is alrady an existing association
     _createEdgeHostname(groupId, contractId, configName, productId, edgeHostnameId = null, edgeHostname = null, force = false, secure = false) {
         if (edgeHostnameId) {
+
             return Promise.resolve(edgeHostnameId);
         }
-        if (edgeHostname) {
-            return Promise.resolve(edgeHostname);
-        }
+        
         return new Promise((resolve, reject) => {
             console.error('Creating edge hostname for property: ' + configName);
+            var domainPrefix;
+            var domainSuffix;
+
+            if (edgeHostname) {
+                var edgeHostnameToArray = edgeHostname.split(".");
+                domainSuffix = edgeHostnameToArray.splice(-2).join(".");
+                domainPrefix = edgeHostnameToArray.join(".");
+            }else {
+                domainPrefix = configName;
+                domainSuffix = "edgesuite.net";
+            }
             let hostnameObj = {
                 "productId": productId,
-                "domainPrefix": configName,
-                "domainSuffix": "edgesuite.net",
+                "domainPrefix": domainPrefix,
+                "domainSuffix": domainSuffix,
                 "secure": false,
                 "ipVersionBehavior": "IPV6_COMPLIANCE",
             };
@@ -1034,6 +1048,9 @@ class WebSite {
                             }
                         } else if (response.body.match('property_version_not_active')) {
                             console.error("Version not active on " + env)
+                            resolve();
+                        } else if (response.body.match(/Property not active in ((STAGING)|(PRODUCTION))/)) {
+                            console.error(response.body.match(/Property not active in ((STAGING)|(PRODUCTION))/)[0])
                             resolve();
                         } else {
                             reject(response.body);
@@ -1356,19 +1373,18 @@ class WebSite {
         return ([configName, hostnames])
     }
 
-    _setRules(groupId, contractId, productId, configName, cpcode = null, hostnames = [], origin = null, secure = false, baserules=null) {
-        
+    _setRules(groupId, contractId, productId, configName, cpcode = null, hostnames = [], origin = null, secure = false, baserules=null, newcpcodename = false) {
+
         return new Promise((resolve, reject) => {
-            if (cpcode) {
+            if (cpcode && !newcpcodename) {
                 return resolve(cpcode)
             } else {
-                return this._createCPCode(groupId,
-                    contractId,
-                    productId,
-                    configName)
+                return newcpcodename ?  resolve(this._createCPCode(groupId, contractId, productId, configName, newcpcodename))
+                                    :
+                                    resolve(this._createCPCode(groupId, contractId, productId, configName));
             }
         })
-            .then(data => {
+        .then(data => {
                 cpcode = data;
                 if (baserules) {
                     return Promise.resolve(baserules)
@@ -1396,6 +1412,7 @@ class WebSite {
             })
     }
 
+    //not being used
     createCPCode(property) {
         return this._createCPCode(property);
     }
@@ -1885,7 +1902,7 @@ class WebSite {
                 rules.rules.behaviors.map(behavior => {
                     if (behavior.name == "cpCode") {
                         cpCodeExists = 1;
-                        behavior.options.value.id = cpcode
+                        behavior.options = { "value" : { "id": Number(cpcode) } };
                     }
                     behaviors.push(behavior)
                 })
@@ -2220,7 +2237,8 @@ class WebSite {
                             edgeHostname = null, 
                             secure = false,
                             productId = null,
-                            accountKey) {
+                            accountKey,
+                            newcpcodename = null) {
 
         this._accountSwitchKey = accountKey;
 
@@ -2276,7 +2294,7 @@ class WebSite {
                 this._propertyById[propInfo.propertyId] = propInfo;
                 this._propertyByName[configName] = propInfo;
 
-                return this._setRules(groupId, contractId, productId, configName, cpcode, hostnames, origin, secure, newRules)
+                return this._setRules(groupId, contractId, productId, configName, cpcode, hostnames, origin, secure, newRules, newcpcodename)
             })
             .then(rules => {
                 return this._updatePropertyRules(configName,
@@ -2288,57 +2306,71 @@ class WebSite {
             })
             .then(data => {
                 let ehn_exists = 0;
-                data.edgeHostnames.items.map(hostname => {
-                    if (hostname.domainPrefix = configName) {
-                        ehn_exists = 1;
-                    }
-                })
-                
                 if (edgeHostname) {
                     if (edgeHostname.indexOf("edgekey") > -1) {
                         secure = true;
                     }
-                    edgeHostnameId = edgeHostname;
+                    data.edgeHostnames.items.map(hostname => {
+                        if (hostname.edgeHostnameDomain == edgeHostname) {
+                            ehn_exists = 1;
+                        }
+                    })
+                    if (!ehn_exists) {
+                        return Promise.resolve(
+                            this._createEdgeHostname(groupId,
+                                contractId,
+                                configName,
+                                productId,
+                                null,
+                                edgeHostname,
+                                false,
+                                secure)
+                            );
+                    }
+                    //edgeHostnameId = edgeHostname;
                     return Promise.resolve(edgeHostname);
                 } else if (data.edgeHostnameId) {
                     edgeHostnameId = data.edgeHostnameId;
                     return Promise.resolve(edgeHostnameId);
                 } else {
-                    edgeHostnameId = configName;
+                    //edgeHostnameId = configName;
+                    data.edgeHostnames.items.map(hostname => {
+                        if (hostname.domainPrefix == configName) {
+                            ehn_exists = 1;
+                        }
+                    })
                     if (!ehn_exists) {
-                        return this._createEdgeHostname(groupId,
-                            contractId,
-                            configName,
-                            productId,
-                            null,
-                            edgeHostname);
+                        return Promise.resolve(
+                            this._createEdgeHostname(groupId,
+                                contractId,
+                                configName,
+                                productId,
+                                null,
+                                null,
+                                false,
+                                secure)
+                            );
                     } else {
                         return Promise.resolve();
                     }
                 }
             })
             .then(edgeHostnameId => {
-                if (newEdgeHostname) {
-                    console.error("Edge hostnames take 30 minutes to appear.  Please use modify to add the hostname at that point.")
-                    return Promise.resolve()
-                } else {
-                    return this._assignHostnames(groupId,
-                        contractId,
-                        configName,
-                        edgeHostnameId,
-                        propertyId,
-                        hostnames,
-                        false,
-                        true,
-                        1);
-
-                    }
+                return this._assignHostnames(groupId,
+                    contractId,
+                    configName,
+                    edgeHostnameId,
+                    propertyId,
+                    hostnames,
+                    false,
+                    true,
+                    1);
             }).then(() => {
                 return Promise.resolve();
             })
     }
 
-    createFromFile(hostnames = [], srcFile, configName = null, contractId = null, groupId = null, cpcode = null, origin = null, edgeHostname = null, ruleformat = null, productId = null, accountKey) {
+    createFromFile(hostnames = [], srcFile, configName = null, contractId = null, groupId = null, cpcode = null, origin = null, edgeHostname = null, ruleformat = null, productId = null, accountKey, newcpcodename = null) {
         let names = this._getConfigAndHostname(configName, hostnames);
         configName = names[0];
         hostnames = names[1];
@@ -2363,7 +2395,7 @@ class WebSite {
                    cpcode = behavior.options.value.id
                 }
             })
-            return this.create(hostnames, cpcode, configName, contractId, groupId, rules, origin, edgeHostname, ruleformat, productId, this._accountSwitchKey);
+            return this.create(hostnames, cpcode, configName, contractId, groupId, rules, origin, edgeHostname, ruleformat, productId, this._accountSwitchKey, newcpcodename);
         })
     }
 
@@ -2376,6 +2408,7 @@ class WebSite {
         let groupId = options.group || null
         let origin = options.origin || null
         let edgeHostname = options.edgehostname || null
+        let newcpcodename = options.newcpcodename || null
         let cpcode = options.cpcode || null
         let ruleformat = options.ruleformat || null
         let secure = options.secure || false
@@ -2422,7 +2455,7 @@ class WebSite {
             })
                
             .then(clone_ehn =>{
-                if ((clone_ehn.hostnames.items) && (!edgeHostnameId)) {
+                if ((clone_ehn.hostnames.items) && (clone_ehn.hostnames.items.length > 0) && !edgeHostnameId)  {
                         edgeHostnameId = clone_ehn.hostnames.items[0].cnameTo || clone_ehn.hostnames.items[0].edgeHostnameId;
                 }
                 return Promise.resolve(edgeHostnameId)
@@ -2456,7 +2489,7 @@ class WebSite {
             })
             .then(format => {
                 latestFormat = format;
-                return this._setRules(groupId, contractId, productId, configName, cpcode, hostnames, origin, secure)
+                return this._setRules(groupId, contractId, productId, configName, cpcode, hostnames, origin, secure, newcpcodename)
             })
             .then(rules => {
                 rules.ruleFormat = latestFormat;
