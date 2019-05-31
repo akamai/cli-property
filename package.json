@@ -1,6 +1,6 @@
 {
   "name": "akamaicliproperty",
-  "version": "0.1.1",
+  "version": "1.1.1",
   "description": "A wrapping development kit to interface common tasks with akamai's {OPEN} API.",
   "repository": "https://github.com/akamai/cli-property",
   "license": "Apache-2.0",
@@ -21,7 +21,7 @@
   "dependencies": {
     "chalk": "^2.4.2",
     "child-process-promise": "^2.2.1",
-    "edgegrid": "^3.0.5",
+    "edgegrid": ">=3.0.6",
     "md5": "^2.2.1",
     "nexe": "^2.0.0-rc.34",
     "options": "0.0.6",
