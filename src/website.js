@@ -815,7 +815,13 @@ class WebSite {
                                 body: rules,
                                 headers: {'Content-Type':'application/vnd.akamai.papirules.' + rules.ruleFormat + '+json'}
                         }
-                    } else {
+                    } else if (rules.ruleFormat && rules.ruleFormat == "latest" ) {
+                        request = {
+                                method: 'PUT',
+                                path: `/papi/v1/properties/${propertyId}/versions/${version}/rules?contractId=${contractId}&groupId=${groupId}`,
+                                body: rules,
+                                headers: {'Content-Type':'application/vnd.akamai.papirules.latest.json'}
+                     } else {
                         request = {
                                 method: 'PUT',
                                 path: `/papi/v1/properties/${propertyId}/versions/${version}/rules?contractId=${contractId}&groupId=${groupId}`,
