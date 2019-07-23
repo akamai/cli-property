@@ -515,6 +515,9 @@ function main () {
             .string('--notes <notes>', { // could use stringArray here to allow multiples, e.g. `--notes one --notes two`
               desc: 'Version notes for the property version'
             })
+            .string('--account-key <account-key>', { 
+              desc: 'The account switch key'
+            })
             .boolean('--retrieve', {
                 desc: "Retrieve rules for created property"
             })
