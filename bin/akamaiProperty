@@ -395,7 +395,7 @@ function main () {
         desc: 'retrieve account groups',
         run: (options, context) => {
           try {
-            let app = new WebSite({path: options.config, section: options.section, debug: options.debug});
+            let app = new WebSite({path: options.config, section: options.section, debug: options.debug, key: options["account-key"]});
             return retrieveGroups(app)
           } catch (error) {
             return errorMessage(error, context);
@@ -406,7 +406,7 @@ function main () {
         desc: 'get rules formats',
         run: (options, context) => {
           try {
-            let app = new WebSite({path: options.config, section: options.section, debug: options.debug});
+            let app = new WebSite({path: options.config, section: options.section, debug: options.debug, key: options["account-key"]});
             if (options.newest) {
               return retrieveNewestFormat(app);
             } else {
@@ -427,7 +427,7 @@ function main () {
                 })
         },
         run: options => {
-            let app = new WebSite({path:options.config, section: options.section, debug: options.debug});
+            let app = new WebSite({path:options.config, section: options.section, debug: options.debug, key: options["account-key"]});
             return listProducts(app, options)
         }
       })
@@ -450,7 +450,7 @@ function main () {
                 })
         },
         run: options => {
-            let app = new WebSite({path:options.config, section: options.section, debug: options.debug});
+            let app = new WebSite({path:options.config, section: options.section, debug: options.debug, key: options["account-key"]});
             return listProperties(app, options.group, options.contract, options.file)
         }
       })
@@ -460,7 +460,7 @@ function main () {
         paramsDesc: 'Enter a string to search for.',
         run: (options, context) => {
           try {
-            let app = new WebSite({path: options.config, section: options.section, debug: options.debug});
+            let app = new WebSite({path: options.config, section: options.section, debug: options.debug, key: options["account-key"]});
             return searchProperties(app, options.string)
           } catch (error) {
             return errorMessage(error, context);
@@ -539,7 +539,7 @@ function main () {
             if(!flagsAreValid(context, options)){
               return;
             }
-            let app = new WebSite({path: options.config, section: options.section, debug: options.debug});
+            let app = new WebSite({path: options.config, section: options.section, debug: options.debug, key: options["account-key"]});
             return createProperty(app, options.property, options).then(() => {
               if (options.forward || options.variables || options.notes) {
                 return modifyProperty(app, options.property, options, 'create')
@@ -613,7 +613,7 @@ function main () {
         },
         run: (options, context) => {
             try {
-              let app = new WebSite({path: options.config, section: options.section, debug: options.debug});
+              let app = new WebSite({path: options.config, section: options.section, debug: options.debug, key: options["account-key"]});
               return modifyProperty(app, options.property, options)
             } catch (error) {
               return errorMessage(error, context);
@@ -643,7 +643,7 @@ function main () {
         },
         run: (options, context) => {
           try {
-            let app = new WebSite({path: options.config, section: options.section, debug: options.debug});
+            let app = new WebSite({path: options.config, section: options.section, debug: options.debug, key: options["account-key"]});
             return activateProperty(app, options.property, options)
           } catch (error) {
             return errorMessage(error, context);
@@ -669,7 +669,7 @@ function main () {
         },
         run: (options, context) => {
           try {
-            let app = new WebSite({path: options.config, section: options.section, debug: options.debug});
+            let app = new WebSite({path: options.config, section: options.section, debug: options.debug, key: options["account-key"]});
             return deactivateProperty(app, options.property, options)
           } catch (error){
             return errorMessage(error, context);
@@ -681,7 +681,7 @@ function main () {
         run: (options, context) => {
           try {
             options.network = "BOTH"
-            let app = new WebSite({path: options.config, section: options.section, debug: options.debug});
+            let app = new WebSite({path: options.config, section: options.section, debug: options.debug, key: options["account-key"]});
             return deactivateProperty(app, options.property, options).then(() => {
               return deleteProperty(app, options.property, options)
             })
@@ -711,7 +711,7 @@ function main () {
               console.log("Required: srcprop or file")
               return Promise.resolve();
             }
-            let app = new WebSite({path: options.config, section: options.section, debug: options.debug});
+            let app = new WebSite({path: options.config, section: options.section, debug: options.debug, key: options["account-key"]});
             return updateProperty(app, options.property, options);
           } catch (error) {
             return errorMessage(error, context);
@@ -731,7 +731,7 @@ function main () {
         })},
         run: (options, context) => {
           try {
-            let app = new WebSite({path: options.config, section: options.section, debug: options.debug});
+            let app = new WebSite({path: options.config, section: options.section, debug: options.debug, key: options["account-key"]});
             if (options.hostnames) {
               return retrieveHostnames(app, options.property)
             } else {

@@ -72,7 +72,8 @@ class WebSite {
         this._propertyHostnameList = {};
         this._edgeHostnames = [];
         this._newestRulesFormat = "";
-        this._accountSwitchKey = "";
+        this._accountSwitchKey = auth.key;
+        console.info('Account Key set to: ' + this._accountSwitchKey)
         if (auth.create) {
             this._initComplete = true;
         }
@@ -1422,7 +1423,7 @@ class WebSite {
      * @returns {Promise} the {object} of Property as the {TResult}
      */
     lookupPropertyIdFromHost(hostname, env = LATEST_VERSION.PRODUCTION, accountKey) {
-        this._accountSwitchKey = accountKey;
+        // // this._accountSwitchKey = accountKey;
         return this._getProperty(hostname, env);
     }
 
@@ -1516,7 +1517,7 @@ class WebSite {
     
     searchProperties(searchString, accountKey) {
         let searchObj = {"propertyName" : searchString};
-        this._accountSwitchKey = accountKey;
+        // // this._accountSwitchKey = accountKey;
         return this._searchByValue(searchObj)
             .then(result => {
                 return result;
@@ -1524,7 +1525,7 @@ class WebSite {
     }
 
     listProperties(groupId, contractId, accountKey) {
-        this._accountSwitchKey = accountKey;
+        // // this._accountSwitchKey = accountKey;
         return this._listProperties(groupId, contractId)
         .then(result => {
             return result;
@@ -1532,7 +1533,7 @@ class WebSite {
     }
 
     listPropertiesToFile(groupId, contractId, toFile, accountKey) {
-        this._accountSwitchKey = accountKey;
+        // // this._accountSwitchKey = accountKey;
         return this._listProperties(groupId, contractId)
         .then(result => {
             return new Promise((resolve, reject) => {
@@ -1547,7 +1548,7 @@ class WebSite {
     }
 
     retrieveGroups(accountKey) {
-        this._accountSwitchKey = accountKey;
+        // // this._accountSwitchKey = accountKey;
         return this._getGroupList()
             .then(result => {
                return Promise.resolve(result.groups.items)
@@ -1556,7 +1557,7 @@ class WebSite {
 
     retrieveFormats(latest=false, accountKey) {
         let latestRule;
-        this._accountSwitchKey = accountKey;
+        // // this._accountSwitchKey = accountKey;
         return this._retrieveFormats()
             .then(result => {
                 if (!latest) {
@@ -1586,7 +1587,7 @@ class WebSite {
          */
     retrieve(propertyLookup, versionLookup = LATEST_VERSION.LATEST, hostnames=false, accountKey) {
         let propertyId;
-        this._accountSwitchKey = accountKey;
+        // // this._accountSwitchKey = accountKey;
         return this._getProperty(propertyLookup)
             .then(property => {
                 if (!hostnames) {
@@ -1611,7 +1612,7 @@ class WebSite {
    */
 
     retrieveToFile(propertyLookup, toFile, versionLookup = LATEST_VERSION.LATEST, accountKey) {
-        this._accountSwitchKey = accountKey;
+        // this._accountSwitchKey = accountKey;
         return this.retrieve(propertyLookup, versionLookup, false, this._accountSwitchKey)
             .then(data => {
                 console.error(`Writing ${propertyLookup} rules to ${toFile}`);
@@ -1636,7 +1637,7 @@ class WebSite {
      */
 
     retrievePropertyRuleFormat(propertyLookup, versionLookup = LATEST_VERSION.LATEST, accountKey) {
-        this._accountSwitchKey = accountKey;
+        // this._accountSwitchKey = accountKey;
         return this.retrieve(propertyLookup, versionLookup, false, this._accountSwitchKey)
             .then(data => {
                 console.log(JSON.stringify(data.ruleFormat));
@@ -1645,7 +1646,7 @@ class WebSite {
     }
 
     createNewPropertyVersion(propertyLookup, accountKey) {
-        this._accountSwitchKey = accountKey;
+        // this._accountSwitchKey = accountKey;
         return this._getProperty(propertyLookup)
             .then(property => {
                 let propertyName = property.propertyName;
@@ -1696,7 +1697,7 @@ class WebSite {
      * @returns {Promise} returns a promise with the updated form of the
      */
     updateFromFile(propertyLookup, srcFile, comment = false, accountKey) {
-        this._accountSwitchKey = accountKey;
+        // this._accountSwitchKey = accountKey;
         return new Promise((resolve, reject) => {
             fs.readFile(untildify(srcFile), (err, data) => {
                 if (err) {
@@ -1724,7 +1725,7 @@ class WebSite {
      * @returns {Promise} returns a promise with the TResult of boolean
      */
     copy(fromProperty, fromVersion = LATEST_VERSION.LATEST, toProperty, comment = false, accountKey) {
-        this._accountSwitchKey = accountKey;
+        // this._accountSwitchKey = accountKey;
         return this.retrieve(fromProperty, fromVersion, false, this._accountSwitchKey)
             .then(fromRules => {
                 console.error(`Copy ${fromProperty} v${fromRules.propertyVersion} to ${toProperty}`);
@@ -1778,7 +1779,7 @@ class WebSite {
             emailNotification = [email];
         let activationVersion = version;
         let property = propertyLookup;
-        this._accountSwitchKey = accountKey;
+        // this._accountSwitchKey = accountKey;
 
         return this._getProperty(propertyLookup)
             .then(data => {
@@ -1817,7 +1818,7 @@ class WebSite {
         if (!Array.isArray(email))
             email = [email];
         let property;
-        this._accountSwitchKey = accountKey;
+        // this._accountSwitchKey = accountKey;
 
         return this._getProperty(propertyLookup)
             .then(data => {
@@ -1847,7 +1848,7 @@ class WebSite {
             propertyId,
             configName;
 
-        this._accountSwitchKey = accountKey;
+        // this._accountSwitchKey = accountKey;
 
         return this._getProperty(propertyLookup)
             .then(data => {
@@ -1878,7 +1879,7 @@ class WebSite {
      *     If the host name is moving between property configurations, use lookupPropertyIdFromHost()
      */
     deleteProperty(propertyLookup, accountkey) {
-      this._accountSwitchKey = accountkey;
+      // this._accountSwitchKey = accountKey;
         //TODO: deactivate first
         return this._getProperty(propertyLookup)
             .then(property => {
@@ -1894,7 +1895,7 @@ class WebSite {
      *     If the host name is moving between property configurations, use lookupPropertyIdFromHost()
      */
     moveProperty(propertyLookup, destGroup, accountKey) {
-        this._accountSwitchKey = accountKey;
+        // this._accountSwitchKey = accountKey;
         //TODO: deactivate first
         console.error(`Moving ${propertyLookup} to ` + destGroup);
 
@@ -1902,7 +1903,7 @@ class WebSite {
     }
 
     setRuleFormat(propertyLookup, version, ruleformat, accountKey) {
-        this._accountSwitchKey = accountKey;
+        // this._accountSwitchKey = accountKey;
         
         return this._getProperty(propertyLookup)
             .then(data => {
@@ -1916,7 +1917,7 @@ class WebSite {
     }
 
     setCpcode(propertyLookup, version, cpcode, accountKey) {
-        this._accountSwitchKey = accountKey;
+        // this._accountSwitchKey = accountKey;
         return this._getProperty(propertyLookup)
             .then(data => {
                 version = WebSite._getLatestVersion(data, version)
@@ -1948,7 +1949,7 @@ class WebSite {
             propertyId,
             configName;
 
-        this._accountSwitchKey = accountKey;
+        // this._accountSwitchKey = accountKey;
 
         let names = this._getConfigAndHostname(propertyLookup, hostnames);
         configName = names[0];
@@ -1984,7 +1985,7 @@ class WebSite {
             configName,
             hostlist;
 
-        this._accountSwitchKey = accountKey;
+        // this._accountSwitchKey = accountKey;
             
         let names = this._getConfigAndHostname(propertyLookup, hostnames);
         configName = names[0];
@@ -2038,7 +2039,7 @@ class WebSite {
         };
         let variables;
 
-        this._accountSwitchKey = accountKey;
+        // this._accountSwitchKey = accountKey;
 
         return new Promise((resolve, reject) => {
             fs.readFile(untildify(variablefile), (err, data) => {
@@ -2111,7 +2112,7 @@ class WebSite {
     }
 
     getVariables(propertyLookup, versionLookup=0, filename=null, accountKey) {
-        this._accountSwitchKey = accountKey;       
+        // this._accountSwitchKey = accountKey;       
         return this._getProperty(propertyLookup)
             .then(property => {
                     let version = (versionLookup && versionLookup > 0) ? versionLookup : WebSite._getLatestVersion(property, versionLookup)
@@ -2136,7 +2137,7 @@ class WebSite {
     }
 
     setComments(propertyLookup, version = 0, comment, accountKey) {
-        this._accountSwitchKey = accountKey;
+        // this._accountSwitchKey = accountKey;
         console.error("... adding version notes")
         return this._getProperty(propertyLookup)
             .then(property => {
@@ -2156,7 +2157,7 @@ class WebSite {
         let forwardHostHeader;
         let customForward = "";
 
-        this._accountSwitchKey = accountKey;
+        // this._accountSwitchKey = accountKey;
         
         if (forward == "origin") {
             forwardHostHeader = "ORIGIN_HOSTNAME"
@@ -2198,7 +2199,7 @@ class WebSite {
     }
 
     setSureRoute(propertyLookup, version=0, sureroutemap, surerouteto, sureroutetohost, accountKey) {
-        this._accountSwitchKey = accountKey;
+        // this._accountSwitchKey = accountKey;
         return this._getProperty(propertyLookup)
             .then(property => {
                 version = WebSite._getLatestVersion(property, version);
@@ -2266,7 +2267,7 @@ class WebSite {
                             accountKey,
                             newcpcodename = null) {
 
-        this._accountSwitchKey = accountKey;
+        // this._accountSwitchKey = accountKey;
 
         let newEdgeHostname;
         if (!configName && !hostnames) {
@@ -2400,7 +2401,7 @@ class WebSite {
         let names = this._getConfigAndHostname(configName, hostnames);
         configName = names[0];
         hostnames = names[1];
-        this._accountSwitchKey = accountKey;
+        // this._accountSwitchKey = accountKey;
         return new Promise((resolve, reject) => {
             fs.readFile(untildify(srcFile), (err, data) => {
                 if (err)
