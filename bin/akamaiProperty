@@ -239,15 +239,15 @@ function createProperty(app, targetProperty, options) {
 }
 
 function retrieveProperty(app, targetProperty, options) {
-    if (options.file) {
+    if (options.variables) {
+        return app.getVariables(targetProperty, numberVersion(options.propver), options.file, options["account-key"])
+    } else if (options.file) {
         return app.retrieveToFile( targetProperty, 
                                         options.file, 
                                         numberVersion(options.propver),
                                         options["account-key"]);
     } else if (options.format) {
         return app.retrievePropertyRuleFormat(targetProperty, numberVersion(options.propver), options["account-key"])
-    } else if (options.variables) {
-        return app.getVariables(targetProperty, numberVersion(options.propver), options.file)
     } else {
         return app.retrieve(targetProperty, 
                                 numberVersion(options.propver),
@@ -392,7 +392,7 @@ function main () {
     const NETWORK_CHOICES = ['PROD', 'STAGING', 'BOTH']
     const chalk = require('chalk')
     return require('sywac')
-      .file('--config <config>', { 
+      .file('--config, --edgerc <config>', { 
           desc: 'Config file ',
           defaultValue: config,
           group: "Command options:"
@@ -477,16 +477,18 @@ function main () {
         run: (options, context) => {
           try {
             let app = new WebSite({path: options.config, section: options.section, debug: options.debug});
+            options.property = options.property || process.env.AKAMAI_PAPI_PROPERTY;
             return searchProperties(app, options.string. options["account-key"])
           } catch (error) {
             return errorMessage(error, context);
           }
         }
       })
-      .command('create <property>', {
+      .command('create ' + ( process.env.AKAMAI_PAPI_PROPERTY ? '[property]' : '<property>' ), {
         desc: 'create a new property',
         setup: sywac => {
           sywac
+            .usage('Usage: $0 <property>(default: [$AKAMAI_PAPI_PROPERTY]) [options]')
             .string('--clone <from>', {
               desc: 'Source property to clone from',
               group: 'Source options:'
@@ -556,6 +558,7 @@ function main () {
               return;
             }
             let app = new WebSite({path: options.config, section: options.section, debug: options.debug});
+            options.property = options.property || process.env.AKAMAI_PAPI_PROPERTY;
             return createProperty(app, options.property, options).then(() => {
               if (options.forward || options.variables || options.notes) {
                 return modifyProperty(app, options.property, options, 'create')
@@ -568,11 +571,12 @@ function main () {
           }
         }
       })
-      .command('modify <property>', {
+      .command('modify ' + ( process.env.AKAMAI_PAPI_PROPERTY ? '[property]' : '<property>' ), {
           desc: 'Modify specified property',
           params: [{ hidden: true }],
           setup: sywac => {
             sywac
+            .usage('Usage: $0 <property>(default: [$AKAMAI_PAPI_PROPERTY]) [options]')
             .number('--propver <propver>', {
                 desc: 'Property version'
             })
@@ -630,6 +634,7 @@ function main () {
         run: (options, context) => {
             try {
               let app = new WebSite({path: options.config, section: options.section, debug: options.debug});
+              options.property = options.property || process.env.AKAMAI_PAPI_PROPERTY;
               return modifyProperty(app, options.property, options)
             } catch (error) {
               return errorMessage(error, context);
@@ -637,11 +642,12 @@ function main () {
         }
     })
 
-      .command('activate <property>', {
+      .command('activate ' + ( process.env.AKAMAI_PAPI_PROPERTY ? '[property]' : '<property>' ), {
         desc: 'activate the property',
         params: [{ hidden: true }],
         setup: sywac => {
           sywac
+            .usage('Usage: $0 <property>(default: [$AKAMAI_PAPI_PROPERTY]) [options]')
             .enumeration('--network <network>', { // just a guess that this is the behavior you want, use `string()` otherwise
               desc: 'Network for activation',
               choices: NETWORK_CHOICES,
@@ -660,17 +666,19 @@ function main () {
         run: (options, context) => {
           try {
             let app = new WebSite({path: options.config, section: options.section, debug: options.debug});
+            options.property = options.property || process.env.AKAMAI_PAPI_PROPERTY;
             return activateProperty(app, options.property, options)
           } catch (error) {
             return errorMessage(error, context);
           }
         }
       })
-      .command('deactivate <property>', {
+      .command('deactivate ' + ( process.env.AKAMAI_PAPI_PROPERTY ? '[property]' : '<property>' ), {
         desc: 'deactivate the property',
         params: [{ hidden: true }],
         setup: sywac => {
           sywac
+            .usage('Usage: $0 <property>(default: [$AKAMAI_PAPI_PROPERTY]) [options]')
             .enumeration('--network <network>', {
               desc: 'Network for deactivation',
               choices: NETWORK_CHOICES,
@@ -686,18 +694,23 @@ function main () {
         run: (options, context) => {
           try {
             let app = new WebSite({path: options.config, section: options.section, debug: options.debug});
+            options.property = options.property || process.env.AKAMAI_PAPI_PROPERTY;
             return deactivateProperty(app, options.property, options)
           } catch (error){
             return errorMessage(error, context);
           }
         }
       })
-      .command('delete <property>', {
+      .command('delete ' + ( process.env.AKAMAI_PAPI_PROPERTY ? '[property]' : '<property>' ), {
         desc: 'delete a property',
+        setup: sywac => {		
+          sywac.usage('Usage: $0 <property>(default: [$AKAMAI_PAPI_PROPERTY]) [options]')		
+        },
         run: (options, context) => {
           try {
             options.network = "BOTH"
             let app = new WebSite({path: options.config, section: options.section, debug: options.debug});
+            options.property = options.property || process.env.AKAMAI_PAPI_PROPERTY;
             return deactivateProperty(app, options.property, options).then(() => {
               return deleteProperty(app, options.property, options)
             })
@@ -706,10 +719,11 @@ function main () {
           }
         }
       })
-      .command('update <property>', {
+      .command('update ' + ( process.env.AKAMAI_PAPI_PROPERTY ? '[property]' : '<property>' ), {
         desc: 'update target property',
         setup: sywac => {
           sywac
+            .usage('Usage: $0 <property>(default: [$AKAMAI_PAPI_PROPERTY]) [options]')
             .string('--srcprop <property>', {
               desc: 'Source property'
             })
@@ -734,26 +748,28 @@ function main () {
               return Promise.resolve();
             }
             let app = new WebSite({path: options.config, section: options.section, debug: options.debug});
+            options.property = options.property || process.env.AKAMAI_PAPI_PROPERTY;
             return updateProperty(app, options.property, options);
           } catch (error) {
             return errorMessage(error, context);
           }
         }
       })
-      .command('retrieve <property>', {
+      .command('retrieve ' + ( process.env.AKAMAI_PAPI_PROPERTY ? '[property]' : '<property>' ), {
         desc: 'retrieve rules from target property',
         setup: sywac => {
           sywac
+            .usage('Usage: $0 <property>(default: [$AKAMAI_PAPI_PROPERTY]) [options]')
             .boolean('--format', { desc: 'Rules format only' })
             .boolean('--hostnames', { desc: 'Retrieve hostnames for property' })
             .boolean('--variables', { desc: 'Retrieve user variables' })
             .number('--propver', { desc: 'Retrieve specified version' })
-            .file('--file <path>', {
-              desc: 'Output file'
-        })},
+            .file('--file <path>', { desc: 'Output file' })
+        },
         run: (options, context) => {
           try {
             let app = new WebSite({path: options.config, section: options.section, debug: options.debug});
+            options.property = options.property || process.env.AKAMAI_PAPI_PROPERTY;
             if (options.hostnames) {
               return retrieveHostnames(app, options.property, options.propver, options["account-key"])
             } else {

@@ -1676,7 +1676,7 @@ class WebSite {
                    newRules.comments = comment;
                  }
                  console.log(newRules)
-                return this._updatePropertyRules(property, property.latestVersion, newRules, dryrun);
+                return this._updatePropertyRules(property, property.latestVersion, newRules, dryRun);
             });
     }
 
