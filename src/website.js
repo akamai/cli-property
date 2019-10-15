@@ -2261,14 +2261,15 @@ class WebSite {
                             newRules = null, 
                             origin = null, 
                             edgeHostname = null, 
-                            secure = false,
+                            ruleFormat = false,//secure? ruleformat
                             productId = null,
                             accountKey,
                             newcpcodename = null) {
 
         this._accountSwitchKey = accountKey;
 
-        let newEdgeHostname;
+        let newEdgeHostname,
+        secure;
         if (!configName && !hostnames) {
             return Promise.reject("Configname or hostname is required.")
         }

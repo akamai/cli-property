@@ -99,7 +99,7 @@ function activateProperty(app, targetProperty, options) {
     let env = options.network.toUpperCase();
     return Promise.resolve()
         .then(() => {
-            return app.lookupPropertyIdFromHost(targetProperty);
+            return app.lookupPropertyIdFromHost(targetProperty, WebSite.LATEST_VERSION.PRODUCTION, options["account-key"]);
         })
         .then(data => {
             if (!numberVersion(options.propver)) {
@@ -110,7 +110,9 @@ function activateProperty(app, targetProperty, options) {
                                             numberVersion(options.propver), 
                                             WebSite.AKAMAI_ENV.STAGING,
                                             options.notes || "Updated Automatically to staging.", 
-                                            options.email);
+                                            options.email,
+                                            true,
+                                            options["account-key"]);
             return Promise.resolve(data);
         })
         .then(data => {
@@ -119,7 +121,9 @@ function activateProperty(app, targetProperty, options) {
                                             numberVersion(options.propver), 
                                             WebSite.AKAMAI_ENV.PRODUCTION,
                                             options.notes || "Updated Automatically to prod.", 
-                                            options.email);
+                                            options.email,
+                                            true,
+                                            options["account-key"]);
             return Promise.resolve(data);
         });
 }
@@ -134,7 +138,9 @@ function deactivateProperty(app, targetProperty, options) {
                return app.deactivate(  targetProperty, 
                                             WebSite.AKAMAI_ENV.STAGING,
                                             options.notes || "Automatically deactivating on staging.", 
-                                            options.email);
+                                            options.email,
+                                            true,
+                                            options["account-key"]);
             return Promise.resolve();
         })
         .then(() => {
@@ -142,7 +148,9 @@ function deactivateProperty(app, targetProperty, options) {
                 return app.deactivate( targetProperty, 
                                             WebSite.AKAMAI_ENV.PRODUCTION,
                                             options.notes || "Automatically deactivating on prod.", 
-                                            options.email);
+                                            options.email,
+                                            true,
+                                            options["account-key"]);
             return Promise.resolve();
         });
 }
@@ -167,7 +175,7 @@ function updateProperty(app, targetProperty, options) {
 }
 
 function deleteProperty(app, targetProperty, options) {
-    return app.deleteProperty(targetProperty);
+    return app.deleteProperty(targetProperty, options["account-key"]);
 }
 
 function createProperty(app, targetProperty, options) {
@@ -215,7 +223,7 @@ function createProperty(app, targetProperty, options) {
     })
     .then(() => {
         if (options.retrieve) {
-            return app.retrieve(targetProperty)
+            return app.retrieve(targetProperty, WebSite.LATEST_VERSION.LATEST, false, options["account-key"])
         } else {
             return Promise.resolve()
         }
@@ -232,15 +240,17 @@ function retrieveProperty(app, targetProperty, options) {
     if (options.file) {
         return app.retrieveToFile( targetProperty, 
                                         options.file, 
-                                        numberVersion(options.propver));
+                                        numberVersion(options.propver),
+                                        options["account-key"]);
     } else if (options.format) {
-        return app.retrievePropertyRuleFormat(targetProperty, numberVersion(options.propver))
+        return app.retrievePropertyRuleFormat(targetProperty, numberVersion(options.propver), options["account-key"])
     } else if (options.variables) {
         return app.getVariables(targetProperty, numberVersion(options.propver), options.file)
     } else {
         return app.retrieve(targetProperty, 
                                 numberVersion(options.propver),
-                                false)
+                                false,
+                                options["account-key"])
         .then(data => {
             console.log(JSON.stringify(data,'',2));
             return Promise.resolve();
@@ -248,47 +258,47 @@ function retrieveProperty(app, targetProperty, options) {
     }
 }
 
-function retrieveNewestFormat(app) {
-    return app.retrieveFormats(true)
+function retrieveNewestFormat(app, accountKey) {
+    return app.retrieveFormats(true, accountKey)
     .then(data => {
         console.log(JSON.stringify(data,'',2));
     })
 }
 
-function retrieveGroups(app) {
-    return app.retrieveGroups()
+function retrieveGroups(app, accountKey) {
+    return app.retrieveGroups(accountKey)
     .then(data => {
         console.log(JSON.stringify(data,'',2));
     })
 }
 
-function searchProperties(app, searchString, options) {
-    return app.searchProperties(searchString)
+function searchProperties(app, searchString, accountKey) {
+    return app.searchProperties(searchString, accountKey)
     .then(data => {
         console.log(JSON.stringify(data,'',2))
     })
 }
 
-function listProperties(app, group, contract, toFile) {
+function listProperties(app, group, contract, toFile, accountKey) {
     if(toFile){
-        return app.listPropertiesToFile(group, contract, toFile)
+        return app.listPropertiesToFile(group, contract, toFile, accountKey)
     }else{
-        return app.listProperties(group, contract)
+        return app.listProperties(group, contract, accountKey)
         .then(data => {
             console.log(JSON.stringify(data,'',2))
         })
     }    
 }
 
-function retrieveFormats(app, options) {
-    return app.retrieveFormats()
+function retrieveFormats(app, accountKey) {
+    return app.retrieveFormats(false, accountKey)
     .then(data => {
         console.log(JSON.stringify(data,'',2))
     })
 }
 
-function retrieveHostnames(app, targetProperty) {
-    return app.retrieve(targetProperty, 0, true)
+function retrieveHostnames(app, targetProperty, version , accountKey) {
+    return app.retrieve(targetProperty, version, true, accountKey)
     .then(data => {
         console.log(JSON.stringify(data.hostnames.items, '', 2));
     })
@@ -297,41 +307,42 @@ function retrieveHostnames(app, targetProperty) {
 function modifyProperty(app, targetProperty, options, command) {
     let version = numberVersion(options.propver) ? numberVersion(options.propver) : 0;
     if (options.new) {
-            return app.createNewPropertyVersion(targetProperty)
+            return app.createNewPropertyVersion(targetProperty, options["account-key"])
         }
     if (options.addhosts && options.addhosts.length > 0) {
-            return app.addHostnames(targetProperty, version, options.addhosts, options.edgehostname);
+            return app.addHostnames(targetProperty, version, options.addhosts, options.edgehostname, options["account-key"]);
         } 
     if (options.delhosts && options.delhosts.length > 0) {
-            return app.delHostnames(targetProperty, version, options.delhosts, options.edgehostname)
+            return app.delHostnames(targetProperty, version, options.delhosts, options.edgehostname, options["account-key"])
         }
     if (options.origin || options.forward) {
-            return app.setOrigin(targetProperty, version, options.origin, options.forward);
+            return app.setOrigin(targetProperty, version, options.origin, options.forward, options["account-key"]);
         }
     if (options.edgehostname && command != "create") {
-            return app.assignEdgeHostname(targetProperty, version, options.edgehostname, options.new);
+            return app.assignEdgeHostname(targetProperty, version, options.edgehostname, options["account-key"]);
         }
     if (options.notes) {
-            return app.setComments(targetProperty, version, options.notes);
+            return app.setComments(targetProperty, version, options.notes, options["account-key"]);
         } 
     if (options.variables) {
-            return app.setVariables(targetProperty, version, options.variables);
+            return app.setVariables(targetProperty, version, options.variables, options["account-key"]);
         }
     if (options.cpcode) {
-            return app.setCpcode(targetProperty, version, options.cpcode)
+            return app.setCpcode(targetProperty, version, options.cpcode, options["account-key"])
         }
     if (options.move) {
             return app.moveProperty(targetProperty, options.move)
         }
     if (options.ruleformat) {
-            return app.setRuleFormat(targetProperty, version, options.ruleformat)
+            return app.setRuleFormat(targetProperty, version, options.ruleformat, options["account-key"])
         } 
     if (options.sureroutemap || options.surerouteto || options.sureroutetohost) {
             return app.setSureRoute(targetProperty,
                                             version, 
                                             options.sureroutemap, 
                                             options.surerouteto,
-                                            options.sureroutetohost);
+                                            options.sureroutetohost,
+                                            options["account-key"]);
         }
 }
 
@@ -399,7 +410,7 @@ function main () {
         run: (options, context) => {
           try {
             let app = new WebSite({path: options.config, section: options.section, debug: options.debug});
-            return retrieveGroups(app)
+            return retrieveGroups(app, options["account-key"])
           } catch (error) {
             return errorMessage(error, context);
           }
@@ -411,9 +422,9 @@ function main () {
           try {
             let app = new WebSite({path: options.config, section: options.section, debug: options.debug});
             if (options.newest) {
-              return retrieveNewestFormat(app);
+              return retrieveNewestFormat(app, options["account-key"]);
             } else {
-              return retrieveFormats(app);
+              return retrieveFormats(app, options["account-key"]);
             }
           } catch (error) {
             return errorMessage(error, context);
@@ -454,7 +465,7 @@ function main () {
         },
         run: options => {
             let app = new WebSite({path:options.config, section: options.section, debug: options.debug});
-            return listProperties(app, options.group, options.contract, options.file)
+            return listProperties(app, options.group, options.contract, options.file, options["account-key"])
         }
       })
       .command('search <string>', { 
@@ -464,7 +475,7 @@ function main () {
         run: (options, context) => {
           try {
             let app = new WebSite({path: options.config, section: options.section, debug: options.debug});
-            return searchProperties(app, options.string)
+            return searchProperties(app, options.string. options["account-key"])
           } catch (error) {
             return errorMessage(error, context);
           }
@@ -739,7 +750,7 @@ function main () {
           try {
             let app = new WebSite({path: options.config, section: options.section, debug: options.debug});
             if (options.hostnames) {
-              return retrieveHostnames(app, options.property)
+              return retrieveHostnames(app, options.property, options.propver, options["account-key"])
             } else {
               return retrieveProperty(app, options.property, options)
             }
