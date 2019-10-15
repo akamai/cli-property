@@ -58,7 +58,7 @@ This script wraps all of the functionality from the [library](#library) into a c
 
 ### Create
 ```
-Usage: akamai property create <property> [options]
+Usage: akamai property create <property>(default: [$AKAMAI_PAPI_PROPERTY]) [options]
 
 Arguments:
   <property>                                                           [required] [string]
@@ -105,7 +105,7 @@ Visit http://github.com/akamai/cli-property for detailed documentation
 
 ### Retrieve
 ```
-Usage: akamai property retrieve <property> [options]
+Usage: akamai property retrieve <property>(default: [$AKAMAI_PAPI_PROPERTY]) [options]
 
 Arguments:
   <property>                                                           [required] [string]
@@ -132,7 +132,7 @@ Visit http://github.com/akamai/cli-property for detailed documentation
 Update the current property version with the rules from a local file, or copy from another property.
 
 ```
-Usage: akamai property update <property> [options]
+Usage: akamai property update <property>(default: [$AKAMAI_PAPI_PROPERTY]) [options]
 
 Arguments:
   <property>                                                           [required] [string]
@@ -159,7 +159,7 @@ Visit http://github.com/akamai/cli-property for detailed documentation
 Activate the specified property version on staging, production or both.
 
 ```
-Usage: akamai property activate <property> [options]
+Usage: akamai property activate <property>(default: [$AKAMAI_PAPI_PROPERTY]) [options]
 
 General options:
   --network <network>  Network for activation      [required] [enum] [PROD, STAGING, BOTH]
@@ -180,7 +180,7 @@ Visit http://github.com/akamai/cli-property for detailed documentation
 ### Modify
 ```
 
-Usage: akamai property modify <property> [options]
+Usage: akamai property modify <property>(default: [$AKAMAI_PAPI_PROPERTY]) [options]
 
 General options:
   --propver <propver>        Property version - LATEST/STAG/PROD/<number>         [string]
