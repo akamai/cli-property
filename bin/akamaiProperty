@@ -163,6 +163,7 @@ function updateProperty(app, targetProperty, options) {
         return app.updateFromFile( targetProperty, 
                                         options.file, 
                                         options.notes,
+                                        options.dryrun,
                                         options["account-key"]);
     
     if (options.srcprop)
@@ -170,6 +171,7 @@ function updateProperty(app, targetProperty, options) {
                                 numberVersion(options.srcver), 
                                 targetProperty,
                                 options.notes,
+                                options.dryrun,
                                 options["account-key"]);
     return Promise.resolve();
 }
@@ -720,6 +722,9 @@ function main () {
             })
             .string('--notes <notes>', {		
               desc: 'Version notes for the property version'		
+            })
+            .boolean('--dryrun', {
+              desc: 'run validations without saving rule tree'
             })
         },
         run: (options, context) => {

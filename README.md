@@ -141,7 +141,8 @@ General options:
   --srcprop <property>  Source property                                           [string]
   --srcver <version>    Source version                                            [string]
   --file <path>         File with JSON rules                           [file] [must exist]
-  --notes <notes>        Version notes for the property version                   [string]
+  --notes <notes>       Version notes for the property version                    [string]
+  --dryrun              run validations without saving rule tree                 [boolean]
 
 Command options:
   --config <config>    Config file                [file] [default: /Users/khunter/.edgerc]
