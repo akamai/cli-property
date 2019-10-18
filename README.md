@@ -38,7 +38,7 @@ Commands:
   products               retrieve products available
 
 Command options:
-  --config <config>    Config file                [file] [default: /Users/khunter/.edgerc]
+  --config, --edgerc <config>    Config file      [file] [default: /Users/khunter/.edgerc]
   --section <section>  Config section                             [string] [default: papi]
   --debug <debug>      Turn on debugging.                                        [boolean]
   --help               Show help                                [commands: help] [boolean]
@@ -58,7 +58,7 @@ This script wraps all of the functionality from the [library](#library) into a c
 
 ### Create
 ```
-Usage: akamai property create <property> [options]
+Usage: akamai property create <property>(default: [$AKAMAI_PAPI_PROPERTY]) [options]
 
 Arguments:
   <property>                                                           [required] [string]
@@ -93,7 +93,7 @@ General options:
   --retrieve             Retrieve rules for created property                     [boolean]
 
 Command options:
-  --config <config>    Config file                [file] [default: /Users/khunter/.edgerc]
+  --config, --edgerc <config>    Config file      [file] [default: /Users/khunter/.edgerc]
   --section <section>  Config section                             [string] [default: papi]
   --debug <debug>      Turn on debugging.                                        [boolean]
   --help               Show help                                [commands: help] [boolean]
@@ -105,7 +105,7 @@ Visit http://github.com/akamai/cli-property for detailed documentation
 
 ### Retrieve
 ```
-Usage: akamai property retrieve <property> [options]
+Usage: akamai property retrieve <property>(default: [$AKAMAI_PAPI_PROPERTY]) [options]
 
 Arguments:
   <property>                                                           [required] [string]
@@ -118,7 +118,7 @@ General options:
   --file <path>  Output file                                                        [file]
 
 Command options:
-  --config <config>    Config file                [file] [default: /Users/khunter/.edgerc]
+  --config, --edgerc <config>    Config file      [file] [default: /Users/khunter/.edgerc]
   --section <section>  Config section                             [string] [default: papi]
   --debug <debug>      Turn on debugging.                                        [boolean]
   --help               Show help                                [commands: help] [boolean]
@@ -132,7 +132,7 @@ Visit http://github.com/akamai/cli-property for detailed documentation
 Update the current property version with the rules from a local file, or copy from another property.
 
 ```
-Usage: akamai property update <property> [options]
+Usage: akamai property update <property>(default: [$AKAMAI_PAPI_PROPERTY]) [options]
 
 Arguments:
   <property>                                                           [required] [string]
@@ -141,9 +141,11 @@ General options:
   --srcprop <property>  Source property                                           [string]
   --srcver <version>    Source version                                            [string]
   --file <path>         File with JSON rules                           [file] [must exist]
+  --notes <notes>       Version notes for the property version                    [string]
+  --dryrun              run validations without saving rule tree                 [boolean]
 
 Command options:
-  --config <config>    Config file                [file] [default: /Users/khunter/.edgerc]
+  --config, --edgerc <config>    Config file      [file] [default: /Users/khunter/.edgerc]
   --section <section>  Config section                             [string] [default: papi]
   --debug <debug>      Turn on debugging.                                        [boolean]
   --help               Show help                                [commands: help] [boolean]
@@ -157,7 +159,7 @@ Visit http://github.com/akamai/cli-property for detailed documentation
 Activate the specified property version on staging, production or both.
 
 ```
-Usage: akamai property activate <property> [options]
+Usage: akamai property activate <property>(default: [$AKAMAI_PAPI_PROPERTY]) [options]
 
 General options:
   --network <network>  Network for activation      [required] [enum] [PROD, STAGING, BOTH]
@@ -165,7 +167,7 @@ General options:
   --email <address>    Email for confirmation                                     [string]
 
 Command options:
-  --config <config>    Config file                [file] [default: /Users/khunter/.edgerc]
+  --config, --edgerc <config>    Config file      [file] [default: /Users/khunter/.edgerc]
   --section <section>  Config section                             [string] [default: papi]
   --debug <debug>      Turn on debugging.                                        [boolean]
   --help               Show help                                [commands: help] [boolean]
@@ -178,7 +180,7 @@ Visit http://github.com/akamai/cli-property for detailed documentation
 ### Modify
 ```
 
-Usage: akamai property modify <property> [options]
+Usage: akamai property modify <property>(default: [$AKAMAI_PAPI_PROPERTY]) [options]
 
 General options:
   --propver <propver>        Property version - LATEST/STAG/PROD/<number>         [string]
@@ -218,7 +220,7 @@ Location options:
   --move <move>      Group to move the property to (User Admin perms)             [string]
 
 Command options:
-  --config <config>    Config file                [file] [default: /Users/khunter/.edgerc]
+  --config, --edgerc <config>    Config file      [file] [default: /Users/khunter/.edgerc]
   --section <section>  Config section                             [string] [default: papi]
   --debug <debug>      Turn on debugging.                                        [boolean]
   --help               Show help                                [commands: help] [boolean]
@@ -236,7 +238,7 @@ Location options:
   --contract <contract>  Contract to retrieve products from                       [string]
 
 Command options:
-  --config <config>    Config file                [file] [default: /Users/khunter/.edgerc]
+  --config, --edgerc <config>    Config file      [file] [default: /Users/khunter/.edgerc]
   --section <section>  Config section                             [string] [default: papi]
   --debug <debug>      Turn on debugging.                                        [boolean]
   --help               Show help                                [commands: help] [boolean]
