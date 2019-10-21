@@ -23,7 +23,7 @@
     "child-process-promise": "^2.2.1",
     "edgegrid": ">=3.0.6",
     "md5": "^2.2.1",
-    "nexe": "^2.0.0-rc.22",
+    "nexe": "^3.3.2",
     "options": "0.0.6",
     "pkg": "^4.3.0-beta.5",
     "request": "^2.74.0",
