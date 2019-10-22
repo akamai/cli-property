@@ -486,7 +486,8 @@
           "httpsPort": 443,
           "originType": "CUSTOMER",
           "ports": "",
-          "originCertificate": ""
+          "originCertificate": "",
+          "useUniqueCacheKey": false
         }
       },
       {
@@ -529,14 +530,14 @@
   },
   "warnings": [
     {
-      "type": "https://problems.luna.akamaiapis.net/papi/v0/validation/validation_message.ssl_delegate_warning_intro",
-      "errorLocation": "#/rules/behaviors/0",
-      "detail": "Akamai enhanced the `Origin Server` behavior. Before configuring any settings, click the <strong>Verification Settings</strong> drop-down menu and read the context-sensitive information that appears."
-    },
-    {
       "type": "https://problems.luna.akamaiapis.net/papi/v0/validation/validation_message.ssl_delegate_warning_rotate",
       "errorLocation": "#/rules/behaviors/0",
-      "detail": "When rotating your origin's certificate, change your setting in the `Origin Server` behavior from <strong>Use Platform Settings</strong> to <strong>Choose Your Own</strong> and ensure both your old and new certificates are trusted. Your new certificate must be trusted <strong>before</strong> you start using it. You must continue to trust your old certificate until you have started using the new certificate. Failure to follow <a href=\"/dl/rd/propmgr/PropMgr_CSH.htm#1090\" target=\"_blank\">this procedure</a> may result in a service outage or a security breach. It is recommended that you contact your account team with any questions or concerns <strong>before</strong> activating your property."
+      "detail": "If your `Origin Server` uses HTTPS, make sure to follow <a href=\"/dl/property-manager/property-manager-help/csh_lookup.html?id=PM_0034\" target=\"_blank\">this procedure</a> to avoid a service outage or a security breach when you rotate your origin's certificate."
+    },
+    {
+      "type": "https://problems.luna.akamaiapis.net/papi/v0/validation/generic_behavior_issue.rum_eol",
+      "errorLocation": "#/rules/behaviors/3",
+      "detail": "<strong> Important </strong>: We recommend using an mPulse behavior instead on this property. mPulse is Akamai's recommended source of RUM data going forward"
     },
     {
       "type": "https://problems.luna.akamaiapis.net/papi/v0/validation/generic_behavior_issue.enabletransferencoding_warning",
@@ -551,9 +552,9 @@
     {
       "title": "Unstable rule format",
       "type": "https://problems.luna.akamaiapis.net/papi/v0/unstable_rule_format",
-      "detail": "This property is using `latest` rule format, which is designed to reflect interface changes immediately. We suggest converting the property to a stable rule format such as `v2017-06-19` to minimize the risk of interface changes breaking your API client program.",
+      "detail": "This property is using `latest` rule format, which is designed to reflect interface changes immediately. We suggest converting the property to a stable rule format such as `v2019-07-25` to minimize the risk of interface changes breaking your API client program.",
       "currentRuleFormat": "latest",
-      "suggestedRuleFormat": "v2017-06-19"
+      "suggestedRuleFormat": "v2019-07-25"
     }
   ],
   "ruleFormat": "latest"
