@@ -1640,13 +1640,13 @@ class WebSite {
             });
     }
 
-    createNewPropertyVersion(propertyLookup, accountKey) {
+    createNewPropertyVersion(propertyLookup, accountKey, fromVersion) {
         this._accountSwitchKey = accountKey;
         return this._getProperty(propertyLookup)
             .then(property => {
                 let propertyName = property.propertyName;
                 console.error(`Creating new version for ${propertyName}`);
-                const version = WebSite._getLatestVersion(property, 0);
+                const version = fromVersion ? fromVersion : WebSite._getLatestVersion(property, 0);
                 property.latestVersion += 1;
                 return this._copyPropertyVersion(property, version);
         })

@@ -309,7 +309,7 @@ function retrieveHostnames(app, targetProperty, version , accountKey) {
 function modifyProperty(app, targetProperty, options, command) {
     let version = numberVersion(options.propver) ? numberVersion(options.propver) : 0;
     if (options.new) {
-            return app.createNewPropertyVersion(targetProperty, options["account-key"])
+            return app.createNewPropertyVersion(targetProperty, options["account-key"], version);
         }
     if (options.addhosts && options.addhosts.length > 0) {
             return app.addHostnames(targetProperty, version, options.addhosts, options.edgehostname, options["account-key"]);
