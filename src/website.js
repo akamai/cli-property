@@ -2474,7 +2474,7 @@ class WebSite {
                 } else {
                     newEdgeHostname = 1;
                 }
-                return this._getEHNId(data.propertyId, data.version, groupId, contractId)
+                return this._getEHNId(data.propertyId, data.version, data.groupId, data.contractId)
             })
                
             .then(clone_ehn =>{
