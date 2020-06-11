@@ -1365,7 +1365,7 @@ class WebSite {
         return ([configName, hostnames])
     }
 
-    _setRules(groupId, contractId, productId, configName, cpcode = null, hostnames = [], origin = null, secure = false, baserules=null, newcpcodename = false) {
+    _setRules(groupId, contractId, productId, configName, cpcode = null, hostnames = [], origin = null, secure = false, newcpcodename = false, baserules=null) {
 
         return new Promise((resolve, reject) => {
             if (cpcode && !newcpcodename) {
