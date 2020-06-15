@@ -1,5 +1,7 @@
 # Akamai CLI for Property Manager
 
+<span style="font-size:larger">No further development is happening for this CLI. Use [cli-property-manager](https://github.com/akamai/cli-property-manager) instead.</span>
+
 *NOTE:* This tool is intended to be installed via the Akamai CLI package manager, which can be retrieved from the releases page of the [Akamai CLI](https://github.com/akamai/cli) tool.
 
 ### Local Install, if you choose not to use the akamai package manager
