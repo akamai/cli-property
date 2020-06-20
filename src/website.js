@@ -778,9 +778,6 @@ class WebSite {
                         if(!behavior.options.enableCustomKey) {
                             behavior.options.enableCustomKey = false;
                         }
-                        if(!behavior.options.customStatKey || !behavior.options.enableCustomKey) {
-                            behavior.options.customStatKey = "default";
-                        }
                     }
                     children_behaviors.push(behavior);
                 })
