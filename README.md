@@ -1,3 +1,9 @@
+<!--esi 
+<esi:assign name="dac_stylesheets" value="['/stylesheets/screen.css']" />
+<esi:assign name="dac_footer_js" value="['/javascripts/app/toc.js']" />
+<esi:eval src="/internal/header.html?http" dca="esi" />
+-->
+
 # Akamai CLI for Property Manager
 **No further development is happening for this CLI. Use [cli-property-manager](https://github.com/akamai/cli-property-manager) instead.**
 
@@ -317,3 +323,7 @@ The Akamai CLI is a new tool and as such we have made some design choices worth 
 * CPCodes - there is currently a fairly strict limitation on creation of CPCodes.  To work around this, pass in a specific CPCode to use.  Your account team can create a bunch of CPCodes which you could then use with your properties.  Cloned properties will inherit the CPCode of the cloned property.
 * Credentials - the tool expects your credentials to be stored under a 'papi' section in your ~/.edgerc file.  If you are unfamiliar with the authentication and provisioning for OPEN APIs, see the "Get Started" section of https://developer.akamai.com
 * Move - in order to perform move functions, the credentials must have both property manager and user admin grants.  
+
+<!--esi 
+<esi:eval src="/internal/footer.html?http" dca="esi" />
+-->
