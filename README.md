@@ -28,7 +28,6 @@ This kit can be used in different ways:
 * [As a gulp integration](#gulp) to integrate with your Continuous Integration/Continuous Deployment toolset.
 
 ```
-MacBook-Pro:AkamaiOPEN-edgegrid-python khunter$ akamai property
 Usage: akamai property <command> <args> [options]
 
 Commands:
@@ -45,7 +44,7 @@ Commands:
   products               retrieve products available
 
 Command options:
-  --config, --edgerc <config>    Config file      [file] [default: /Users/khunter/.edgerc]
+  --config, --edgerc <config>    Config file      [file] [default: ~/.edgerc]
   --section <section>  Config section                             [string] [default: papi]
   --debug <debug>      Turn on debugging.                                        [boolean]
   --help               Show help                                [commands: help] [boolean]
@@ -100,7 +99,7 @@ General options:
   --retrieve             Retrieve rules for created property                     [boolean]
 
 Command options:
-  --config, --edgerc <config>    Config file      [file] [default: /Users/khunter/.edgerc]
+  --config, --edgerc <config>    Config file      [file] [default: ~/.edgerc]
   --section <section>  Config section                             [string] [default: papi]
   --debug <debug>      Turn on debugging.                                        [boolean]
   --help               Show help                                [commands: help] [boolean]
@@ -125,7 +124,7 @@ General options:
   --file <path>  Output file                                                        [file]
 
 Command options:
-  --config, --edgerc <config>    Config file      [file] [default: /Users/khunter/.edgerc]
+  --config, --edgerc <config>    Config file      [file] [default: ~/.edgerc]
   --section <section>  Config section                             [string] [default: papi]
   --debug <debug>      Turn on debugging.                                        [boolean]
   --help               Show help                                [commands: help] [boolean]
@@ -152,7 +151,7 @@ General options:
   --dryrun              run validations without saving rule tree                 [boolean]
 
 Command options:
-  --config, --edgerc <config>    Config file      [file] [default: /Users/khunter/.edgerc]
+  --config, --edgerc <config>    Config file      [file] [default: ~/.edgerc]
   --section <section>  Config section                             [string] [default: papi]
   --debug <debug>      Turn on debugging.                                        [boolean]
   --help               Show help                                [commands: help] [boolean]
@@ -174,7 +173,7 @@ General options:
   --email <address>    Email for confirmation                                     [string]
 
 Command options:
-  --config, --edgerc <config>    Config file      [file] [default: /Users/khunter/.edgerc]
+  --config, --edgerc <config>    Config file      [file] [default: ~/.edgerc]
   --section <section>  Config section                             [string] [default: papi]
   --debug <debug>      Turn on debugging.                                        [boolean]
   --help               Show help                                [commands: help] [boolean]
@@ -227,7 +226,7 @@ Location options:
   --move <move>      Group to move the property to (User Admin perms)             [string]
 
 Command options:
-  --config, --edgerc <config>    Config file      [file] [default: /Users/khunter/.edgerc]
+  --config, --edgerc <config>    Config file      [file] [default: ~/.edgerc]
   --section <section>  Config section                             [string] [default: papi]
   --debug <debug>      Turn on debugging.                                        [boolean]
   --help               Show help                                [commands: help] [boolean]
@@ -245,7 +244,7 @@ Location options:
   --contract <contract>  Contract to retrieve products from                       [string]
 
 Command options:
-  --config, --edgerc <config>    Config file      [file] [default: /Users/khunter/.edgerc]
+  --config, --edgerc <config>    Config file      [file] [default: ~/.edgerc]
   --section <section>  Config section                             [string] [default: papi]
   --debug <debug>      Turn on debugging.                                        [boolean]
   --help               Show help                                [commands: help] [boolean]
@@ -321,7 +320,7 @@ let exampleDotCom = new WebSite({clientToken:"a1b2", clientSecret: "c3d4", acces
 The Akamai CLI is a new tool and as such we have made some design choices worth mentioning.
 * Edge Hostnames - if not specified, the system will create a new edge hostname, but cannot assign it as it will not yet be active.  You will need to run a 'modify' subsequently to assign the hostname.
 * CPCodes - there is currently a fairly strict limitation on creation of CPCodes.  To work around this, pass in a specific CPCode to use.  Your account team can create a bunch of CPCodes which you could then use with your properties.  Cloned properties will inherit the CPCode of the cloned property.
-* Credentials - the tool expects your credentials to be stored under a 'papi' section in your ~/.edgerc file.  If you are unfamiliar with the authentication and provisioning for OPEN APIs, see the "Get Started" section of https://developer.akamai.com
+* Credentials - the tool expects your credentials to be stored under a 'papi' section in your `~/.edgerc` file.  If you are unfamiliar with the authentication and provisioning for OPEN APIs, see the "Get Started" section of https://developer.akamai.com
 * Move - in order to perform move functions, the credentials must have both property manager and user admin grants.  
 
 <!--esi 
